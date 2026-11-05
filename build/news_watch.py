@@ -50,14 +50,16 @@ TRUE_RX = re.compile(r"^\s*(true|correct|accurate|mostly true)\s*$", re.I)
 NOT_OUTLETS = re.compile(r"(^|\.)(facebook|fb|instagram|twitter|x|tiktok|youtube|youtu|t|telegram|threads|reddit|"
                          r"whatsapp|archive|web\.archive|archive\.ph|archive\.today|perma|ghostarchive|google|bit|"
                          r"rumble|bitchute|truthsocial|gettr|vk|weibo|linkedin|pinterest|snopes|politifact|factcheck|"
-                         r"fullfact|leadstories|afp|reuters\.com/fact-check)\.", re.I)
+                         r"fullfact|leadstories|afp|reuters\.com/fact-check|mvau|tinyurl|vimeo|googleusercontent|dailymotion|"
+                         r"factly|vishvasnews|boomlive|thip|newsmeter|firstcheck|logicallyfacts|youturn|c-span)\.", re.I)
 
 
 # Places a claim "appeared" that are not an outlet's own reporting: screenshots and image hosts, and
 # transcripts (an outlet hosting a transcript of someone speaking did not make the claim itself).
 NOT_REPORTING = re.compile(r"(^|\.)(awesomescreenshot|imgur|ibb|postimg|gyazo|prnt|tinypic|flickr|giphy|"
                            r"factbase|transcripts?)\.|transcript|/factbase/|\.(png|jpe?g|gif|webp|mp4|pdf)(\?|$)|"
-                           r"/wp-content/uploads/", re.I)
+                           r"/wp-content/uploads/|fact-?check|webqoof|fact-detail|/video/|/watch/", re.I)
+# (an outlet's own fact-check desk debunking the claim is not a lead; nor is a clip of someone saying it)
 # The public list of fresh debunks sticks to health and science, the site's beat.
 SCIENCE_RX = re.compile(r"\b(vaccin\w*|jabs?|mmr|measles|covid\w*|coronavirus|virus\w*|pandemic|plague|cancers?|"
                         r"autism|stud(y|ies)|research\w*|scientists?|diseases?|medicines?|medical|cures?|"
