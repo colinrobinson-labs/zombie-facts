@@ -26,6 +26,8 @@ jobs:
       - name: Tests
         run: python -m unittest discover build/tests
       - name: Watch the news
+        env:
+          MEDIACLOUD_API_KEY: ${{ secrets.MEDIACLOUD_API_KEY }}
         run: python build/news_watch.py ${{ github.ref != 'refs/heads/main' && '--probe' || '' }}
       - name: Commit and redeploy
         if: github.ref == 'refs/heads/main'
