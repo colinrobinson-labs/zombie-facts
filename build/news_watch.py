@@ -298,7 +298,7 @@ def mc_setup(probe=False):
         qr = str((_mc_get("search/api-params").get("params") or {}).get("query-rate") or "")
         m = re.fullmatch(r"(\d+)/m", qr)
         if m and int(m.group(1)) > 0:
-            MC_GAP = max(MC_GAP, 60 / int(m.group(1)) + 0.5)
+            MC_GAP = 60 / int(m.group(1)) + 0.5
         log(f"mediacloud rate {qr or '?'}; one search every {MC_GAP:.1f}s; collections {MC_COLLECTIONS}")
     except Exception as e:
         log("mediacloud api-params failed", getattr(e, "code", None) or e, "; pacing at", MC_GAP)
