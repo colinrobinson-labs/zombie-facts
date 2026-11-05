@@ -339,5 +339,19 @@ function fallback(){if(!has("kick"))return;
   $("feat").innerHTML=`<p class="empty">The weekly register is being rebuilt. Use the live scanner below in the meantime.</p>`;
   $("reg").innerHTML="";$("cnt").textContent="";$("tick").innerHTML=`<span class="it">The register is rebuilding. Try the live scanner below.</span>`;
 }
+/* ---------- newsroom (reads news.json; only human-confirmed cases are shown in detail) ---------- */
+async function newsroom(){
+  let N=null;try{const r=await fetch(BASE+"news.json",{cache:"no-cache"});if(r.ok)N=await r.json()}catch(_){}
+  const S=(N&&N.stats)||{},items=(N&&N.items)||[];
+  const ok=items.filter(i=>i.review==="confirmed"),fixed=ok.filter(i=>i.outcome==="fixed");
+  const nd=s=>s?new Date(s+"T00:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}):"";
+  $("nBoard").innerHTML=`<div><b>${N?full(S.factchecks):"—"}</b><span>Fact-checks read · last 4 months</span></div><div><b>${N?full(S.titlesSearched):"—"}</b><span>Retracted papers searched in the news</span></div><div><b>${N?full(ok.length):"—"}</b><span>Confirmed news cases${S.unreviewed?` · ${full(S.unreviewed)} being read`:""}</span></div><div class="fx"><b>${N?full(fixed.length):"—"}</b><span>Fixed by the outlet</span></div>`;
+  $("nCases").innerHTML=ok.length?ok.map(i=>`<li><a class="cp" href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.headline||i.url)}</a><span class="cd${i.outcome==="fixed"?" ok":""}">${esc(i.outcome||"open")}<small>${esc(nd(i.first))}</small></span><span class="ca">${esc(i.outlet||i.domain)} · ${i.kind==="paper"?`cites a paper retracted ${esc(nd(i.retracted))}`:`repeats a claim ${esc(i.checker)} rated “${esc(i.verdict)}”`}</span></li>`).join("")
+    :`<li><span class="nil">${N?`No confirmed cases yet. ${S.unreviewed?full(S.unreviewed)+" leads are waiting for a person to read them.":"The first search is running."}`:"The newsroom feed is being built."}</span></li>`;
+  const F=(N&&N.factchecks)||[];
+  $("nChecks").innerHTML=F.length?F.slice(0,24).map(f=>`<li><q>${esc(f.claim)}</q><div class="m"><span class="pill r">${esc(f.verdict)}</span><span>${esc(f.checker)} · ${esc(nd(f.date))}</span>${f.url?`<a href="${esc(f.url)}" target="_blank" rel="noopener">Read the fact-check</a>`:""}</div></li>`).join("")
+    :`<li class="dim">The fact-check feed is being built.</li>`;
+}
+if(has("nBoard"))newsroom();
 load();
 })();

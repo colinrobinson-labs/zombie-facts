@@ -15,17 +15,19 @@ SRC = os.path.join(ROOT, "src")
 SITE = "https://zombiefacts.org"
 
 PAGES = [  # slug, nav label, <title>, description, fragments, next slug
-    ("", "Home", "Zombie Facts", "Retracted research that Wikipedia still cites as evidence, and the fight to fix it. Every retraction in the Retraction Watch database, checked against every DOI link on English Wikipedia.",
+    ("", "Home", "Zombie Facts", "Retracted, debunked and outdated facts that are still in circulation, and the fight to fix them. Starting with every retraction on record, checked against every source on English Wikipedia.",
      ["_hero", "_worst", "_deskhome", "_explore"], "register"),
     ("register", "Register", "The register · Zombie Facts", "Search every retracted paper English Wikipedia still cites, with the exact sentences and the official retraction notices.",
      ["_register"], "desk"),
     ("desk", "Correction desk", "Correction desk · Zombie Facts", "Every zombie citation is a case: reviewed by hand, reported to Wikipedia editors, and tracked until it is fixed.",
-     ["_desk"], "autopsy"),
+     ["_desk"], "news"),
+    ("news", "Newsroom", "Newsroom · Zombie Facts", "Retracted research and debunked claims still circulating in the news, and what happens when we ask outlets to fix them.",
+     ["_newsroom"], "autopsy"),
     ("autopsy", "Autopsy", "Autopsy · Zombie Facts", "Why the papers Wikipedia still cites were retracted, and when.",
      ["_autopsy"], "check"),
     ("check", "Check a page", "Check a page · Zombie Facts", "Scan any Wikipedia article for retracted sources, live in your browser.",
      ["_check"], "method"),
-    ("method", "Method", "How it works · Zombie Facts", "How Zombie Facts finds retracted research on Wikipedia, how cases are reviewed, and how corrections are tracked.",
+    ("method", "Method", "How it works · Zombie Facts", "How Zombie Facts finds retracted and debunked facts still in circulation, how cases are reviewed, and how corrections are tracked.",
      ["_method"], ""),
 ]
 
@@ -67,21 +69,23 @@ def live_counts():
 
 
 def share_text():
+    """Home-page link preview. The headline stays general; the live count is the proof."""
+    title = "The study was retracted. The fact is still out there."
     c = live_counts()
     if not c or not c[0]:
-        return ("Zombie Facts: Wikipedia still cites research that was retracted",
-                "The study was retracted. The fact kept walking. We check every retraction on record against every source on English Wikipedia, and track each one until it's fixed.")
+        return (title, "Zombie Facts hunts down retracted, debunked and outdated facts that are still in circulation, "
+                       "and tracks each one until it's fixed.")
     cites, arts, reads = c
     r = f"{reads // 10000 * 10000:,}" if reads >= 20000 else f"{reads // 1000 * 1000:,}"
-    return (f"Wikipedia still cites retracted research {cites} times, on pages read {r}+ times a month.",
-            f"The study was retracted. The fact kept walking. Zombie Facts checks every retraction on record against every source on English Wikipedia, finds {cites} still cited with no warning across {arts} articles, and tracks each one until it's fixed.")
+    return (title, f"Zombie Facts hunts down retracted, debunked and outdated facts that are still in circulation. "
+                   f"On Wikipedia alone: {cites} citations of retracted research with no warning, on pages read {r}+ times a month.")
 
 
 def href(slug):
     return "/" + (slug + "/" if slug else "")
 
 
-SHORT = {"Correction desk": "Desk", "Check a page": "Check"}
+SHORT = {"Correction desk": "Desk", "Newsroom": "News", "Check a page": "Check"}
 
 
 def navlabel(label):
@@ -96,7 +100,7 @@ def masthead(active):
         for s, label, *_ in PAGES)
     return f'''<header class="top">
     <a class="np" href="/" aria-label="Zombie Facts home">{MARK}<span>Zombie Facts</span></a>
-    <span class="ed"><span>Vol. 1 · <b id="edDate">—</b></span><span>Retraction Watch × English Wikipedia</span></span>
+    <span class="ed"><span>Vol. 1 · <b id="edDate">—</b></span><span>Retracted · Debunked · Out of date</span></span>
     <button class="iconbtn" id="theme" aria-label="Switch light or dark">{NAV_ICON}</button>
   </header>
   <nav class="nav" aria-label="Sections"><div>{links}</div></nav>'''
