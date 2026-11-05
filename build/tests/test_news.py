@@ -37,10 +37,19 @@ class FactChecks(unittest.TestCase):
         self.assertEqual(self.parse(cr("Typo year claim", "False", date="2923-01-02")), [])
 
     def test_public_list_is_science_and_capped(self):
-        fcs = self.parse(*[cr(f"Vaccine claim {i}", "False") for i in range(6)], cr("A politician said a thing", "False"))
+        fcs = self.parse(*[cr(f"Vaccine claim {i}", "False") for i in range(8)], cr("A politician said a thing", "False"))
         pub = N.public_checks(fcs)
-        self.assertEqual(len(pub), 4)
+        self.assertEqual(len(pub), 6)
         self.assertTrue(all("Vaccine" in f["claim"] for f in pub))
+
+
+    def test_science_filter_and_verdict_tidy(self):
+        fcs = self.parse(cr("A monk prayed for a king who could defeat wrong views", "False"),
+                         cr("A man was caught smuggling drugs", "False"),
+                         cr("The WHO changed its plague fact sheet", "DW Fact check: Misleading. The WHO updated it in May."))
+        pub = N.public_checks(fcs)
+        self.assertEqual([f["claim"] for f in pub], ["The WHO changed its plague fact sheet"])
+        self.assertEqual(pub[0]["verdict"], "Misleading")
 
 
 class Papers(unittest.TestCase):
