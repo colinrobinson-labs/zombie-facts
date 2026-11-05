@@ -15,7 +15,7 @@ REPO = "https://github.com/colinrobinson-labs/zombie-facts"
 # Switches Colin can turn on once an account exists (all free). Empty means off.
 GOATCOUNTER = "zombiefacts"  # e.g. "zombiefacts" for https://zombiefacts.goatcounter.com
 NEWSLETTER = ""       # sign-up page of a free newsletter service, shown next to the feed
-TIPS_EMAIL = ""       # e.g. "tips@zombiefacts.org" (Porkbun email forwarding is free)
+TIPS_EMAIL = "tips@zombiefacts.org"  # e.g. "tips@zombiefacts.org" (Porkbun email forwarding is free)
 
 esc = lambda s: html.escape(str(s if s is not None else ""), quote=True)
 
