@@ -270,10 +270,10 @@ def gdelt(query, timespan="3months", n=50):
 
 MC_API = "https://search.mediacloud.org/api/"
 MC_KEY = os.environ.get("MEDIACLOUD_API_KEY", "").strip()
-# Media Cloud searches a set of collections. 34412234 = "United States - National" (the collection the
-# official client's own tests use). Add more ids, comma-separated, in ZF_MC_COLLECTIONS.
-MC_COLLECTIONS = os.environ.get("ZF_MC_COLLECTIONS", "34412234").strip()
-MC_GAP = 6.5        # the free tier allows 10 searches a minute; mc_setup() reads the real limit
+# Media Cloud searches a set of collections: 34412234 United States - National, 9272347 Global English
+# Language Sources, 34412118 India - National. Change with ZF_MC_COLLECTIONS (comma-separated ids).
+MC_COLLECTIONS = os.environ.get("ZF_MC_COLLECTIONS", "34412234,9272347,34412118").strip()
+MC_GAP = 30.5       # free accounts get 2 searches a minute; mc_setup() reads the real limit
 MC_GIVE_UP = 4      # after 4 searches in a row that Media Cloud never answered, stop asking this run
 _last_mc = [0.0]
 _mc_ok = [0]

@@ -33,7 +33,7 @@ jobs:
         env:
           MEDIACLOUD_API_KEY: ${{ secrets.MEDIACLOUD_API_KEY }}
           ZF_FACTCHECK_DAYS: ${{ inputs.days || '730' }}
-          ZF_NEWS_MINUTES: ${{ github.ref == 'refs/heads/main' && '30' || '4' }}
+          ZF_NEWS_MINUTES: ${{ github.ref == 'refs/heads/main' && '55' || '4' }}
         run: python build/news_watch.py ${{ github.ref != 'refs/heads/main' && '--probe' || '' }}
       - name: Commit and redeploy
         if: github.ref == 'refs/heads/main'
