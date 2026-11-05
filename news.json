@@ -1,1 +1,180 @@
-{"built": "", "stats": {}, "factchecks": [], "items": []}
+{
+ "built": "2026-11-05T19:23:03Z",
+ "seconds": 680,
+ "stats": {
+  "factchecks": 414,
+  "checkers": 11,
+  "titlesSearched": 2,
+  "stories": 0,
+  "storiesMentionRetraction": 0,
+  "unreviewed": 1,
+  "confirmed": 0
+ },
+ "factchecks": [
+  {
+   "claim": "Kiribathgoda Gnanananda Thero recently prayed for a Sinhala Buddhist king who could defeat the forces of wrong views.",
+   "verdict": "Missing Context",
+   "checker": "Fact Crescendo Sri Lanka",
+   "url": "https://srilanka.factcrescendo.com/english/kiribathgoda-gnanananda-thero-2019-speech-shared-as-new-missing-context/",
+   "date": "2026-11-03"
+  },
+  {
+   "claim": "The monk who began a march from Kandy to Colombo on October 30, 2026, carrying a snake-headed walking stick, is Greshan Keraminiyage, a former SLPP Ambalangoda municipal councillor and founder of the ‘Pahanata Thel’ movement.",
+   "verdict": "False",
+   "checker": "Fact Crescendo Sri Lanka",
+   "url": "https://srilanka.factcrescendo.com/english/bodhidhamma-thero-greshan-keraminiyage-same-person-false/",
+   "date": "2026-11-03"
+  },
+  {
+   "claim": "Deputy Minister of Transport and Highways Prasanna Gunasena said villagers built the Walapane Keerthi Bandara Devalaya for a CTB driver named Keerthi Bandara, who died after leaning a brake-failed bus against a hill to save his passengers.",
+   "verdict": "False",
+   "checker": "Fact Crescendo Sri Lanka",
+   "url": "https://srilanka.factcrescendo.com/english/an-edited-video-circulating-as-deputy-transport-ministers-statement/",
+   "date": "2026-11-03"
+  },
+  {
+   "claim": "Philippine Army troops from the 10th Infantry (Agila) Division (10ID) supporting Sen. Ronald \"Bato\" dela Rosa, who is wanted by the International Criminal Court.",
+   "verdict": "Fake",
+   "checker": "VERA Files",
+   "url": "https://verafiles.org/articles/fact-check-ai-generated-photo-falsely-shows-army-divisions-support-for-bato-dela-rosa",
+   "date": "2026-11-03"
+  },
+  {
+   "claim": "The video shows a customer attacking a Muslim street vendor for allegedly mixing contraceptive pills into sugarcane juice.",
+   "verdict": "FALSE",
+   "checker": "FACTLY",
+   "url": "https://factly.in/this-viral-video-being-circulated-with-the-food-jihad-narrative-is-scripted/",
+   "date": "2026-10-31"
+  },
+  {
+   "claim": "President Anura Kumara Dissanayake was hospitalized due to a sudden illness, according to a Newsfirst post.",
+   "verdict": "False",
+   "checker": "Fact Crescendo Sri Lanka",
+   "url": "https://srilanka.factcrescendo.com/english/was-the-president-hospitalized-due-to-a-sudden-illness/",
+   "date": "2026-10-27"
+  },
+  {
+   "claim": "The posts depict a Bangladeshi couple who were sentenced to death in Saudi Arabia for committing an indecent act inside a mosque in Mecca.",
+   "verdict": "MISLEADING",
+   "checker": "FACTLY",
+   "url": "https://factly.in/this-video-of-a-woman-revealing-her-pregnancy-to-her-husband-is-falsely-linked-to-a-bangladeshi-couple-sentenced-to-death-in-saudi-arabia/",
+   "date": "2026-10-27"
+  },
+  {
+   "claim": "A video bearing the ANI logo shows Lieutenant General Girish Kalia claiming that China has taken control of Asaphila, Longju, and Taksing Circle in Arunachal Pradesh and that the central government has not taken sufficient action.",
+   "verdict": "FALSE",
+   "checker": "FACTLY",
+   "url": "https://factly.in/this-video-attributing-remarks-on-chinas-control-of-arunachal-pradesh-to-lt-gen-girish-kalia-is-a-deepfake/",
+   "date": "2026-10-26"
+  },
+  {
+   "claim": "Philippine Drug Enforcement Agency named Ferdinand Marcos Jr. and his son Sandro Marcos as financiers of the foiled drug smuggling attempt in Laos.",
+   "verdict": "False",
+   "checker": "VERA Files",
+   "url": "https://verafiles.org/articles/fact-check-pdea-did-not-say-marcos-rep-sandro-are-financiers-of-laos-drug-smuggling",
+   "date": "2026-10-26"
+  },
+  {
+   "claim": "Video of protesters in France attacking security forces, who were seen defending themselves with riot shields in October 2026.",
+   "verdict": "MISLEADING",
+   "checker": "FACTLY",
+   "url": "https://factly.in/old-indonesian-protest-video-falsely-linked-to-2026-france-unrest/",
+   "date": "2026-10-21"
+  },
+  {
+   "claim": "Video claims President Marcos, wife masterminds in Laos drug trafficking",
+   "verdict": "FALSE",
+   "checker": "FactRakers",
+   "url": "https://www.factrakers.org/post/ai-generated-thumbnail-falsely-links-marcoses-to-laos-drug-bust",
+   "date": "2026-10-20"
+  },
+  {
+   "claim": "The private jet seized in Laos for alleged drug smuggling bound for the Philippines is the same aircraft that took Rodrigo Duterte to The Hague, Netherlands.",
+   "verdict": "False",
+   "checker": "VERA Files",
+   "url": "https://verafiles.org/articles/fact-check-jet-seized-in-laos-not-the-same-one-that-flew-duterte-to-the-hague",
+   "date": "2026-10-14"
+  },
+  {
+   "claim": "\"For those who don't get it: in Irkutsk, a lab technician broke a flask containing the plague virus and became infected with the disease, dying a few days later,\" a user posted on X in Russian.",
+   "verdict": "DW Fact check: Unproven There is no independent evidence confirming that a leak ",
+   "checker": "Deutsche Welle",
+   "url": "https://www.dw.com/en/russia-lab-worker-death-fact-check/a-79560752",
+   "date": "2026-10-06"
+  },
+  {
+   "claim": "\"The WHO appears to have updated its fact sheet on plague the same day the Irkutsk lab worker presented at hospital, with (probably) the plague.\" This claim appeared in a number of posts on X, with some users suggesting the timing indicates that the organization may have known something about the alleged case before it became public.",
+   "verdict": "DW Fact check: Misleading The World Health Organization (WHO) updated its plague",
+   "checker": "Deutsche Welle",
+   "url": "https://www.dw.com/en/russia-lab-worker-death-fact-check/a-79560752",
+   "date": "2026-10-06"
+  },
+  {
+   "claim": "Claire Castro calling Ferdinand Marcos Jr. an “addict” and “bangag (intoxicated by drugs),” accusing him of abusing fentanyl.",
+   "verdict": "False",
+   "checker": "VERA Files",
+   "url": "https://verafiles.org/articles/fact-check-claire-castro-did-not-badmouth-accuse-marcos-of-fentanyl-abuse",
+   "date": "2026-10-05"
+  },
+  {
+   "claim": "Vaccines a 'misfortunate,' tied to medical conditions",
+   "verdict": "MISSING CONTEXT",
+   "checker": "FactRakers",
+   "url": "https://www.factrakers.org/post/vaccines-don-t-cause-many-illnesses-blamed-on-them-in-graphic",
+   "date": "2026-10-03"
+  },
+  {
+   "claim": "Ad shows an AI-version of James Talarico saying: “I always think of myself as a Christian who hates Christianity.”",
+   "verdict": "Missing context",
+   "checker": "FactCheck.org",
+   "url": "https://www.factcheck.org/2026/09/paxtons-ai-heavy-ad-leaves-out-context-of-talarico-remarks-about-christianity/",
+   "date": "2026-09-15"
+  },
+  {
+   "claim": "\"The reason why we have seen a measles outbreak in certain parts of the country is because of rampant illegal immigration into the United States from the previous administration.”",
+   "verdict": "Unsupported",
+   "checker": "FactCheck.org",
+   "url": "https://www.factcheck.org/2026/09/rising-measles-cases-driven-by-falling-vaccination-not-illegal-immigration/",
+   "date": "2026-09-01"
+  },
+  {
+   "claim": "After El-Sayed secured the Democratic nomination, his Republican opponent, Mike Rogers, posted a statement on X, calling him \"someone who believes America deserved 9/11.\"",
+   "verdict": "DW Fact check: False. The allegation has come up repeatedly but conflates previo",
+   "checker": "Deutsche Welle",
+   "url": "https://www.dw.com/en/fact-check-false-claims-target-us-senate-candidate-abdul-el-sayed/a-78340951",
+   "date": "2026-08-14"
+  },
+  {
+   "claim": "Trump's executive order on Gold Standard Childhood Vaccine Recommendations \"finally aligns the United States with other advanced and developed nations around the world.”",
+   "verdict": "Misleading",
+   "checker": "FactCheck.org",
+   "url": "https://www.factcheck.org/2026/08/trump-and-rfk-jr-repeat-false-and-misleading-vaccine-claims/",
+   "date": "2026-08-11"
+  },
+  {
+   "claim": "The U.S. is “requiring 72 jabs for our beautiful, healthy, lovely, delicate little children.”",
+   "verdict": "False",
+   "checker": "FactCheck.org",
+   "url": "https://www.factcheck.org/2026/08/trump-and-rfk-jr-repeat-false-and-misleading-vaccine-claims/",
+   "date": "2026-08-11"
+  }
+ ],
+ "items": [
+  {
+   "kind": "factcheck",
+   "url": "https://dunning-kruger-times.com/michigan-election-update-abdul-el-sayed-got-three-times-as-many-votes-in-detroit-as-there-are-registered-voters/?fbclid=IwY2xjawTvvwtwZG9mBWV4dG4DYWVtAjExAHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7YyQk-m-kQ38-iDo6nkQtvAd5XUJ97nu-Yr-53GGl__lo4Ck30cS4EdSfdfQ_aem_fvNOsd7KXl6XkCM6d6bPQA",
+   "outlet": "dunning-kruger-times.com",
+   "domain": "dunning-kruger-times.com",
+   "claim": "\"Of course they cheated. Nobody actually votes for communists,\" a Facebook post claimed, linking to an article headlined: \"Abdul El-Sayed got three times as many votes in Detroit as there are registered voters.\"",
+   "verdict": "DW Fact check: False. According to the Michigan Voter Information Center, Michig",
+   "checker": "Deutsche Welle",
+   "checkUrl": "https://www.dw.com/en/fact-check-false-claims-target-us-senate-candidate-abdul-el-sayed/a-78340951",
+   "checked": "2026-08-14",
+   "known": false,
+   "key": "factcheck|https://www.dw.com/en/fact-check-false-claims-target-us-senate-candidate-abdul-el-sayed/a-78340951|https://dunning-kruger-times.com/michigan-election-update-abdul-el-sayed-got-three-times-as-many-votes-in-detroit-as-there-are-registered-voters/?fbclid=IwY2xjawTvvwtwZG9mBWV4dG4DYWVtAjExAHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7YyQk-m-kQ38-iDo6nkQtvAd5XUJ97nu-Yr-53GGl__lo4Ck30cS4EdSfdfQ_aem_fvNOsd7KXl6XkCM6d6bPQA",
+   "review": "unreviewed",
+   "first": "2026-11-05",
+   "last": "2026-11-05"
+  }
+ ]
+}
