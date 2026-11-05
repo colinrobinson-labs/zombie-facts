@@ -72,6 +72,17 @@ class Classify(unittest.TestCase):
         _, _, fl2 = B.context_for(txt2, txt2.lower(), txt2.lower().find("10.1/zz"))
         self.assertFalse(fl2)
 
+    def test_inline_doi_uses_its_own_row(self):
+        txt = ("==May==\n* An earlier item about a different discovery entirely.<ref>{{cite web|url=a}}</ref>\n"
+               "* Researchers report a bacterium that can grow using arsenic instead of phosphorus in its DNA. "
+               "[https://x.org (NASA)] {{doi-inline|10.1/aa|(''Science'')}}\n* Later row says retracted.\n")
+        low = txt.lower()
+        said, sec, fl = B.context_for(txt, low, low.find("10.1/aa"))
+        self.assertTrue(said.startswith("Researchers report a bacterium"), said)
+        self.assertFalse(said.endswith("(NASA)"))
+        self.assertEqual(sec, "May")
+        self.assertFalse(fl)
+
 
 class Retire(unittest.TestCase):
     def test_closed_case_retires_note(self):
