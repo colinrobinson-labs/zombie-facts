@@ -27,8 +27,9 @@ jobs:
         run: |
           git config user.name "zombie-facts-bot"
           git config user.email "actions@users.noreply.github.com"
+          python build/cards.py || true  # share images for new or changed cases
           python build/make_pages.py  # share-card counts follow the data
-          git add data.json index.html 404.html */index.html
+          git add data.json index.html 404.html */index.html case feed.xml sitemap.xml robots.txt
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -m "Zombie Facts: refresh dataset"
           for i in 1 2 3 4 5; do git pull --rebase origin main && git push && break; sleep $((i*5)); done

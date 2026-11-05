@@ -1,0 +1,47 @@
+name: Contest a case
+description: Tell us a Zombie Facts case is wrong, or has been fixed
+title: "Contest: "
+labels: ["contest"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for checking our work. We read every request and answer here, in public. If you're right, the case closes and the correction is logged on https://zombiefacts.org/about/#corrections.
+  - type: input
+    id: case
+    attributes:
+      label: Which case?
+      description: The link to the case page on zombiefacts.org
+      placeholder: https://zombiefacts.org/case/...
+    validations:
+      required: true
+  - type: dropdown
+    id: reason
+    attributes:
+      label: What's wrong with it?
+      options:
+        - The page cites the retracted source on purpose, to discuss it
+        - The retraction doesn't affect the claim being cited
+        - The source was reinstated, or the retraction was itself corrected
+        - It has already been fixed
+        - A detail on the case page is wrong
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Links help most, such as a reinstatement notice, a correction, or the sentence that discusses the retraction
+    validations:
+      required: true
+  - type: dropdown
+    id: who
+    attributes:
+      label: Are you connected to it?
+      description: Optional. It doesn't change how we read the request.
+      options:
+        - "No"
+        - I'm an author of the paper
+        - I edit the page or work for the outlet
+        - Prefer not to say

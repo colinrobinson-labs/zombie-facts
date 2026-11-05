@@ -81,10 +81,12 @@ const LISTSEC=/^(references|further reading|bibliography|sources|notes|external 
 const said=(w,max=260)=>{if(!w||LISTSEC.test(w.section||"")||/^\d{4} in /.test(w.page||""))return "";let s=(w.said||"").replace(/^.*\}\}\s*/,"").replace(/\{\{.*$/,"").replace(/^[\s|\]\[}"]+/,"").replace(/^[\s*#:;]+/,"").trim();if(/https?:|\[|\]/.test(s)||s.split(/\s+/).length<8)return "";if(/\|\s*[\w-]+\s*=|^\W*title\s*=/.test(s))return "";if(s.length<25||/^[\W\d]+$/.test(s)||/^(doi|isbn|pmid)\b/i.test(s))return "";if(s.length>max)s="…"+s.slice(-max).replace(/^\S*\s/,"");return s};
 
 /* ---------- data ---------- */
-let D=null,ZP=[],OUT=[];
+let D=null,ZP=[],OUT=[],CASEIX={};
+const casePath=doi=>CASEIX[doi]?"/case/"+CASEIX[doi].s+"/":null;
 async function load(){
   try{const r=await fetch(BASE+"data.json",{cache:"no-cache"});if(!r.ok)throw 0;D=await r.json()}catch(_){D=null}
   try{const r=await fetch(BASE+"outreach.json",{cache:"no-cache"});if(r.ok)OUT=(await r.json()).notes||[]}catch(_){}
+  try{const r=await fetch(BASE+"case/index.json",{cache:"no-cache"});if(r.ok)CASEIX=await r.json()}catch(_){}
   if(!D||!D.papers||!D.papers.length){fallback();return}
   ZP=D.papers.map((p,i)=>({...p,title:cleanT(p.title),i,_c:causesOf(p),_sup:!!p.superseded||!causesOf(p).some(c=>CAUSES.some(x=>x[0]===c))&&(p.reasons||[]).some(r=>SUP.test(r)),_s:(p.title+" "+p.journal+" "+(p.authors||[]).join(" ")+" "+p.wiki.map(w=>w.page).join(" ")+" "+(p.subject||[]).join(" ")).toLowerCase()}));
   const S=D.stats;
@@ -196,13 +198,13 @@ function show(p){
    ${p.reasons&&p.reasons.length?`<div class="cause">${p.reasons.slice(0,8).map(r=>`<span>${esc(r)}</span>`).join("")}</div>`:""}
    <div class="ws"><h4>Where Wikipedia still uses it</h4>${ws.map((w,wi)=>`<div class="w ${w.status==="zombie"?"":"fl"}"><div class="wt"><a href="${wurl(w.page,w.section)}" target="_blank" rel="noopener">${esc(w.page)}</a><span class="pill ${w.status==="zombie"?"z":"fl"}">${w.status==="author"?"author's own page":w.status==="reviewed"?"reviewed · ok":w.status}</span></div>
      ${said(w,500)?`<blockquote>${esc(said(w,500))}</blockquote>`:""}<div class="wm">${w.section?esc(w.section)+" · ":""}${full(w.views)} views in the last 30 days</div>${w.status==="zombie"?fixRow(p,w,wi):""}</div>`).join("")}</div>
-   <div class="acts"><a class="p" href="https://doi.org/${esc(p.notice||p.doi)}" target="_blank" rel="noopener">Retraction notice</a><a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">The paper</a>${p.zombies?`<button id="cpy">Copy note to editors</button>`:""}<button id="shr">Share</button>${p.zombies&&said(z1(p))?`<button id="card">Save share image</button>`:""}</div>`;
+   <div class="acts"><a class="p" href="https://doi.org/${esc(p.notice||p.doi)}" target="_blank" rel="noopener">Retraction notice</a><a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">The paper</a>${p.zombies?`<button id="cpy">Copy note to editors</button>`:""}${casePath(p.doi)?`<a href="${casePath(p.doi)}">Case page</a>`:""}<button id="shr">Share</button>${p.zombies&&said(z1(p))?`<button id="card">Save share image</button>`:""}</div>`;
   const z=ws.find(w=>w.status==="zombie");
   const c=$("cpy");if(c)c.onclick=()=>copy(noteFor(p,z),"Note copied");
   $("db").querySelectorAll("[data-talk]").forEach(a=>a.onclick=()=>{copy(noteFor(p,ws[+a.dataset.talk]),"Note copied. Paste it into the talk page.")});
   $("db").querySelectorAll("[data-note]").forEach(b=>b.onclick=()=>copy(noteFor(p,ws[+b.dataset.note]),"Note copied"));
   const cb=$("card");if(cb)cb.onclick=()=>shareCard(p,z1(p),cb);
-  $("shr").onclick=async()=>{const u=location.href,t=`Wikipedia still cites this retracted paper: ${p.title}`;if(navigator.share){try{await navigator.share({title:"Zombie Facts",text:t,url:u})}catch(_){}}else copy(u,"Link copied")};
+  $("shr").onclick=async()=>{const u=casePath(p.doi)?location.origin+casePath(p.doi):location.href,t=`Wikipedia still cites this retracted paper: ${p.title}`;if(navigator.share){try{await navigator.share({title:"Zombie Facts",text:t,url:u})}catch(_){}}else copy(u,"Link copied")};
   $("db").scrollTop=0;$("drawer").classList.add("on");$("scrim").classList.add("on");document.body.style.overflow="hidden";setTimeout(()=>$("dClose").focus(),50);
 }
 async function copy(s,m){try{await navigator.clipboard.writeText(s);toast(m)}catch(_){prompt("Copy this:",s)}}
@@ -247,7 +249,7 @@ async function shareCard(p,w,btn){
     g.fillStyle=INK;g.fillRect(0,H-118,W,118);g.fillStyle=ACID;g.font='400 46px "Anton",Impact,sans-serif';g.fillText("THE PAPER DIED. THE FACT KEPT WALKING.",M,H-46);
     const blob=await new Promise(r=>c.toBlob(r,"image/png"));const name="zombie-facts-"+w.page.replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".png";
     const file=new File([blob],name,{type:"image/png"});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],text:`Wikipedia still cites a retracted paper on “${w.page}”. ${location.href}`})}catch(_){}}
+    if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],text:`Wikipedia still cites a retracted paper on “${w.page}”. ${casePath(p.doi)?location.origin+casePath(p.doi):location.href}`})}catch(_){}}
     else{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Image saved")}
   }catch(e){toast("Couldn't draw the image")}
   btn.disabled=false;btn.textContent=lbl;
@@ -269,8 +271,8 @@ function desk(){
   const today=(D.checked||D.built).slice(0,10),byDoi={};ZP.forEach(p=>byDoi[p.doi]=p);
   const all=Object.entries(L.cases).map(([k,c])=>{const doi=k.slice(0,k.indexOf("|"));return {...c,k,doi,p:byDoi[doi],n:noteOf(k)}}).filter(c=>!(c.p&&c.p._sup));
   const open=all.filter(c=>!c.c).sort((a,b)=>(b.v||0)-(a.v||0));
-  const kept=open.filter(c=>c.n&&c.n.status==="dismissed"),told=open.filter(c=>toldS(c.n)),waiting=open.filter(c=>!kept.includes(c)&&!told.includes(c));
-  const shut=all.filter(c=>c.c&&c.how!=="author").sort((a,b)=>b.c.localeCompare(a.c));
+  const kept=all.filter(c=>c.n&&c.n.status==="dismissed"),told=open.filter(c=>toldS(c.n)),waiting=open.filter(c=>!kept.includes(c)&&!told.includes(c));
+  const shut=all.filter(c=>c.c&&c.how!=="author"&&!(c.n&&c.n.status==="dismissed")).sort((a,b)=>b.c.localeCompare(a.c));
   const ds=shut.map(c=>daysBetween(c.o,c.c)).sort((a,b)=>a-b),med=ds.length?ds[Math.floor(ds.length/2)]:null;
   const fixedReads=shut.reduce((a,c)=>a+(c.v||0),0),posted=OUT.filter(toldS),replies=posted.reduce((a,n)=>a+(n.replies||[]).length,0);
   $("board").innerHTML=`<div><b>${full(waiting.length+told.length)}</b><span>Open cases</span></div><div><b>${full(posted.length)}</b><span>Notes posted${replies?` · ${replies} ${replies>1?"replies":"reply"}`:""}</span></div><div class="fx"><b>${full(shut.length)}</b><span>Fixed${fixedReads?` · ${fmt(fixedReads)} reads/mo now clean`:""}</span></div><div><b>${med==null?"—":med+" d"}</b><span>Median days to fix · tracking since ${esc(shortD(L.since))}</span></div>`;
@@ -287,7 +289,7 @@ function desk(){
 }
 function feed(all){
   const ev=[],pg=k=>k.slice(k.indexOf("|")+1),doi=k=>k.slice(0,k.indexOf("|")),btn=k=>`<button data-doi="${esc(doi(k))}">${esc(pg(k))}</button>`;
-  all.forEach(c=>{if(c.c&&c.how!=="author")ev.push([c.c,"fix","Fixed",`${btn(c.k)}: ${c.how==="flagged"?"an editor marked the retracted source":"the retracted source was removed"}, ${daysBetween(c.o,c.c)} days after we found it.`])});
+  all.forEach(c=>{if(c.c&&c.how!=="author"&&!(c.n&&c.n.status==="dismissed"))ev.push([c.c,"fix","Fixed",`${btn(c.k)}: ${c.how==="flagged"?"an editor marked the retracted source":"the retracted source was removed"}, ${daysBetween(c.o,c.c)} days after we found it.`])});
   OUT.forEach(n=>{
     if(n.posted)ev.push([n.posted.slice(0,10),"post","Note posted",`${btn(n.key)}: <a href="https://en.wikipedia.org/wiki/${encodeURIComponent("Talk:"+n.page)}" target="_blank" rel="noopener">talk page</a>`]);
     (n.replies||[]).forEach(r=>ev.push([(r.at||"").slice(0,10),"rep","Reply",`${btn(n.key)}: ${esc(r.user)} wrote <q>${esc(r.said.slice(-160))}</q>`]));
@@ -353,5 +355,16 @@ async function newsroom(){
     :"";if(!F.length)$("nChecks").parentNode.style.display="none";
 }
 if(has("nBoard"))newsroom();
-load();
+/* ---------- case pages: share button ---------- */
+document.querySelectorAll(".cf-share").forEach(b=>b.onclick=async()=>{const u=b.dataset.url,t=b.dataset.text;if(navigator.share){try{await navigator.share({title:"Zombie Facts",text:t,url:u})}catch(_){}}else copy(u,"Link copied")});
+/* ---------- report a zombie: hand the tip to a pre-filled GitHub issue form ---------- */
+if(has("tipForm"))$("tipForm").onsubmit=e=>{e.preventDefault();
+  const st=$("tipSt"),w=$("tWhere").value.trim(),c=$("tClaim").value.trim(),y=$("tWhy").value.trim();
+  if($("tHp").value){st.textContent="Thanks.";return}
+  if(!/^https?:\/\/\S+\.\S+/.test(w)){st.textContent="Add a link to where you saw it (starting with https://).";$("tWhere").focus();return}
+  if(c.length<10||y.length<10){st.textContent="Tell us what it says and why it's wrong, a sentence each is plenty.";return}
+  let host="";try{host=new URL(w).hostname.replace(/^www\./,"")}catch(_){}
+  const u="https://github.com/colinrobinson-labs/zombie-facts/issues/new?"+new URLSearchParams({template:"tip.yml",title:"Tip: "+(host||"zombie fact")+" · "+c.slice(0,60),where:w,claim:c.slice(0,3000),why:y.slice(0,3000)});
+  st.textContent="Opening GitHub. Press Create on the next page to send it.";setTimeout(()=>{location.href=u},400)};
+if(document.body.dataset.page!=="case")load();
 })();

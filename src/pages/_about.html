@@ -1,0 +1,44 @@
+  <section class="sec pagehead" id="about">
+    <div class="sh"><h2>About</h2><p>Who is behind Zombie Facts, what we claim and what we don't, and what happens when we get something wrong.</p></div>
+    <div class="ab">
+      <div class="ab-main">
+        <h3>Who runs it</h3>
+        <p>Zombie Facts is an independent project run by <b>Colin Robinson</b>. It has no staff, no sponsor and no political or commercial backer. The only running cost is the domain name, paid out of pocket. There are no ads, no trackers that follow you around the web, and nothing to buy.</p>
+        <p>On Wikipedia, our notes to editors come from the account <a href="https://en.wikipedia.org/wiki/User:XavierCatastrophe" target="_blank" rel="noopener">XavierCatastrophe</a>, and every note says it was found with this tracker. We don't edit articles with automated tools, and we don't add links to this site in Wikipedia articles.</p>
+
+        <h3>What a case means</h3>
+        <p>A case says one checkable thing: a source was retracted (or a claim was rated false by a fact-checker), and a page still uses it without telling readers. Every case links to the official retraction notice or the fact-check, and to the exact place it is still used.</p>
+        <p>A case is not an accusation against the people who wrote the page. Most zombie facts are honest leftovers: the citation went in before the retraction, and nobody went back. Some pages cite a retracted paper on purpose, to discuss it. That's why a person reads every case before we contact anyone, and why some cases end as "reviewed, no fix needed".</p>
+
+        <h3 id="corrections">Corrections policy</h3>
+        <p>If we get something wrong, we fix it on the page, say what changed, and log it below with the date. We don't quietly delete mistakes. Errors in the data (a wrong date, a misread quote, a paper that isn't really retracted) are corrected as soon as we confirm them, and the daily build carries the fix to every page.</p>
+
+        <h3 id="contest">Contest a case</h3>
+        <p>If you think a case is wrong, because the citation is there on purpose, the retraction doesn't touch the claim, or the source has been reinstated, tell us. Authors, editors and outlets are all welcome.</p>
+        <ol class="nsteps">
+          <li><b>Open the case page</b> and press <em>Contest this case</em>. It opens a short form on GitHub, which is free and keeps every request and our answer public.</li>
+          <li><b>Give us the evidence:</b> a link to the reinstatement, the correction, or the sentence that discusses the retraction.</li>
+          <li><b>We read it</b> and reply on the same thread. If you're right, the case closes as "reviewed, no fix needed", the reason shows on the case page, and the fix goes in the log below.</li>
+        </ol>
+        <p>Prefer Wikipedia? Reply under our note on the article's talk page. We read those replies every day.</p>
+        <a class="golink" href="https://github.com/colinrobinson-labs/zombie-facts/issues/new?template=contest.yml" target="_blank" rel="noopener">Contest a case →</a>
+      </div>
+      <aside class="ab-side">
+        <h4>Corrections log</h4>
+        <ol class="feed ab-log">
+          <li><time>Nov 5, 2026</time><span class="k rev">Data</span><span>Quotes from citations inside a sentence sometimes showed the wrong sentence. Fixed for every case.</span></li>
+          <li><time>Nov 5, 2026</time><span class="k rev">Data</span><span>We had counted 25 Cochrane reviews as zombies that were withdrawn only because a newer version replaced them. Outdated is not discredited, so they're no longer counted. One switch in the register still shows them.</span></li>
+          <li><time>Nov 5, 2026</time><span class="k rev">Case</span><span>Trazodone: closed as "no fix needed" after reading the withdrawal notice. The review was handed to new authors, not discredited.</span></li>
+        </ol>
+        <h4 class="h4b">Where the data comes from</h4>
+        <ul class="ab-src">
+          <li>The <a href="https://retractionwatch.com/retraction-watch-database-user-guide/" target="_blank" rel="noopener">Retraction Watch database</a>, published openly by Crossref (CC0)</li>
+          <li>English Wikipedia, read through its public API</li>
+          <li>Fact-checkers' own ratings (ClaimReview) via Data Commons</li>
+        </ul>
+        <p class="rs-fine">We read every source politely: public APIs where they exist, a named user agent, one request at a time. <a href="/method/">The full method</a> · <a href="https://github.com/colinrobinson-labs/zombie-facts">Every line of code</a></p>
+        <h4 class="h4b">Follow along</h4>
+        <p class="rs-fine"><a href="/feed.xml">Feed</a> of new cases and fixes, for any feed reader. <a href="/results/">Results</a> for the scoreboard. <a href="/report/">Report a zombie</a> if you've spotted one.</p>
+      </aside>
+    </div>
+  </section>
