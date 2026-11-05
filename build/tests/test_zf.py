@@ -73,6 +73,29 @@ class Classify(unittest.TestCase):
         self.assertFalse(fl2)
 
 
+class Retire(unittest.TestCase):
+    def test_closed_case_retires_note(self):
+        o = {"notes": [{"key": "a|P", "status": "approved"}, {"key": "b|Q", "status": "queued"}]}
+        n = R.retire_notes(o, {"a|P": {"c": "2026-11-06", "how": "flagged"}, "b|Q": {"c": None}}, "2026-11-06")
+        self.assertEqual(n, 1)
+        self.assertEqual(o["notes"][0]["status"], "skipped")
+        self.assertEqual(o["notes"][1]["status"], "queued")
+
+
+class Audit(unittest.TestCase):
+    def test_offline_checks(self):
+        import audit as A
+        d = {"papers": [{"doi": "10.1002/14651858.cd1", "reasons": ["Withdrawn as Out of Date"], "superseded": False,
+                         "zombies": 1, "wiki": [{"page": "P", "status": "zombie", "said": "* list row"}]}],
+             "ledger": {"cases": {"10.1/x|Q": {"c": "2026-11-01", "how": "removed"}}}}
+        o = {"notes": [{"key": "10.1/x|Q", "page": "Q", "status": "approved"}]}
+        out = "\n".join(A.offline_checks(d, o))
+        self.assertIn("superseded flag out of date", out)
+        self.assertIn("unclean quote", out)
+        self.assertIn("zombie without a case", out)
+        self.assertIn("case closed", out)
+
+
 class Polite(unittest.TestCase):
     def test_maxlag_backs_off_then_succeeds(self):
         import io, urllib.request

@@ -165,6 +165,17 @@ def watch_outreach(outreach, pages, now_ts):
     return events
 
 
+def retire_notes(outreach, cases, now):
+    """A note still waiting to go out whose case has closed is no longer needed."""
+    n_ = 0
+    for n in outreach.get("notes", []):
+        c = cases.get(n.get("key"))
+        if n.get("status") in ("queued", "approved") and c and c.get("c"):
+            n.update(status="skipped", why_skipped=f"fixed before we posted ({c.get('how')}, {c['c']})")
+            n_ += 1
+    return n_
+
+
 def main():
     data = load(OUT, None)
     if not data or not data.get("papers"):
@@ -186,6 +197,7 @@ def main():
     if still_open and len(closed) > max(10, 0.5 * still_open):
         sys.exit(f"would close {len(closed)} of {still_open} cases in one day; refusing (looks broken)")
     replies = watch_outreach(outreach, pages, now_ts)
+    retire_notes(outreach, cases, now)
     for p in data["papers"]:  # older builds stored list rows and markup as quotes
         p["superseded"] = superseded(p)
         for w in p["wiki"]:
