@@ -268,9 +268,12 @@ def gdelt(query, timespan="3months", n=50):
     return []
 
 
-MEDIACLOUD = "https://search.mediacloud.org/api/search/story-list"
+MC_API = "https://search.mediacloud.org/api/"
 MC_KEY = os.environ.get("MEDIACLOUD_API_KEY", "").strip()
-MC_GAP = 2.0
+# Media Cloud searches a set of collections. 34412234 = "United States - National" (the collection the
+# official client's own tests use). Add more ids, comma-separated, in ZF_MC_COLLECTIONS.
+MC_COLLECTIONS = os.environ.get("ZF_MC_COLLECTIONS", "34412234").strip()
+MC_GAP = 6.5        # the free tier allows 10 searches a minute; mc_setup() reads the real limit
 MC_GIVE_UP = 4      # after 4 searches in a row that Media Cloud never answered, stop asking this run
 _last_mc = [0.0]
 _mc_ok = [0]
@@ -278,11 +281,43 @@ _mc_fails = [0]
 NEWS_MINUTES = float(os.environ.get("ZF_NEWS_MINUTES", "30"))   # time budget for the whole news search
 
 
+def _mc_get(path, params=None, timeout=40):
+    req = urllib.request.Request(MC_API + path + ("?" + urllib.parse.urlencode(params) if params else ""),
+                                 headers={"User-Agent": UA, "Authorization": "Token " + MC_KEY,
+                                          "Accept": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return json.loads(r.read())
+
+
+def mc_setup(probe=False):
+    """Ask Media Cloud for this account's search rate and pace to stay under it."""
+    global MC_GAP
+    if not MC_KEY:
+        return
+    try:
+        qr = str((_mc_get("search/api-params").get("params") or {}).get("query-rate") or "")
+        m = re.fullmatch(r"(\d+)/m", qr)
+        if m and int(m.group(1)) > 0:
+            MC_GAP = max(MC_GAP, 60 / int(m.group(1)) + 0.5)
+        log(f"mediacloud rate {qr or '?'}; one search every {MC_GAP:.1f}s; collections {MC_COLLECTIONS}")
+    except Exception as e:
+        log("mediacloud api-params failed", getattr(e, "code", None) or e, "; pacing at", MC_GAP)
+    if probe:   # list national collections so we can widen the search beyond the US
+        for name in ("national", "global"):
+            try:
+                time.sleep(MC_GAP)
+                j = _mc_get("sources/collections/", {"name": name, "platform": "online_news", "limit": 40})
+                for c in j.get("results") or []:
+                    print("MCCOLL", c.get("id"), c.get("name"), c.get("source_count"), flush=True)
+            except Exception as e:
+                log("mediacloud collections", name, getattr(e, "code", None) or e)
+
+
 def mediacloud(query, days=365, n=100):
     """Media Cloud online-news search (free account). Returns GDELT-shaped rows: url, title, seendate.
 
-    Used instead of GDELT when the MEDIACLOUD_API_KEY repo secret is set. Paced at one request per 2 s,
-    Retry-After honoured, gives up quietly so a Media Cloud outage never breaks the weekly run.
+    Used instead of GDELT when the MEDIACLOUD_API_KEY repo secret is set. Paced under the account's
+    rate limit, Retry-After honoured, gives up quietly so a Media Cloud outage never breaks the weekly run.
     """
     if not MC_KEY:
         return None
@@ -290,18 +325,14 @@ def mediacloud(query, days=365, n=100):
         return []
     end = now().date()
     params = {"q": query, "start": str(end - timedelta(days=days)), "end": str(end),
-              "platform": "onlinenews-mediacloud", "page_size": n}
+              "platform": "onlinenews-mediacloud", "cs": MC_COLLECTIONS, "page_size": n}
     for i in range(2):
         wait = _last_mc[0] + MC_GAP - time.time()
         if wait > 0:
             time.sleep(wait)
         _last_mc[0] = t0 = time.time()
         try:
-            req = urllib.request.Request(MEDIACLOUD + "?" + urllib.parse.urlencode(params),
-                                         headers={"User-Agent": UA, "Authorization": "Token " + MC_KEY,
-                                                  "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=40) as r:
-                j = json.loads(r.read())
+            j = _mc_get("search/story-list", params)
             _mc_ok[0] += 1
             _mc_fails[0] = 0
             if _mc_ok[0] <= 3:
@@ -315,6 +346,13 @@ def mediacloud(query, days=365, n=100):
             if code in (401, 403):
                 log("mediacloud refused the key", code)
                 return None
+            if code and 400 <= code < 500 and code != 429:   # our request is wrong: retrying won't help
+                try:
+                    body = e.read()[:300].decode("utf-8", "replace")
+                except Exception:
+                    body = ""
+                log("mediacloud rejected the search", code, body)
+                break
             ra = getattr(e, "headers", None) and e.headers.get("Retry-After")
             pause = int(ra) if ra and str(ra).isdigit() else 15 * (i + 1)
             log("mediacloud retry", i, code or e, "wait", min(pause, 60))
@@ -340,7 +378,11 @@ def papers_to_search(data):
     """Retracted papers worth searching for: the ones still cited, most-read first."""
     ps = [p for p in data.get("papers", []) if not p.get("superseded") and not superseded(p)]
     ps.sort(key=lambda p: -(p.get("reach") or 0))
-    return ps[:MAX_TITLES]
+    ps = ps[:MAX_TITLES]
+    if ps:   # start somewhere new each week, so a time budget still covers every paper over a month
+        k = (now().isocalendar()[1] * 120) % len(ps)
+        ps = ps[k:] + ps[:k]
+    return ps
 
 
 def news_mentions(data, outlets):
@@ -348,7 +390,7 @@ def news_mentions(data, outlets):
     stop = time.time() + NEWS_MINUTES * 60
     for n, p in enumerate(papers_to_search(data)):
         if time.time() > stop:
-            log(f"news search hit its {NEWS_MINUTES:g}-minute budget after {n} titles; the rest wait for next week")
+            log(f"news search hit its {NEWS_MINUTES:g}-minute budget after {n} titles; next week starts further down the list")
             break
         q = title_query(p.get("title"))
         if not q:
@@ -472,6 +514,7 @@ def main():
     hits = outlet_hits(fcs, outlets)
     log("fact-checked claims published by tracked outlets", len(hits))
 
+    mc_setup(probe)
     stories = news_mentions(data, outlets)
     log("stories naming a retracted paper", len(stories))
     reads = 0
