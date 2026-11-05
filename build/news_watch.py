@@ -56,7 +56,7 @@ NOT_OUTLETS = re.compile(r"(^|\.)(facebook|fb|instagram|twitter|x|tiktok|youtube
 # Places a claim "appeared" that are not an outlet's own reporting: screenshots and image hosts, and
 # transcripts (an outlet hosting a transcript of someone speaking did not make the claim itself).
 NOT_REPORTING = re.compile(r"(^|\.)(awesomescreenshot|imgur|ibb|postimg|gyazo|prnt|tinypic|flickr|giphy|"
-                           r"factbase|transcripts?)\.|/transcripts?/|/factbase/|\.(png|jpe?g|gif|webp|mp4|pdf)(\?|$)|"
+                           r"factbase|transcripts?)\.|transcript|/factbase/|\.(png|jpe?g|gif|webp|mp4|pdf)(\?|$)|"
                            r"/wp-content/uploads/", re.I)
 # The public list of fresh debunks sticks to health and science, the site's beat.
 SCIENCE_RX = re.compile(r"\b(vaccin|jab|mmr|measles|covid|virus|viral infection|pandemic|cancer|tumou?r|autism|"
