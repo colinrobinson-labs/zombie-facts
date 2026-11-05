@@ -32,6 +32,16 @@ PAGES = [  # slug, nav label, <title>, description, fragments, next slug
 NAV_ICON = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg>'
 
 
+MARK = ('<svg class="mark" viewBox="0 0 40 40" aria-hidden="true">'
+        '<path class="hd" d="M8 9.5C10 4.5 17 3 23 3.6c7.4.8 11.6 5.3 11.3 12.6-.2 4.7.9 8.7-.6 13.2-1.6 4.7-6.3 7.4-12.6 7.6-6.9.2-12.4-2.2-14-7.6C5.6 24.6 6 14.3 8 9.5z"/>'
+        '<path class="ln" d="M12 8.6l9.8-1.4M14.2 6.6l.7 3.4M17.6 6.1l.6 3.3M20.6 5.7l.6 3.3"/>'
+        '<path class="ln" d="M11 15.2l5.6 5.4M16.6 15.2L11 20.6"/>'
+        '<g class="eye"><circle cx="26.4" cy="17.6" r="4.6" class="wh"/><circle cx="27.6" cy="18.4" r="1.9" class="pu"/></g>'
+        '<path class="ln" d="M12.6 28.2c2.6 1.2 5.2-.8 7.8.2s4.6 1.4 7.4-.4"/>'
+        '<path class="ln" d="M15.4 26.6l.4 3.2M19.6 27.2l.2 3M23.8 27.8l.2 3"/>'
+        '<path class="dr" d="M21 36.9c.3 1.6.4 2.4 0 2.8-.5.4-1.3.1-1.2-.8 0-.7.5-1.2.7-2.1z"/>'
+        '</svg>')
+
 def href(slug):
     return "/" + (slug + "/" if slug else "")
 
@@ -41,7 +51,7 @@ def masthead(active):
         f'<a href="{href(s)}"{" aria-current=\"page\"" if s == active else ""}>{label}</a>'
         for s, label, *_ in PAGES)
     return f'''<header class="top">
-    <a class="np" href="/">Zombie Facts</a>
+    <a class="np" href="/" aria-label="Zombie Facts home">{MARK}<span>Zombie Facts</span></a>
     <span class="ed"><span>Vol. 1 · <b id="edDate">—</b></span><span>Retraction Watch × English Wikipedia</span></span>
     <button class="iconbtn" id="theme" aria-label="Switch light or dark">{NAV_ICON}</button>
   </header>
@@ -73,7 +83,7 @@ def build():
         page = (h + f'<link rel="canonical" href="{url}">\n<link rel="stylesheet" href="/assets/site.css">\n</head>\n'
                 f'<body data-page="{slug or "home"}">\n<div class="wrap">\n  {masthead(slug)}\n\n{body}\n\n'
                 f'  {nextlink(nxt)}\n'
-                '  <footer>\n    <div><a class="np" href="/">Zombie Facts</a><br><span id="built">—</span></div>\n'
+                '  <footer>\n    <div><a class="np" href="/">' + MARK + '<span>Zombie Facts</span></a><br><span id="built">—</span></div>\n'
                 '    <div class="fnav">' + "".join(f'<a href="{href(s)}">{l}</a>' for s, l, *_ in PAGES) + '</div>\n'
                 '    <div style="max-width:60ch">Data: Retraction Watch database via Crossref (CC0), Wikipedia (CC BY-SA), Crossref REST API. '
                 'Not affiliated with any of them. Built by Colin Robinson. <a href="https://github.com/colinrobinson-labs/zombie-facts">Source code</a>.</div>\n  </footer>\n</div>\n\n'

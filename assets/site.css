@@ -20,7 +20,18 @@ button{font:inherit;color:inherit}
 
 /* ── masthead ── */
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0 10px;border-bottom:1px solid var(--ink);font:500 11px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.top .np{font:400 22px/1 var(--black);letter-spacing:0;text-transform:none}
+.np{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);font:400 23px/1 var(--head);letter-spacing:.02em;text-transform:uppercase}
+.np .mark{width:34px;height:34px;flex:none;overflow:visible;transform-origin:50% 90%;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.np:hover .mark{transform:rotate(-8deg)}
+.mark .hd{fill:var(--acid);stroke:#141412;stroke-width:2;stroke-linejoin:round}
+.mark .ln{fill:none;stroke:#141412;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mark .wh{fill:#f6f2e8;stroke:#141412;stroke-width:2}
+.mark .pu{fill:#141412;animation:pu 9s ease-in-out infinite}
+.mark .eye{transform-origin:26.4px 17.6px;animation:blink 6s infinite}
+.mark .dr{fill:var(--acid);stroke:#141412;stroke-width:1.2;transform-origin:20.5px 36.5px;animation:ooze 6s ease-in infinite}
+@keyframes blink{0%,46%,52%,100%{transform:none}49%{transform:scaleY(.1)}}
+@keyframes pu{0%,30%{transform:none}38%,62%{transform:translate(-2.2px,-.6px)}70%,100%{transform:none}}
+@keyframes ooze{0%,60%{transform:scaleY(.4);opacity:0}75%{transform:scaleY(1);opacity:1}100%{transform:translateY(3px) scaleY(1.1);opacity:0}}
 .nav{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:3px double var(--ink);margin:0 calc(50% - 50vw);padding:0 max(var(--pad),calc(50vw - 620px + var(--pad)))}
 .nav div{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .nav div::-webkit-scrollbar{display:none}
@@ -210,7 +221,7 @@ select{font:500 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;b
 .method li{margin-bottom:6px}
 pre{white-space:pre-wrap;font:12px/1.55 var(--mono);background:var(--card);border:1px solid var(--rule);padding:14px;margin:0;overflow-wrap:anywhere}
 footer{margin-top:clamp(50px,8vw,100px);padding:20px 0 calc(30px + env(safe-area-inset-bottom));border-top:3px double var(--ink);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font:500 11px/1.6 var(--mono);color:var(--mute);letter-spacing:.04em}
-footer .np{font:400 26px/1 var(--black);color:var(--ink)}
+footer .np{font-size:26px;margin-bottom:6px}
 
 /* drawer */
 .scrim{position:fixed;inset:0;background:#0009;opacity:0;pointer-events:none;transition:opacity .25s;z-index:60}
