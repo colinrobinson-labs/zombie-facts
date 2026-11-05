@@ -299,11 +299,11 @@ function feed(all){
   $("feed").querySelectorAll("button[data-doi]").forEach(b=>b.onclick=()=>openP(b.dataset.doi));
 }
 /* ---------- live tools (browser → Crossref + Wikipedia) ---------- */
-const CR="https://api.crossref.org",WP="https://en.wikipedia.org/w/api.php";
+const CR="https://api.crossref.org",MAILTO="&mailto=zombiefacts@users.noreply.github.com",WP="https://en.wikipedia.org/w/api.php";
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function getJSON(u,t=2){for(let i=0;i<=t;i++){try{const r=await fetch(u);if(r.status===429){await sleep(1500*(i+1));continue}if(!r.ok)throw new Error("HTTP "+r.status);return await r.json()}catch(e){if(i===t)throw e;await sleep(700)}}}
 const dp=x=>x&&x["date-parts"]&&x["date-parts"][0]?x["date-parts"][0].map(v=>String(v).padStart(2,"0")).join("-"):"";
-async function works(dois){const out={};for(let i=0;i<dois.length;i+=40){const c=dois.slice(i,i+40);try{const j=await getJSON(`${CR}/works?filter=${c.map(d=>"doi:"+encodeURIComponent(d)).join(",")}&rows=40&select=DOI,title,container-title,issued,updated-by,is-referenced-by-count`);j.message.items.forEach(w=>out[w.DOI.toLowerCase()]=w)}catch(_){}}return out}
+async function works(dois){const out={};for(let i=0;i<dois.length;i+=40){const c=dois.slice(i,i+40);try{const j=await getJSON(`${CR}/works?filter=${c.map(d=>"doi:"+encodeURIComponent(d)).join(",")}&rows=40&select=DOI,title,container-title,issued,updated-by,is-referenced-by-count${MAILTO}`);j.message.items.forEach(w=>out[w.DOI.toLowerCase()]=w)}catch(_){}}return out}
 const retr=w=>{const r=(w&&w["updated-by"]||[]).filter(u=>/retract/i.test(u.type||""));if(!r.length)return null;return {notice:(r.find(x=>x.DOI)||{}).DOI||"",date:dp(r[0].updated)}};
 ["Ivermectin","Hydroxychloroquine","Amyloid beta","Stem cell","Superconductivity","Graphene","Microbiome","Placebo"].forEach(t=>{if(!has("tryScan"))return;const b=document.createElement("button");b.className="chip";b.textContent=t;b.onclick=()=>{$("qScan").value=t;$("bScan").click()};$("tryScan").appendChild(b)});
 $("qScan").onkeydown=e=>{if(e.key==="Enter")$("bScan").click()};
@@ -323,10 +323,10 @@ $("bScan").onclick=async()=>{
   b.disabled=false};
 $("bFresh").onclick=async()=>{
   const st=$("sFresh"),o=$("oFresh"),b=$("bFresh");b.disabled=true;o.innerHTML="";st.innerHTML="<i></i>Fetching the newest notices…";
-  try{const j=await getJSON(`${CR}/works?filter=update-type:retraction&sort=created&order=desc&rows=25&select=DOI,update-to,created`);
+  try{const j=await getJSON(`${CR}/works?filter=update-type:retraction&sort=created&order=desc&rows=25&select=DOI,update-to,created${MAILTO}`);
     const L=[],seen=new Set();j.message.items.forEach(n=>(n["update-to"]||[]).forEach(u=>{const k=(u.DOI||"").toLowerCase();if(/retract/i.test(u.type)&&k&&!seen.has(k)){seen.add(k);L.push({doi:k,notice:n.DOI,date:dp(n.created)})}}));
     const W=await works(L.map(x=>x.doi));let done=0;
-    const res=await Promise.all(L.map(async x=>{let n=0;try{const s=await getJSON(`${WP}?action=query&list=search&srsearch=${encodeURIComponent('insource:"'+x.doi+'"')}&srnamespace=0&srlimit=5&format=json&origin=*`);n=s.query.searchinfo?s.query.searchinfo.totalhits:0}catch(_){}st.innerHTML=`<i></i>Checking Wikipedia ${++done}/${L.length}`;return {...x,n}}));
+    const res=[];for(const x of L){let n=0;try{const s=await getJSON(`${WP}?action=query&list=search&srsearch=${encodeURIComponent('insource:"'+x.doi+'"')}&srnamespace=0&srlimit=5&format=json&origin=*`);n=s.query.searchinfo?s.query.searchinfo.totalhits:0}catch(_){}st.innerHTML=`<i></i>Checking Wikipedia ${++done}/${L.length}`;res.push({...x,n});await sleep(250)}
     res.sort((a,b)=>b.n-a.n);
     o.innerHTML=res.map(x=>{const w=W[x.doi]||{};return `<div class="hit">${x.n?`<span class="pill z">on Wikipedia ×${x.n}</span>`:""}<h5>${esc(cleanT((w.title||[])[0]||x.doi))}</h5><p>${esc((w["container-title"]||[])[0]||"")} · notice filed ${esc(x.date)} · <a href="https://doi.org/${esc(x.notice)}" target="_blank" rel="noopener">notice</a></p></div>`}).join("");
     const hit=res.filter(x=>x.n).length;st.textContent=`${L.length} newest retractions · ${hit?hit+" already cited on Wikipedia":"none cited on Wikipedia yet"} · ${new Date().toLocaleTimeString()}`;
