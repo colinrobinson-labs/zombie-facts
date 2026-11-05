@@ -40,7 +40,7 @@ GDELT = "https://api.gdeltproject.org/api/v2/doc/doc"
 GDELT_GAP = 6.0           # GDELT asks for at most one request every 5 s
 MAX_TITLES = int(os.environ.get("ZF_NEWS_TITLES", "400"))
 MAX_READS = int(os.environ.get("ZF_NEWS_READS", "150"))
-FACTCHECK_DAYS = int(os.environ.get("ZF_FACTCHECK_DAYS", "120"))
+FACTCHECK_DAYS = int(os.environ.get("ZF_FACTCHECK_DAYS", "730"))
 
 FALSE_RX = re.compile(r"\b(false|fake|fabricated|misleading|incorrect|inaccurate|wrong|not true|untrue|debunked|"
                       r"pants on fire|four pinocchios|baseless|unsupported|unproven|no evidence|distort|mostly false|"
@@ -483,6 +483,7 @@ def main():
         "seconds": round(time.time() - t0),
         "stats": {
             "factchecks": len(fcs),
+            "days": FACTCHECK_DAYS,
             "checkers": len({f["checker"] for f in fcs}),
             "titlesSearched": _gdelt_ok[0] + _mc_ok[0],
             "newsSource": "Media Cloud" if _mc_ok[0] else ("GDELT" if _gdelt_ok[0] else ""),
