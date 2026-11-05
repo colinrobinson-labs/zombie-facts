@@ -473,8 +473,8 @@ def main():
     for s in stories:
         if probe:
             print("STORY", json.dumps(s, ensure_ascii=False)[:600], flush=True)
-    for h in hits[:40] if probe else []:
-        print("FCHIT", json.dumps(h, ensure_ascii=False)[:600], flush=True)
+    for h in hits[:300] if probe else []:
+        print("FCHIT", json.dumps({k: h[k] for k in ("url", "outlet", "claim", "verdict", "checker", "checkUrl", "checked")}, ensure_ascii=False)[:700], flush=True)
 
     found = [s for s in stories if s["verdict"] in ("no mention", "unread")] + hits
     items = merge(prev, found)
