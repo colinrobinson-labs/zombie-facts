@@ -45,12 +45,11 @@
    "key": "10.1002/14651858.cd003592|Trazodone",
    "doi": "10.1002/14651858.cd003592",
    "page": "Trazodone",
-   "status": "queued",
-   "verdict": "Cochrane withdrew this 2003 review in 2016, so it should not be cited as current evidence; the other sources on this sentence may be enough on their own.",
+   "status": "dismissed",
+   "verdict": "Cochrane withdrew the 2003 review in 2016 only to hand it to new authors; it is outdated, not discredited.",
    "reviewed": "2026-11-05",
    "section": "Retracted source: Antidepressants for generalised anxiety disorder (GAD)",
-   "text": "The section \"Other disorders\" cites ''Antidepressants for generalised anxiety disorder (GAD)'' ([https://doi.org/10.1002/14651858.cd003592 doi:10.1002/14651858.cd003592]), which was retracted on 10 March 2016 ([https://doi.org/10.1002/14651858.cd003592.pub2 retraction notice]). It is cited for: \"However, use of trazodone in anxiety disorders is off-label and evidence of its effectiveness for these indications is variable and limited.\" Cochrane withdrew this 2003 review in 2016, so it should not be cited as current evidence; the other sources on this sentence may be enough on their own. Suggest replacing the source or marking it with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, please disregard. (Found by [https://zombiefacts.org/ Zombie Facts], which tracks retracted papers still cited on Wikipedia.) ~~~~",
-   "hold": "Checking whether Cochrane withdrew it as out of date before posting."
+   "text": "The section \"Other disorders\" cites ''Antidepressants for generalised anxiety disorder (GAD)'' ([https://doi.org/10.1002/14651858.cd003592 doi:10.1002/14651858.cd003592]), which was retracted on 10 March 2016 ([https://doi.org/10.1002/14651858.cd003592.pub2 retraction notice]). It is cited for: \"However, use of trazodone in anxiety disorders is off-label and evidence of its effectiveness for these indications is variable and limited.\" Cochrane withdrew this 2003 review in 2016, so it should not be cited as current evidence; the other sources on this sentence may be enough on their own. Suggest replacing the source or marking it with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, please disregard. (Found by [https://zombiefacts.org/ Zombie Facts], which tracks retracted papers still cited on Wikipedia.) ~~~~"
   },
   {
    "key": "10.1002/14651858.cd002766.pub4|Gary Null",

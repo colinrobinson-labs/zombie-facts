@@ -86,7 +86,7 @@ async function load(){
   try{const r=await fetch(BASE+"data.json",{cache:"no-cache"});if(!r.ok)throw 0;D=await r.json()}catch(_){D=null}
   try{const r=await fetch(BASE+"outreach.json",{cache:"no-cache"});if(r.ok)OUT=(await r.json()).notes||[]}catch(_){}
   if(!D||!D.papers||!D.papers.length){fallback();return}
-  ZP=D.papers.map((p,i)=>({...p,title:cleanT(p.title),i,_c:causesOf(p),_sup:!causesOf(p).some(c=>CAUSES.some(x=>x[0]===c))&&(p.reasons||[]).some(r=>SUP.test(r)),_s:(p.title+" "+p.journal+" "+(p.authors||[]).join(" ")+" "+p.wiki.map(w=>w.page).join(" ")+" "+(p.subject||[]).join(" ")).toLowerCase()}));
+  ZP=D.papers.map((p,i)=>({...p,title:cleanT(p.title),i,_c:causesOf(p),_sup:!!p.superseded||!causesOf(p).some(c=>CAUSES.some(x=>x[0]===c))&&(p.reasons||[]).some(r=>SUP.test(r)),_s:(p.title+" "+p.journal+" "+(p.authors||[]).join(" ")+" "+p.wiki.map(w=>w.page).join(" ")+" "+(p.subject||[]).join(" ")).toLowerCase()}));
   const S=D.stats;
   HOLD=new Set(OUT.filter(n=>n.hold).map(n=>n.key));
   const DIS=new Set(OUT.filter(n=>n.status==="dismissed").map(n=>n.key));
