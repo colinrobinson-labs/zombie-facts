@@ -17,7 +17,7 @@ permissions:
   contents: write
   actions: write
 concurrency:
-  group: ${{ github.ref == 'refs/heads/main' && 'zombie-facts-data' || github.ref }}
+  group: ${{ github.ref == 'refs/heads/main' && 'zombie-facts-data' || format('news-{0}', github.ref) }}
   cancel-in-progress: false
 jobs:
   news:
