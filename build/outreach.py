@@ -14,7 +14,6 @@ sys.path.insert(0, os.path.dirname(__file__))
 from build_data import OUT  # noqa: E402
 from recheck import OUTREACH, load, save  # noqa: E402
 
-SITE = "https://zombiefacts.org/"
 
 
 def fmt(d):
@@ -46,8 +45,8 @@ def note_text(p, w, why):
         f"The {where(sec)} cites ''{short(p['title'], 200)}'' "
         f"([https://doi.org/{p['doi']} doi:{p['doi']}]), which was retracted on {fmt(p['retracted'])}{notice}."
         f"{support} {why} "
-        "Suggest replacing the source or marking it with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, "
-        f"please disregard. (Found by [{SITE} Zombie Facts], which tracks retracted papers still cited on Wikipedia.) ~~~~"
+        "Suggest replacing the source or marking the citation with {{tl|Retracted}}; if it is cited on purpose to discuss "
+        "the retraction, please disregard. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~"
     )
 
 

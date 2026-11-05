@@ -29,6 +29,12 @@ def log(*a):
 
 
 def get(url, tries=7, raw=False):
+    """GET with a descriptive User-Agent, honouring Retry-After and Wikipedia's maxlag.
+
+    Being a good citizen keeps us from being blocked: every request names the
+    project, a 429/503 waits as long as the server asks, and a maxlag reply
+    (servers busy) backs off instead of hammering.
+    """
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Encoding": "gzip"})
@@ -36,12 +42,22 @@ def get(url, tries=7, raw=False):
                 b = r.read()
                 if r.headers.get("Content-Encoding") == "gzip":
                     b = gzip.decompress(b)
-                return b if raw else json.loads(b)
+                if raw:
+                    return b
+                j = json.loads(b)
+                err = j.get("error") if isinstance(j, dict) else None
+                if isinstance(err, dict) and err.get("code") == "maxlag":
+                    wait = int(r.headers.get("Retry-After") or 5) * (i + 1)
+                    log("maxlag, waiting", wait, "s")
+                    time.sleep(wait)
+                    continue
+                return j
         except Exception as e:
             code = getattr(e, "code", None)
-            wait = 2 * (i + 1) * (5 if code == 429 else 1)
-            log("retry", i, code or e, url[:120])
-            time.sleep(wait)
+            ra = getattr(e, "headers", None) and e.headers.get("Retry-After")
+            wait = int(ra) if ra and str(ra).isdigit() else 2 * (i + 1) * (5 if code in (429, 503) else 1)
+            log("retry", i, code or e, url[:120], "wait", wait)
+            time.sleep(min(wait, 300))
     raise RuntimeError("failed: " + url)
 
 
@@ -275,9 +291,10 @@ def read_pages(titles):
                                "ts": rev.get("timestamp", ""), "views": views}
         return r
 
-    # content of many pages per request is limited; 10 is safe and fast enough
+    # content of many pages per request is limited; 10 is safe and fast enough.
+    # One request at a time: Wikimedia's API etiquette asks clients not to run requests in parallel.
     chunks = [titles[i:i + 10] for i in range(0, len(titles), 10)]
-    with ThreadPoolExecutor(2) as ex:
+    with ThreadPoolExecutor(1) as ex:
         for n, r in enumerate(ex.map(batch, chunks)):
             out.update(r)
             if n % 50 == 0:
@@ -317,7 +334,7 @@ def crossref_counts(dois):
             log("crossref batch failed", e); return []
 
     chunks = [dois[i:i + 40] for i in range(0, len(dois), 40)]
-    with ThreadPoolExecutor(3) as ex:
+    with ThreadPoolExecutor(2) as ex:  # Crossref's polite pool allows a few concurrent requests; stay under it
         for items in ex.map(batch, chunks):
             for w in items:
                 out[w["DOI"].lower()] = w
