@@ -1,17 +1,41 @@
 name: Zombie Facts newsroom
+# Weekly: read the latest fact-checks and search the news for retracted papers, then
+# update news.json and redeploy. Every lead lands as "unreviewed"; nothing is sent to anyone.
+# On feature branches: a short probe run that prints what it found, no commit.
 on:
+  schedule:
+    - cron: "30 10 * * 1"   # weekly, Monday, after the main data build
   workflow_dispatch:
   push:
     branches-ignore: [main]
-    paths: ["build/news*", ".github/workflows/news-watch.yml"]
+    paths: ["build/news_watch.py", "outlets.json", ".github/workflows/news-watch.yml"]
 permissions:
-  contents: read
+  contents: write
+  actions: write
+concurrency:
+  group: ${{ github.ref == 'refs/heads/main' && 'zombie-facts-data' || github.ref }}
+  cancel-in-progress: false
 jobs:
-  probe:
+  news:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: python build/news_probe.py
+      - name: Tests
+        run: python -m unittest discover build/tests
+      - name: Watch the news
+        run: python build/news_watch.py ${{ github.ref != 'refs/heads/main' && '--probe' || '' }}
+      - name: Commit and redeploy
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "zombie-facts-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add news.json
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "Zombie Facts: newsroom refresh"
+          for i in 1 2 3 4 5; do git pull --rebase origin main && git push && break; sleep $((i*5)); done
+          gh workflow run pages.yml --ref main
