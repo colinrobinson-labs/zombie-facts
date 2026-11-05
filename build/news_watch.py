@@ -53,6 +53,19 @@ NOT_OUTLETS = re.compile(r"(^|\.)(facebook|fb|instagram|twitter|x|tiktok|youtube
                          r"fullfact|leadstories|afp|reuters\.com/fact-check)\.", re.I)
 
 
+# Places a claim "appeared" that are not an outlet's own reporting: screenshots and image hosts, and
+# transcripts (an outlet hosting a transcript of someone speaking did not make the claim itself).
+NOT_REPORTING = re.compile(r"(^|\.)(awesomescreenshot|imgur|ibb|postimg|gyazo|prnt|tinypic|flickr|giphy|"
+                           r"factbase|transcripts?)\.|/transcripts?/|/factbase/|\.(png|jpe?g|gif|webp|mp4|pdf)(\?|$)|"
+                           r"/wp-content/uploads/", re.I)
+# The public list of fresh debunks sticks to health and science, the site's beat.
+SCIENCE_RX = re.compile(r"\b(vaccin|jab|mmr|measles|covid|virus|viral infection|pandemic|cancer|tumou?r|autism|"
+                        r"study|studies|research|scientist|doctor|physician|nurse|hospital|disease|drug|medicine|"
+                        r"pill|supplement|cure|treatment|health|diet|nutrition|obes|diabet|heart|brain|dna|gene|"
+                        r"climate|warming|carbon|fluorid|tylenol|acetaminophen|ivermectin|hydroxychloroquine|"
+                        r"radiation|5g|chemtrail|pesticide|microplastic|fda|cdc|who\b|nih)", re.I)
+
+
 def now():
     return datetime.now(timezone.utc)
 
@@ -121,7 +134,7 @@ def parse_claimreviews(feed, since):
             if not isinstance(cr, dict) or cr.get("@type") != "ClaimReview":
                 continue
             date = (cr.get("datePublished") or el.get("dateCreated") or "")[:10]
-            if date < since:
+            if date < since or date > today():   # some feeds carry typo'd years like 2923
                 continue
             lang = (cr.get("inLanguage") or "")
             lang = (lang.get("name") or lang.get("alternateName") or "") if isinstance(lang, dict) else str(lang)
@@ -172,7 +185,8 @@ def outlet_hits(fcs, outlets):
     for f in fcs:
         for u in f["seen"]:
             h = host(u)
-            if not h or NOT_OUTLETS.search(h + ".") or NOT_OUTLETS.search(u):
+            if (not h or NOT_OUTLETS.search(h + ".") or NOT_REPORTING.search(h + ".") or NOT_REPORTING.search(u)
+                    or h == host(f["url"])):
                 continue
             o = outlet_for(h, outlets) or {"name": h, "domain": h}
             out.append({"kind": "factcheck", "url": u, "outlet": o["name"], "domain": o["domain"],
@@ -181,9 +195,23 @@ def outlet_hits(fcs, outlets):
     return out
 
 
+def public_checks(fcs, n=60, per_checker=4):
+    """Newest health and science debunks, no more than a few from any one fact-checker."""
+    out, per = [], {}
+    for f in sorted(fcs, key=lambda f: f["date"], reverse=True):
+        if not SCIENCE_RX.search(f["claim"]) or per.get(f["checker"], 0) >= per_checker:
+            continue
+        per[f["checker"]] = per.get(f["checker"], 0) + 1
+        out.append({k: f[k] for k in ("claim", "verdict", "checker", "url", "date")})
+        if len(out) >= n:
+            break
+    return out
+
+
 # ---------------------------------------------------------------- 2. news naming retracted papers
 _last_gdelt = [0.0]
 _gdelt_fails = [0]
+_gdelt_ok = [0]       # searches GDELT actually answered, so the site never overstates coverage
 GDELT_GIVE_UP = 3   # GDELT often refuses shared cloud IPs; after 3 straight refusals stop asking this run
 
 
@@ -203,6 +231,7 @@ def gdelt(query, timespan="3months", n=50):
             with urllib.request.urlopen(req, timeout=60) as r:
                 b = r.read()
             _gdelt_fails[0] = 0
+            _gdelt_ok[0] += 1
             if not b.strip():
                 return []
             try:
@@ -229,7 +258,7 @@ def title_query(t):
     words = re.findall(r"[A-Za-z0-9][A-Za-z0-9'\-]*", t)
     if len(words) < 6:
         return None
-    return '"' + " ".join(words[:12]) + '"'
+    return '"' + " ".join(words[:8]) + '"'   # GDELT rejects longer phrases
 
 
 def papers_to_search(data):
@@ -312,6 +341,7 @@ def read_story(u):
 def judge(item, story):
     """What the story says about the paper: 'mentions retraction', 'no mention', or None if the paper isn't there."""
     text, links = story
+    text = " ".join(re.findall(r"[A-Za-z0-9][A-Za-z0-9'\-]*", text))   # same tokens as the query
     low = text.lower()
     tq = (title_query(item.get("paper")) or "").strip('"').lower()
     linked = any(norm(l).endswith(item["doi"]) or item["doi"] in urllib.parse.unquote(l).lower() for l in links)
@@ -390,14 +420,14 @@ def main():
         "stats": {
             "factchecks": len(fcs),
             "checkers": len({f["checker"] for f in fcs}),
-            "titlesSearched": min(MAX_TITLES, len(data.get("papers", []))),
+            "titlesSearched": _gdelt_ok[0],
             "stories": len(stories),
             "storiesMentionRetraction": sum(s["verdict"] == "mentions retraction" for s in stories),
             "unreviewed": sum(i["review"] == "unreviewed" for i in items),
             "confirmed": sum(i["review"] == "confirmed" for i in items),
         },
         # the latest debunks, for the newsroom page: claim, verdict, who checked it
-        "factchecks": sorted(fcs, key=lambda f: f["date"], reverse=True)[:60],
+        "factchecks": public_checks(fcs),
         "items": items,
     }
     if probe:
