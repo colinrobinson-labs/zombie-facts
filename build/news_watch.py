@@ -40,7 +40,7 @@ GDELT = "https://api.gdeltproject.org/api/v2/doc/doc"
 GDELT_GAP = 6.0           # GDELT asks for at most one request every 5 s
 MAX_TITLES = int(os.environ.get("ZF_NEWS_TITLES", "400"))
 MAX_READS = int(os.environ.get("ZF_NEWS_READS", "150"))
-FACTCHECK_DAYS = int(os.environ.get("ZF_FACTCHECK_DAYS", "120"))
+FACTCHECK_DAYS = int(os.environ.get("ZF_FACTCHECK_DAYS", "730"))
 
 FALSE_RX = re.compile(r"\b(false|fake|fabricated|misleading|incorrect|inaccurate|wrong|not true|untrue|debunked|"
                       r"pants on fire|four pinocchios|baseless|unsupported|unproven|no evidence|distort|mostly false|"
@@ -50,14 +50,16 @@ TRUE_RX = re.compile(r"^\s*(true|correct|accurate|mostly true)\s*$", re.I)
 NOT_OUTLETS = re.compile(r"(^|\.)(facebook|fb|instagram|twitter|x|tiktok|youtube|youtu|t|telegram|threads|reddit|"
                          r"whatsapp|archive|web\.archive|archive\.ph|archive\.today|perma|ghostarchive|google|bit|"
                          r"rumble|bitchute|truthsocial|gettr|vk|weibo|linkedin|pinterest|snopes|politifact|factcheck|"
-                         r"fullfact|leadstories|afp|reuters\.com/fact-check)\.", re.I)
+                         r"fullfact|leadstories|afp|reuters\.com/fact-check|mvau|tinyurl|vimeo|googleusercontent|dailymotion|"
+                         r"factly|vishvasnews|boomlive|thip|newsmeter|firstcheck|logicallyfacts|youturn|c-span)\.", re.I)
 
 
 # Places a claim "appeared" that are not an outlet's own reporting: screenshots and image hosts, and
 # transcripts (an outlet hosting a transcript of someone speaking did not make the claim itself).
 NOT_REPORTING = re.compile(r"(^|\.)(awesomescreenshot|imgur|ibb|postimg|gyazo|prnt|tinypic|flickr|giphy|"
                            r"factbase|transcripts?)\.|transcript|/factbase/|\.(png|jpe?g|gif|webp|mp4|pdf)(\?|$)|"
-                           r"/wp-content/uploads/", re.I)
+                           r"/wp-content/uploads/|fact-?check|webqoof|fact-detail|/video/|/watch/", re.I)
+# (an outlet's own fact-check desk debunking the claim is not a lead; nor is a clip of someone saying it)
 # The public list of fresh debunks sticks to health and science, the site's beat.
 SCIENCE_RX = re.compile(r"\b(vaccin\w*|jabs?|mmr|measles|covid\w*|coronavirus|virus\w*|pandemic|plague|cancers?|"
                         r"autism|stud(y|ies)|research\w*|scientists?|diseases?|medicines?|medical|cures?|"
@@ -473,8 +475,8 @@ def main():
     for s in stories:
         if probe:
             print("STORY", json.dumps(s, ensure_ascii=False)[:600], flush=True)
-    for h in hits[:40] if probe else []:
-        print("FCHIT", json.dumps(h, ensure_ascii=False)[:600], flush=True)
+    for h in hits[:300] if probe else []:
+        print("FCHIT", json.dumps({k: h[k] for k in ("url", "outlet", "claim", "verdict", "checker", "checkUrl", "checked")}, ensure_ascii=False)[:700], flush=True)
 
     found = [s for s in stories if s["verdict"] in ("no mention", "unread")] + hits
     items = merge(prev, found)
@@ -483,6 +485,7 @@ def main():
         "seconds": round(time.time() - t0),
         "stats": {
             "factchecks": len(fcs),
+            "days": FACTCHECK_DAYS,
             "checkers": len({f["checker"] for f in fcs}),
             "titlesSearched": _gdelt_ok[0] + _mc_ok[0],
             "newsSource": "Media Cloud" if _mc_ok[0] else ("GDELT" if _gdelt_ok[0] else ""),

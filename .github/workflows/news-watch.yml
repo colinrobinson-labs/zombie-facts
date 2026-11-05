@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: "30 10 * * 1"   # weekly, Monday, after the main data build
   workflow_dispatch:
+    inputs:
+      days:
+        description: "How many days of fact-checks to scan for outlet leads"
+        default: "730"
   push:
     branches-ignore: [main]
     paths: ["build/news_watch.py", "outlets.json", ".github/workflows/news-watch.yml"]
@@ -13,7 +17,7 @@ permissions:
   contents: write
   actions: write
 concurrency:
-  group: ${{ github.ref == 'refs/heads/main' && 'zombie-facts-data' || github.ref }}
+  group: ${{ github.ref == 'refs/heads/main' && 'zombie-facts-data' || format('news-{0}', github.ref) }}
   cancel-in-progress: false
 jobs:
   news:
@@ -28,6 +32,7 @@ jobs:
       - name: Watch the news
         env:
           MEDIACLOUD_API_KEY: ${{ secrets.MEDIACLOUD_API_KEY }}
+          ZF_FACTCHECK_DAYS: ${{ inputs.days || '730' }}
         run: python build/news_watch.py ${{ github.ref != 'refs/heads/main' && '--probe' || '' }}
       - name: Commit and redeploy
         if: github.ref == 'refs/heads/main'

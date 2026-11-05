@@ -71,6 +71,23 @@
    "first": "2026-11-05",
    "last": "2026-11-05",
    "note": "Satire site; the article is labelled as satire. Not an outlet error to correct."
+  },
+  {
+   "kind": "factcheck",
+   "url": "https://www.hindustantimes.com/lifestyle/health/cardiologist-explains-how-harmful-samosas-jalebis-actually-are-after-health-ministry-calls-for-cigarette-like-warning-101752490938986.html",
+   "outlet": "hindustantimes.com",
+   "domain": "hindustantimes.com",
+   "claim": "Samosas and jalebis are loaded with sugar and trans fat, which can affect health in the long term.",
+   "verdict": "misleading",
+   "checker": "youturn",
+   "checkUrl": "https://en.youturn.in/factcheck/pib-fact-check-addressed-the-matter-and-refuted-the-rumours-around-samosas-and-jalebis.html",
+   "checked": "2025-07-16",
+   "known": false,
+   "key": "factcheck|https://en.youturn.in/factcheck/pib-fact-check-addressed-the-matter-and-refuted-the-rumours-around-samosas-and-jalebis.html|https://www.hindustantimes.com/lifestyle/health/cardiologist-explains-how-harmful-samosas-jalebis-actually-are-after-health-ministry-calls-for-cigarette-like-warning-101752490938986.html",
+   "review": "drafted",
+   "note": "Headline says the health ministry called for cigarette-like warnings; PIB fact check says the advisory carries no warning labels. Body is accurate. Read 2026-11-05, unchanged. Draft: zombie-facts/outreach/hindustan-times-samosa.md. Awaiting Colin's OK.",
+   "first": "2026-11-05",
+   "last": "2026-11-05"
   }
  ]
 }
