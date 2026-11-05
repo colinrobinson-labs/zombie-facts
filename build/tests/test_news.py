@@ -68,6 +68,13 @@ class Papers(unittest.TestCase):
         self.assertEqual(said, "no mention")
         self.assertEqual(N.judge(item, ("Unrelated text.", []))[0], None)
 
+    def test_mediacloud_off_without_key(self):
+        old, N.MC_KEY = N.MC_KEY, ""
+        try:
+            self.assertIsNone(N.mediacloud('"anything at all here"'))
+        finally:
+            N.MC_KEY = old
+
     def test_merge_keeps_reviews(self):
         prev = {"items": [{"key": "paper|10.1/a|https://n/1", "kind": "paper", "doi": "10.1/a", "url": "https://n/1",
                            "review": "confirmed", "note": "checked", "first": "2026-10-01"}]}

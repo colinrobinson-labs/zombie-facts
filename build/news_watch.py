@@ -266,6 +266,52 @@ def gdelt(query, timespan="3months", n=50):
     return []
 
 
+MEDIACLOUD = "https://search.mediacloud.org/api/search/story-list"
+MC_KEY = os.environ.get("MEDIACLOUD_API_KEY", "").strip()
+MC_GAP = 2.0
+_last_mc = [0.0]
+_mc_ok = [0]
+
+
+def mediacloud(query, days=365, n=100):
+    """Media Cloud online-news search (free account). Returns GDELT-shaped rows: url, title, seendate.
+
+    Used instead of GDELT when the MEDIACLOUD_API_KEY repo secret is set. Paced at one request per 2 s,
+    Retry-After honoured, gives up quietly so a Media Cloud outage never breaks the weekly run.
+    """
+    if not MC_KEY:
+        return None
+    end = now().date()
+    params = {"q": query, "start": str(end - timedelta(days=days)), "end": str(end),
+              "platform": "onlinenews-mediacloud", "page_size": n}
+    for i in range(3):
+        wait = _last_mc[0] + MC_GAP - time.time()
+        if wait > 0:
+            time.sleep(wait)
+        _last_mc[0] = time.time()
+        try:
+            req = urllib.request.Request(MEDIACLOUD + "?" + urllib.parse.urlencode(params),
+                                         headers={"User-Agent": UA, "Authorization": "Token " + MC_KEY,
+                                                  "Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                j = json.loads(r.read())
+            _mc_ok[0] += 1
+            rows = j.get("stories") if isinstance(j, dict) else j
+            return [{"url": x.get("url") or "", "title": x.get("title") or "",
+                     "seendate": re.sub(r"\D", "", str(x.get("publish_date") or x.get("indexed_date") or ""))[:8]}
+                    for x in rows or [] if isinstance(x, dict)]
+        except Exception as e:
+            code = getattr(e, "code", None)
+            if code in (401, 403):
+                log("mediacloud refused the key", code)
+                return None
+            ra = getattr(e, "headers", None) and e.headers.get("Retry-After")
+            pause = int(ra) if ra and str(ra).isdigit() else 15 * (i + 1)
+            log("mediacloud retry", i, code or e, "wait", pause)
+            time.sleep(min(pause, 120))
+    return []
+
+
 def title_query(t):
     """An exact-phrase query from a paper title, or None if the title is too generic to search."""
     t = re.sub(r"^(RETRACTED( ARTICLE)?|WITHDRAWN)\s*:\s*", "", t or "", flags=re.I)
@@ -290,7 +336,9 @@ def news_mentions(data, outlets):
         q = title_query(p.get("title"))
         if not q:
             continue
-        arts = gdelt(q + " sourcelang:english")
+        arts = mediacloud(q)
+        if arts is None:   # no Media Cloud key (or it was refused): fall back to GDELT
+            arts = gdelt(q + " sourcelang:english")
         for a in arts:
             u = a.get("url") or ""
             seen = (a.get("seendate") or "")[:8]
@@ -436,7 +484,8 @@ def main():
         "stats": {
             "factchecks": len(fcs),
             "checkers": len({f["checker"] for f in fcs}),
-            "titlesSearched": _gdelt_ok[0],
+            "titlesSearched": _gdelt_ok[0] + _mc_ok[0],
+            "newsSource": "Media Cloud" if _mc_ok[0] else ("GDELT" if _gdelt_ok[0] else ""),
             "stories": len(stories),
             "storiesMentionRetraction": sum(s["verdict"] == "mentions retraction" for s in stories),
             "unreviewed": sum(i["review"] == "unreviewed" for i in items),
