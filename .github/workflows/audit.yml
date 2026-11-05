@@ -1,0 +1,30 @@
+name: Weekly accuracy audit
+# Re-reads every "flagged" citation, checks data consistency, and re-checks Cochrane
+# withdrawals against PubMed. Results go to one standing issue so they're easy to review.
+on:
+  schedule:
+    - cron: "0 15 * * 0"   # Sundays, after the daily watch, before Monday's full build
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency: zombie-facts-audit
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Run audit
+        run: python build/audit.py --report /tmp/audit.md
+      - name: Publish to the audit issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat /tmp/audit.md >> "$GITHUB_STEP_SUMMARY"
+          { echo "_Run $(date -u +%Y-%m-%d) · [log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})_"; echo; cat /tmp/audit.md; } > /tmp/body.md
+          n=$(gh issue list --state open --search "Weekly accuracy audit in:title" --json number --jq '.[0].number')
+          if [ -n "$n" ]; then gh issue edit "$n" --body-file /tmp/body.md && gh issue comment "$n" --body "$(head -1 /tmp/audit.md)"
+          else gh issue create --title "Weekly accuracy audit" --body-file /tmp/body.md; fi
