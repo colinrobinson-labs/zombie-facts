@@ -8,7 +8,7 @@ assembled from fragments in src/pages/. Run after editing anything in src/:
     python build/make_pages.py          # writes index.html, register/index.html, ...
     python build/make_pages.py --check  # exit 1 if the committed pages are stale (CI)
 """
-import os, re, sys
+import json, os, re, sys
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 SRC = os.path.join(ROOT, "src")
@@ -42,6 +42,41 @@ MARK = ('<svg class="mark" viewBox="0 0 40 40" aria-hidden="true">'
         '<path class="dr" d="M21 36.9c.3 1.6.4 2.4 0 2.8-.5.4-1.3.1-1.2-.8 0-.7.5-1.2.7-2.1z"/>'
         '</svg>')
 
+CAUSE_RE = re.compile(r"fabricat|falsif|image|paper mill|fake peer|peer review|compromised|randomly generated|computer-aided|plagiar|euphemism|duplicat|misconduct|error|unreliable|reproduc|contamina|results not|ethic|consent|irb|iacuc|authorship|author unaware|legal|copyright|third party|objections", re.I)
+SUP_RE = re.compile(r"out of date|retract and replace", re.I)
+
+
+def live_counts():
+    """Zombie citations, articles and monthly readers, counted the way the page counts them."""
+    try:
+        d = json.load(open(os.path.join(ROOT, "data.json")))
+        notes = json.load(open(os.path.join(ROOT, "outreach.json"))).get("notes", [])
+    except (OSError, ValueError):
+        return None
+    dismissed = {n["key"] for n in notes if n.get("status") == "dismissed"}
+    cites, pages = 0, {}
+    for p in d.get("papers", []):
+        rs = p.get("reasons") or []
+        if p.get("superseded") or (not any(CAUSE_RE.search(r) for r in rs) and any(SUP_RE.search(r) for r in rs)):
+            continue
+        for w in p.get("wiki", []):
+            if w.get("status") == "zombie" and f'{p["doi"]}|{w["page"]}' not in dismissed:
+                cites += 1
+                pages[w["page"]] = w.get("views") or 0
+    return cites, len(pages), sum(pages.values())
+
+
+def share_text():
+    c = live_counts()
+    if not c or not c[0]:
+        return ("Zombie Facts: Wikipedia still cites research that was retracted",
+                "The study was retracted. The fact kept walking. We check every retraction on record against every source on English Wikipedia, and track each one until it's fixed.")
+    cites, arts, reads = c
+    r = f"{reads // 10000 * 10000:,}" if reads >= 20000 else f"{reads // 1000 * 1000:,}"
+    return (f"Wikipedia still cites retracted research {cites} times, on pages read {r}+ times a month.",
+            f"The study was retracted. The fact kept walking. Zombie Facts checks every retraction on record against every source on English Wikipedia, finds {cites} still cited with no warning across {arts} articles, and tracks each one until it's fixed.")
+
+
 def href(slug):
     return "/" + (slug + "/" if slug else "")
 
@@ -73,11 +108,13 @@ def build():
         url = SITE + href(slug)
         h = head
         h = re.sub(r"<title>.*?</title>", f"<title>{title}</title>", h)
-        h = re.sub(r'(<meta name="description" content=")[^"]*', lambda m: m.group(1) + desc, h)
+        h = re.sub(r'(<meta name="description" content=")[^"]*', lambda m: m.group(1) + (share_text()[1] if not slug else desc), h)
         h = re.sub(r'(<meta property="og:url" content=")[^"]*', lambda m: m.group(1) + url, h)
-        if slug:
-            h = re.sub(r'(<meta property="og:title" content=")[^"]*', lambda m: m.group(1) + title, h)
-            h = re.sub(r'(<meta name="twitter:title" content=")[^"]*', lambda m: m.group(1) + title, h)
+        st, sd = share_text()
+        h = re.sub(r'(<meta property="og:title" content=")[^"]*', lambda m: m.group(1) + (st if not slug else title), h)
+        h = re.sub(r'(<meta name="twitter:title" content=")[^"]*', lambda m: m.group(1) + (st if not slug else title), h)
+        h = re.sub(r'(<meta property="og:description" content=")[^"]*', lambda m: m.group(1) + (sd if not slug else desc), h)
+        h = re.sub(r'(<meta name="twitter:description" content=")[^"]*', lambda m: m.group(1) + (sd if not slug else desc), h)
         h = h.replace("</head>", "")
         body = "\n".join(open(os.path.join(SRC, "pages", f + ".html")).read().rstrip() for f in frags)
         page = (h + f'<link rel="canonical" href="{url}">\n<link rel="stylesheet" href="/assets/site.css">\n</head>\n'

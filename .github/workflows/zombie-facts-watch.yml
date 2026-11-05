@@ -76,7 +76,8 @@ jobs:
         run: |
           git config user.name "zombie-facts-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data.json outreach.json 2>/dev/null || true
+          python build/make_pages.py  # share-card counts follow the data
+          git add data.json outreach.json index.html 404.html */index.html 2>/dev/null || true
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -m "Zombie Facts: daily recheck"
           for i in 1 2 3 4 5; do git pull --rebase origin main && git push && break; sleep $((i*5)); done
