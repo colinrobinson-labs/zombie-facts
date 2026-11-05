@@ -1,0 +1,31 @@
+  <section class="sec pagehead" id="report">
+    <div class="sh"><h2>Report a zombie</h2><p>Seen a fact that was retracted, debunked or overtaken and is still being repeated? A Wikipedia article, a news story, a textbook, a viral post. Send it in. A person reads every tip, and good ones become cases with their own page.</p></div>
+    <div class="desk">
+      <div class="dcol">
+        <h4>Your tip</h4>
+        <form class="tip" id="tipForm" novalidate>
+          <label>Where is it? <small>A link to the page, story or post</small>
+            <input type="url" id="tWhere" required placeholder="https://" autocomplete="off" inputmode="url"></label>
+          <label>What does it say? <small>Quote the sentence if you can</small>
+            <textarea id="tClaim" rows="3" required></textarea></label>
+          <label>Why is it wrong? <small>A link to the retraction notice, correction or fact-check</small>
+            <textarea id="tWhy" rows="3" required></textarea></label>
+          <label class="hp" aria-hidden="true">Leave this empty <input type="text" id="tHp" tabindex="-1" autocomplete="off"></label>
+          <button type="submit" class="tipgo">Continue on GitHub →</button>
+          <p class="tipst" id="tipSt" role="status"></p>
+        </form>
+      </div>
+      <div class="dcol">
+        <h4>How tips work</h4>
+        <ol class="nsteps">
+          <li><b>Sent on GitHub.</b> The button opens your tip as a public, pre-filled form on GitHub, where the site's code lives. You need a free GitHub account, which keeps spam out and lets us reply to you.</li>
+          <li><b>Read.</b> We check the source ourselves: is it really retracted or debunked, and does the page use it without saying so?</li>
+          <li><b>Opened.</b> If it holds up, it becomes a case with its own page, and we tell the people who can fix it.</li>
+          <li><b>Credited.</b> The case page says it came from a reader tip. We'll name you only if you ask.</li>
+        </ol>
+        <p class="rs-fine" id="tipMail" hidden></p>
+        <h4 class="h4b">Want to check a Wikipedia page yourself?</h4>
+        <p class="rs-fine"><a href="/check/">Check a page</a> scans any article for retracted sources in a few seconds.</p>
+      </div>
+    </div>
+  </section>

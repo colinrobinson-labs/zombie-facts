@@ -1,0 +1,37 @@
+name: Report a zombie
+description: A retracted, debunked or outdated fact that is still in circulation
+title: "Tip: "
+labels: ["tip"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the tip. A person reads every one. Please don't include anyone's private details.
+  - type: input
+    id: where
+    attributes:
+      label: Where is it?
+      description: A link to the page, story or post that repeats it
+      placeholder: https://
+    validations:
+      required: true
+  - type: textarea
+    id: claim
+    attributes:
+      label: What does it say?
+      description: Quote the sentence if you can
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is it wrong?
+      description: A link to the retraction notice, correction or fact-check, and anything else we should know
+    validations:
+      required: true
+  - type: checkboxes
+    id: credit
+    attributes:
+      label: Credit
+      options:
+        - label: Name me (my GitHub username) on the case page if this becomes a case
