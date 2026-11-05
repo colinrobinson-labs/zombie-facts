@@ -73,6 +73,27 @@ class Classify(unittest.TestCase):
         self.assertFalse(fl2)
 
 
+class Said(unittest.TestCase):
+    def test_clean(self):
+        self.assertEqual(B.clean_said("* Estrogen receptor alpha,"), "")
+        self.assertEqual(B.clean_said("** The probe Juno is launched. (BBC) [http://www.nasa.go"), "")
+        self.assertEqual(B.clean_said("|title = Art Spiegelman's"), "")
+        good = "*16 November – The Emperor of All Maladies: a biography of cancer is published."
+        self.assertTrue(B.clean_said(good).startswith("16 November"))
+        self.assertEqual(B.clean_said("Meladrazine is a drug used in urology as an antispasmodic."),
+                         "Meladrazine is a drug used in urology as an antispasmodic.")
+
+
+    def test_superseded(self):
+        c = lambda r, d="10.1002/14651858.cd003592": B.superseded({"doi": d, "reasons": r})
+        self.assertTrue(c(["Notice - Limited or No Information", "Removed"]))
+        self.assertTrue(c(["Retract and Replace", "Withdrawn as Out of Date"]))
+        self.assertTrue(c(["Temporary Removal"]))
+        self.assertFalse(c(["Concerns/Issues about Data", "Notice - Limited or No Information", "Unreliable Data"]))
+        self.assertFalse(c(["Conflict of Interest", "Withdrawn as Out of Date"]))
+        self.assertFalse(c(["Removed"], "10.1016/x"))
+
+
 class Talk(unittest.TestCase):
     TXT = """== Older ==
 Hi. [[User:Someone|Someone]] 10:00, 1 January 2026 (UTC)
@@ -94,6 +115,35 @@ x
         self.assertEqual(rs[0]["at"], "2026-11-07T14:05Z")
         self.assertIn("replaced it", rs[0]["said"])
         self.assertIsNone(R.find_section(self.TXT, "Missing"))
+
+
+    def test_ip_reply(self):
+        body = ("Note. [[User:ZombieFacts|ZombieFacts]] 12:00, 6 November 2026 (UTC)\n"
+                ":Fixed it. <small>[[Special:Contributions/203.0.113.7|203.0.113.7]]</small> 08:00, 9 November 2026 (UTC)\n")
+        rs = R.parse_replies(body, ["ZombieFacts"])
+        self.assertEqual([r["user"] for r in rs], ["203.0.113.7"])
+
+
+class Posting(unittest.TestCase):
+    def setUp(self):
+        import post_notes as P
+        self.P = P
+
+    def test_duplicate_section_detected(self):
+        P = self.P
+        orig = P.api
+        P.api = lambda params, post=False: {"parse": {"sections": [{"line": "Old"}, {"line": "Retracted source: Foo bar"}]}}
+        try:
+            self.assertTrue(P.talk_has_section("X", "Retracted source: Foo bar"))
+            self.assertFalse(P.talk_has_section("X", "Retracted source: Other"))
+        finally:
+            P.api = orig
+
+    def test_no_nocreate_flag(self):
+        # MediaWiki treats any nocreate value as true, which blocks posting to talk pages that don't exist yet
+        with open(os.path.join(HERE, "..", "post_notes.py")) as f:
+            src = f.read()
+        self.assertNotIn('"nocreate"', src)
 
 
 class DataFile(unittest.TestCase):

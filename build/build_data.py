@@ -203,6 +203,33 @@ def plain(s):
     return re.sub(r"\s+", " ", s).strip()
 
 
+PROCEDURAL = re.compile(r"out of date|retract and replace|^removed$|temporary removal|limited or no information|"
+                        r"date of (?:article|retraction)|notice unknown|upgrade/update", re.I)
+
+
+def superseded(p):
+    """A Cochrane review withdrawn for procedural reasons (out of date, handed to new authors, replaced).
+
+    PubMed's withdrawal notices for these say e.g. "This review is to be passed onto a new group of
+    authors". The review is outdated, not discredited, so it is not presented as a zombie. Withdrawals
+    with any substantive reason (data concerns, conflict of interest, misconduct) are kept.
+    """
+    if not p["doi"].startswith("10.1002/14651858"):
+        return False
+    rs = p.get("reasons") or []
+    return bool(rs) and all(PROCEDURAL.search(r) for r in rs)
+
+
+def clean_said(s):
+    """The quoted sentence, or "" when it isn't a readable sentence (list rows, markup, cut-off fragments)."""
+    s = re.sub(r"^[\s*#:;•\-–]+", "", s or "").strip()
+    if not s or re.search(r"https?:|\[\[|\]\]|\[\S+\.\S+|\{|\}|\|", s):
+        return ""
+    if len(re.findall(r"[A-Za-z]{2,}", s)) < 6:
+        return ""
+    return s
+
+
 def context_for(txt, low, i):
     """Sentence the citation supports, its section, and whether the retraction is mentioned."""
     rs = low.rfind("<ref", 0, i)
@@ -219,7 +246,7 @@ def context_for(txt, low, i):
     sentence = parts[-1] if parts else sent
     if len(sentence) < 40 and len(parts) > 1:
         sentence = parts[-2] + " " + sentence
-    sentence = sentence[-420:]
+    sentence = clean_said(sentence[-420:])
     sec = "Lead"
     for m in re.finditer(r"^(={2,4})\s*(.+?)\s*\1\s*$", txt[:i], flags=re.M):
         sec = plain(m.group(2))
@@ -419,6 +446,7 @@ def main():
                           "section": sec, "views": pg["views"], "rev": pg["ts"][:10]})
         if not cites:
             continue
+        rec["superseded"] = superseded(rec)
         rec["wiki"] = sorted(cites, key=lambda c: (c["status"] != "zombie", -c["views"]))
         rec["zombies"] = sum(c["status"] == "zombie" for c in cites)
         rec["reach"] = sum(c["views"] for c in cites if c["status"] == "zombie")
