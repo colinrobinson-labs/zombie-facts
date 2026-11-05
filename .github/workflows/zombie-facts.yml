@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["build/**", ".github/workflows/zombie-facts.yml"]
+    paths: ["build/build_data.py", ".github/workflows/zombie-facts.yml"]  # not make_pages.py etc: a full rebuild re-downloads the Wikipedia dump
 permissions:
   contents: write
   actions: write
