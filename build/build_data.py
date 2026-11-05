@@ -250,8 +250,16 @@ def context_for(txt, low, i):
     """Sentence the citation supports, its section, and whether the retraction is mentioned."""
     rs = low.rfind("<ref", 0, i)
     re_ = low.find("</ref>", i)
-    if rs < 0 or i - rs > 4000:
-        rs = max(0, i - 300)
+    tag_end = low.find(">", rs) if rs >= 0 else -1
+    # the DOI is inside this <ref> only if the ref is open (not self-closing, not closed) before it
+    inside = rs >= 0 and i - rs <= 4000 and low[tag_end - 1] != "/" and low.find("</ref>", rs, i) < 0
+    if not inside:
+        # inline citation such as {{doi-inline}} in a list row: the text before it on the same line
+        ls = low.rfind("\n", 0, i) + 1
+        t0 = low.rfind("{{", ls, i)
+        rs = t0 if t0 >= 0 else max(ls, i - 300)
+        le = low.find("\n", i)
+        row_end = le if le >= 0 else len(low)
     # first occurrence might be a named ref defined in a reference list
     a = max(0, rs - 1600)
     before = txt[a:rs]
@@ -262,11 +270,14 @@ def context_for(txt, low, i):
     sentence = parts[-1] if parts else sent
     if len(sentence) < 40 and len(parts) > 1:
         sentence = parts[-2] + " " + sentence
-    sentence = clean_said(sentence[-420:])
+    sentence = clean_said(re.sub(r"\s*\([^()]{1,40}\)$", "", sentence[-420:]))
     sec = "Lead"
     for m in re.finditer(r"^(={2,4})\s*(.+?)\s*\1\s*$", txt[:i], flags=re.M):
         sec = plain(m.group(2))
-    win = low[max(0, rs - 600): (re_ + 400 if 0 <= re_ - i < 4000 else i + 900)]
+    if inside:
+        win = low[max(0, rs - 600): (re_ + 400 if 0 <= re_ - i < 4000 else i + 900)]
+    else:  # an inline citation: only its own list row
+        win = low[low.rfind("\n", 0, i) + 1: row_end]
     flagged = bool(re.search(r"retract|\{\{\s*retracted|expression of concern|withdr|\bremoved:|was (?:\w+ )?removed\b", win))
     return sentence, sec, flagged
 
