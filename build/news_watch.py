@@ -271,8 +271,11 @@ def gdelt(query, timespan="3months", n=50):
 MEDIACLOUD = "https://search.mediacloud.org/api/search/story-list"
 MC_KEY = os.environ.get("MEDIACLOUD_API_KEY", "").strip()
 MC_GAP = 2.0
+MC_GIVE_UP = 4      # after 4 searches in a row that Media Cloud never answered, stop asking this run
 _last_mc = [0.0]
 _mc_ok = [0]
+_mc_fails = [0]
+NEWS_MINUTES = float(os.environ.get("ZF_NEWS_MINUTES", "30"))   # time budget for the whole news search
 
 
 def mediacloud(query, days=365, n=100):
@@ -283,21 +286,26 @@ def mediacloud(query, days=365, n=100):
     """
     if not MC_KEY:
         return None
+    if _mc_fails[0] >= MC_GIVE_UP:
+        return []
     end = now().date()
     params = {"q": query, "start": str(end - timedelta(days=days)), "end": str(end),
               "platform": "onlinenews-mediacloud", "page_size": n}
-    for i in range(3):
+    for i in range(2):
         wait = _last_mc[0] + MC_GAP - time.time()
         if wait > 0:
             time.sleep(wait)
-        _last_mc[0] = time.time()
+        _last_mc[0] = t0 = time.time()
         try:
             req = urllib.request.Request(MEDIACLOUD + "?" + urllib.parse.urlencode(params),
                                          headers={"User-Agent": UA, "Authorization": "Token " + MC_KEY,
                                                   "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=60) as r:
+            with urllib.request.urlopen(req, timeout=40) as r:
                 j = json.loads(r.read())
             _mc_ok[0] += 1
+            _mc_fails[0] = 0
+            if _mc_ok[0] <= 3:
+                log(f"mediacloud answered in {time.time() - t0:.1f}s")
             rows = j.get("stories") if isinstance(j, dict) else j
             return [{"url": x.get("url") or "", "title": x.get("title") or "",
                      "seendate": re.sub(r"\D", "", str(x.get("publish_date") or x.get("indexed_date") or ""))[:8]}
@@ -309,8 +317,11 @@ def mediacloud(query, days=365, n=100):
                 return None
             ra = getattr(e, "headers", None) and e.headers.get("Retry-After")
             pause = int(ra) if ra and str(ra).isdigit() else 15 * (i + 1)
-            log("mediacloud retry", i, code or e, "wait", pause)
-            time.sleep(min(pause, 120))
+            log("mediacloud retry", i, code or e, "wait", min(pause, 60))
+            time.sleep(min(pause, 60))
+    _mc_fails[0] += 1
+    if _mc_fails[0] >= MC_GIVE_UP:
+        log("mediacloud keeps failing; skipping the rest of the news search this run")
     return []
 
 
@@ -334,7 +345,11 @@ def papers_to_search(data):
 
 def news_mentions(data, outlets):
     out = []
+    stop = time.time() + NEWS_MINUTES * 60
     for n, p in enumerate(papers_to_search(data)):
+        if time.time() > stop:
+            log(f"news search hit its {NEWS_MINUTES:g}-minute budget after {n} titles; the rest wait for next week")
+            break
         q = title_query(p.get("title"))
         if not q:
             continue
