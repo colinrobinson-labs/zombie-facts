@@ -433,7 +433,7 @@ def main():
     if probe:
         print("STATS", json.dumps(out["stats"]), flush=True)
         for f in out["factchecks"][:15]:
-            print("FC", json.dumps({k: f[k] for k in ("date", "checker", "verdict", "claim", "seen")}, ensure_ascii=False)[:500], flush=True)
+            print("FC", json.dumps({k: f[k] for k in ("date", "checker", "verdict", "claim")}, ensure_ascii=False)[:500], flush=True)
     save(NEWS, out)
     log("news.json written", out["stats"])
 

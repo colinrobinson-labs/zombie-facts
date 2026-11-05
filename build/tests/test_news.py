@@ -27,7 +27,7 @@ class FactChecks(unittest.TestCase):
         fcs = self.parse(cr("A false claim", "Mostly false", seen=[
             "https://www.facebook.com/x/posts/1", "https://t.me/chan/2", "https://www.dailymail.co.uk/news/a.html",
             "https://smallblog.example/post", "https://www.awesomescreenshot.com/image/1",
-            "https://transcripts.cnn.com/show/x", "https://checker.example/wp-content/uploads/a.png"]))
+            "https://transcripts.cnn.com/show/x", "https://www.cbsnews.com/news/face-the-nation-transcript-08-23/", "https://checker.example/wp-content/uploads/a.png"]))
         hits = N.outlet_hits(fcs, [{"domain": "dailymail.co.uk", "name": "Daily Mail", "page": "https://x"}])
         self.assertEqual(sorted(h["domain"] for h in hits), ["dailymail.co.uk", "smallblog.example"])
         self.assertTrue(next(h for h in hits if h["domain"] == "dailymail.co.uk")["known"])
