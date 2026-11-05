@@ -73,6 +73,32 @@ class Classify(unittest.TestCase):
         self.assertFalse(fl2)
 
 
+class Polite(unittest.TestCase):
+    def test_maxlag_backs_off_then_succeeds(self):
+        import io, urllib.request
+        calls, slept = [], []
+
+        class R(io.BytesIO):
+            headers = {"Retry-After": "1"}
+            def __enter__(self): return self
+            def __exit__(self, *a): pass
+
+        def fake(req, timeout=0):
+            calls.append(req.get_header("User-agent"))
+            body = b'{"error":{"code":"maxlag"}}' if len(calls) == 1 else b'{"ok":1}'
+            return R(body)
+
+        o_open, o_sleep = urllib.request.urlopen, B.time.sleep
+        urllib.request.urlopen, B.time.sleep = fake, slept.append
+        try:
+            self.assertEqual(B.get("https://example.org/x"), {"ok": 1})
+        finally:
+            urllib.request.urlopen, B.time.sleep = o_open, o_sleep
+        self.assertEqual(len(calls), 2)
+        self.assertTrue(slept and slept[0] >= 1)
+        self.assertIn("zombiefacts.org", calls[0])
+
+
 class Said(unittest.TestCase):
     def test_clean(self):
         self.assertEqual(B.clean_said("* Estrogen receptor alpha,"), "")
