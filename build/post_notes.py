@@ -30,7 +30,7 @@ opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
 
 
 def api(params, post=False):
-    params = dict(params, format="json", formatversion="2")
+    params = dict(params, format="json", formatversion="2", maxlag="5")
     data = urllib.parse.urlencode(params).encode()
     req = urllib.request.Request(WP if post else WP + "?" + data.decode(), data=data if post else None,
                                  headers={"User-Agent": UA})

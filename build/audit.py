@@ -15,7 +15,7 @@ by a person (NOTICE lines).
 
 Read-only: prints a summary and AUDIT / NOTICE lines, writes nothing.
 """
-import json, os, re, sys, urllib.parse
+import json, os, re, sys, time, urllib.parse
 sys.path.insert(0, os.path.dirname(__file__))
 from build_data import OUT, get, log, read_pages  # noqa: E402
 
@@ -71,27 +71,20 @@ def notice_text(doi):
 
 
 def cochrane_reason(notice):
-    """Withdrawal reason for a Cochrane review, from PubMed's record or the Cochrane Library page."""
-    import urllib.request
+    """Withdrawal reason for a Cochrane review, from PubMed's record (NCBI E-utilities, <3 requests/s)."""
     out = []
     try:
         ids = get("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?" + urllib.parse.urlencode(
             {"db": "pubmed", "term": notice + "[doi]", "retmode": "json"}), tries=2)["esearchresult"]["idlist"]
+        time.sleep(0.5)
         if ids:
             x = get("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" + urllib.parse.urlencode(
                 {"db": "pubmed", "id": ids[0], "rettype": "abstract", "retmode": "text"}), tries=2, raw=True)
+            time.sleep(0.5)
             out.append("PUBMED " + re.sub(r"\s+", " ", x.decode("utf-8", "replace"))[:900])
     except Exception as e:
         out.append(f"pubmed failed {e}")
-    try:
-        req = urllib.request.Request(f"https://www.cochranelibrary.com/cdsr/doi/{notice}/full",
-                                     headers={"User-Agent": "Mozilla/5.0"})
-        h = urllib.request.urlopen(req, timeout=40).read().decode("utf-8", "replace")
-        t = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", h))
-        hits = [t[max(0, m.start() - 200): m.start() + 400] for m in re.finditer(r"withdraw", t, re.I)][:3]
-        out.append("COCHRANE " + " ... ".join(hits))
-    except Exception as e:
-        out.append(f"cochrane failed {e}")
+    # The Cochrane Library blocks automated clients; we don't scrape it.
     return " ## ".join(out)
 
 
@@ -100,6 +93,7 @@ def notices():
     for p in data["papers"]:
         if not p["zombies"]:
             continue
+        time.sleep(0.3)  # Europe PMC asks for modest request rates
         t = notice_text(p["notice"]) if p.get("notice") else ""
         if not t.strip(" |"):
             t = notice_text(p["doi"])
