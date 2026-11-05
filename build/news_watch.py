@@ -59,11 +59,12 @@ NOT_REPORTING = re.compile(r"(^|\.)(awesomescreenshot|imgur|ibb|postimg|gyazo|pr
                            r"factbase|transcripts?)\.|transcript|/factbase/|\.(png|jpe?g|gif|webp|mp4|pdf)(\?|$)|"
                            r"/wp-content/uploads/", re.I)
 # The public list of fresh debunks sticks to health and science, the site's beat.
-SCIENCE_RX = re.compile(r"\b(vaccin|jab|mmr|measles|covid|virus|viral infection|pandemic|cancer|tumou?r|autism|"
-                        r"study|studies|research|scientist|doctor|physician|nurse|hospital|disease|drug|medicine|"
-                        r"pill|supplement|cure|treatment|health|diet|nutrition|obes|diabet|heart|brain|dna|gene|"
-                        r"climate|warming|carbon|fluorid|tylenol|acetaminophen|ivermectin|hydroxychloroquine|"
-                        r"radiation|5g|chemtrail|pesticide|microplastic|fda|cdc|who\b|nih)", re.I)
+SCIENCE_RX = re.compile(r"\b(vaccin\w*|jabs?|mmr|measles|covid\w*|coronavirus|virus\w*|pandemic|plague|cancers?|"
+                        r"autism|stud(y|ies)|research\w*|scientists?|diseases?|medicines?|medical|cures?|"
+                        r"health\w*|diet|nutrition\w*|obesity|diabet\w*|dna|genes?|genetic\w*|climate|"
+                        r"global warming|fluorid\w*|tylenol|acetaminophen|ivermectin|hydroxychloroquine|5g|"
+                        r"chemtrails?|pesticides?|microplastics?|fda|cdc|nih|epidemic|outbreak|infection)\b", re.I)
+SCIENCE_CASED = re.compile(r"\bWHO\b")   # the World Health Organization, not the word "who"
 
 
 def now():
@@ -126,6 +127,20 @@ def _urls(x):
     return [u for u in out if u.startswith("http")]
 
 
+LEAD_RATING = re.compile(r"(?:(?:mostly|partly|partially|largely|half)\s+\w+|missing context|out of context|"
+                         r"pants on fire|four pinocchios|\w+)", re.I)
+
+
+def tidy_verdict(v):
+    """'DW Fact check: Unproven There is no evidence...' -> 'Unproven'. Short ratings pass through."""
+    v = re.sub(r"^(?:[\w .]+ )?fact[ -]?check\s*:\s*", "", v, flags=re.I)
+    v = re.split(r"(?<=\w)[.;:]\s|\s[-–—]\s", v)[0].strip()
+    if len(v) > 30:
+        m = LEAD_RATING.match(v)
+        v = m.group(0) if m else v[:30]
+    return v
+
+
 def parse_claimreviews(feed, since):
     """Recent English ClaimReviews that rated a claim false-ish, with where the claim appeared."""
     out = []
@@ -146,6 +161,7 @@ def parse_claimreviews(feed, since):
             rating = _first(cr.get("reviewRating")) or {}
             rating = rating if isinstance(rating, dict) else {}
             verdict = re.sub(r"\s+", " ", str(rating.get("alternateName") or rating.get("name") or "")).strip()
+            verdict = tidy_verdict(verdict)
             if not verdict or TRUE_RX.match(verdict) or not FALSE_RX.search(verdict):
                 continue
             author = _first(cr.get("author")) or {}
@@ -195,11 +211,11 @@ def outlet_hits(fcs, outlets):
     return out
 
 
-def public_checks(fcs, n=60, per_checker=4):
+def public_checks(fcs, n=60, per_checker=6):
     """Newest health and science debunks, no more than a few from any one fact-checker."""
     out, per = [], {}
     for f in sorted(fcs, key=lambda f: f["date"], reverse=True):
-        if not SCIENCE_RX.search(f["claim"]) or per.get(f["checker"], 0) >= per_checker:
+        if not (SCIENCE_RX.search(f["claim"]) or SCIENCE_CASED.search(f["claim"])) or per.get(f["checker"], 0) >= per_checker:
             continue
         per[f["checker"]] = per.get(f["checker"], 0) + 1
         out.append({k: f[k] for k in ("claim", "verdict", "checker", "url", "date")})
