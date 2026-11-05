@@ -5,11 +5,12 @@ Only notes in outreach.json with status "approved" are posted, at most
 ZF_POST_LIMIT per run (default 3), and only when the account's credentials are
 present as environment variables (GitHub secrets):
 
-  WIKI_USER  bot-password login name, e.g. "ZombieFactsBot@poster"
+  WIKI_USER  bot-password login of Colin's personal account, e.g. "ColinRobinson@poster"
   WIKI_PASS  bot password
 
-Without them the script does nothing. Use an account that has Wikipedia's bot
-approval before scheduling this; until then run it by hand (workflow_dispatch).
+Without them the script does nothing. Policy: never scheduled. Colin starts each
+run by hand (workflow_dispatch) for notes he has read and approved, posted from his
+own account, with a plain edit summary and no site credit.
 Each note is re-checked against the live article first, so a citation fixed in
 the meantime is never reported.
 """
@@ -78,7 +79,7 @@ def main():
         if DRY:
             log("DRY RUN would post to Talk:" + n["page"], "|", n["section"]); continue
         r = api({"action": "edit", "title": "Talk:" + n["page"], "section": "new", "sectiontitle": n["section"],
-                 "text": n["text"], "summary": "Note: a cited source was retracted (Zombie Facts)",
+                 "text": n["text"], "summary": "Cited source was retracted; see note",
                  "token": csrf}, post=True)
         e = r.get("edit", {})
         if e.get("result") != "Success":
