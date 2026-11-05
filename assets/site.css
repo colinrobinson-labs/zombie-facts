@@ -20,7 +20,7 @@ button{font:inherit;color:inherit}
 
 /* ── masthead ── */
 .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0 10px;border-bottom:1px solid var(--ink);font:500 11px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.np{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink);font:400 23px/1 var(--head);letter-spacing:.02em;text-transform:uppercase}
+.np{display:inline-flex;align-items:center;gap:9px;white-space:nowrap;text-decoration:none;color:var(--ink);font:400 23px/1 var(--head);letter-spacing:.02em;text-transform:uppercase}
 .np .mark{width:34px;height:34px;flex:none;overflow:visible;transform-origin:50% 90%;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
 .np:hover .mark{transform:rotate(-8deg)}
 .mark .hd{fill:var(--acid);stroke:#141412;stroke-width:2;stroke-linejoin:round}
@@ -263,6 +263,8 @@ footer .np{font-size:26px;margin-bottom:6px}
  .nav div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
  .nav a,.nav a:first-child{padding:11px 4px 9px;text-align:center;font-size:11px;letter-spacing:.05em}
  .nav .lg{display:none}
+ .top .np{font-size:20px;gap:7px}.top .np .mark{width:30px;height:30px}
+ .top .ed span:first-child{font-size:9.5px}
  .nav a[href="/"]{display:none}
  .tools{position:static}
  .ed span:nth-child(2){display:none}
