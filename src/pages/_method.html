@@ -1,0 +1,20 @@
+  <section class="sec" id="method">
+    <div class="sh"><h2>How this works</h2><p>Built from two open sources, rebuilt every week by a script anyone can read.</p></div>
+    <div class="method">
+      <div><h4>The record</h4><ol>
+        <li>The Retraction Watch database, now published openly by Crossref, lists every known retraction. We keep only full retractions, not corrections.</li>
+        <li>We walk every link to doi.org on English Wikipedia (<span id="mLinks">millions</span> of them) and match each one to that list.</li>
+        <li>For each match we read the article, find the sentence the citation supports, and check the citation and its surroundings for any mention of the retraction.</li></ol></div>
+      <div><h4>Zombie or flagged</h4><p><b style="background:var(--acid);color:#141412;padding:0 4px">Zombie</b> means the retracted paper is cited and nothing near it says so. <b style="color:var(--flag)">Flagged</b> means the article already warns readers, usually with Wikipedia's Retracted template. A citation on the biography of one of the paper's own authors is listed separately, since it is there to describe their work.</p><p>A zombie is not an accusation. Some articles cite a retracted paper to discuss it, and some retractions were for reasons that don't touch the cited claim. A person should read the context before editing. Every entry links to the article and the official notice.</p><p>We leave out, by default, reviews withdrawn only because a newer version replaced them (common with Cochrane). Those are outdated, not discredited. One switch in the register brings them back.</p></div>
+      <div><h4>Note to editors</h4><pre id="tpl">A note from Zombie Facts, a free public tracker of retracted research.
+
+The article "{PAGE}" ({SECTION}) cites
+  {TITLE}
+  https://doi.org/{DOI}
+which was retracted on {DATE}: https://doi.org/{NOTICE}
+
+It supports this sentence: "{SAID}"
+
+If the citation is there to discuss the retraction, nothing to do. Otherwise it may need replacing, or marking with {{tl|Retracted}}. ~~~~</pre></div>
+    </div>
+  </section>

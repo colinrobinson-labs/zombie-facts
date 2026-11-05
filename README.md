@@ -1,0 +1,18 @@
+# Zombie Facts
+
+**https://zombiefacts.org** tracks retracted research that English Wikipedia still cites as evidence. It also follows the fixes.
+
+| Piece | What it does | When |
+|---|---|---|
+| `build/build_data.py` | Checks every retraction in the Retraction Watch database (via Crossref) against every DOI link on English Wikipedia, reads each citing article, and updates the case ledger | Weekly, Monday 09:00 UTC (`zombie-facts.yml`) |
+| `build/recheck.py` | Re-reads articles with open cases and closes the fixed ones, then reads talk-page replies to our notes | Daily, 14:15 UTC (`zombie-facts-watch.yml`) |
+| `build/outreach.py` | Drafts a sourced talk-page note for a reviewed case into `outreach.json` | By hand |
+| `build/post_notes.py` | Posts approved notes, at most 3 per run. Needs the `WIKI_USER` and `WIKI_PASS` repo secrets | Manual run of the watch workflow with `post` ticked |
+| `index.html`, `register/`, `desk/`, `autopsy/`, `check/`, `method/`, `404.html` | The pages. Generated from `src/` by `build/make_pages.py`; edit `src/`, never the output | Deployed by `pages.yml` |
+| `assets/site.css`, `assets/app.js` | Shared styles and script; the script reads `data.json` and `outreach.json` | |
+
+A note in `outreach.json` moves through these statuses: `queued` → `approved` → `posted` → `replied`, or ends as `dismissed`, which means we reviewed it and no fix is needed.
+
+Tests: `python -m unittest discover build/tests`. The code uses only the Python standard library.
+
+Data: Retraction Watch database via Crossref (CC0), Wikipedia (CC BY-SA), Crossref REST API. Not affiliated with any of them.

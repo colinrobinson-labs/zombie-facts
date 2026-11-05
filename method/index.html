@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>How it works · Zombie Facts</title>
+<meta name="description" content="How Zombie Facts finds retracted research on Wikipedia, how cases are reviewed, and how corrections are tracked.">
+<meta property="og:title" content="How it works · Zombie Facts">
+<meta property="og:description" content="The paper died. The fact kept walking. See the sentences on Wikipedia still resting on retracted science.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://zombiefacts.org/method/">
+<meta property="og:image" content="https://zombiefacts.org/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Zombie Facts: the paper was retracted, the fact kept walking on Wikipedia.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How it works · Zombie Facts">
+<meta name="twitter:description" content="The paper died. The fact kept walking. See the sentences on Wikipedia still resting on retracted science.">
+<meta name="twitter:image" content="https://zombiefacts.org/og.png">
+<meta name="theme-color" content="#ece7da">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23121210'/%3E%3Cpath d='M2 18h7l2-6 3 12 3-16 2 10h3' fill='none' stroke='%23c6f432' stroke-width='2.4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=UnifrakturMaguntia&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="canonical" href="https://zombiefacts.org/method/">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body data-page="method">
+<div class="wrap">
+  <header class="top">
+    <a class="np" href="/">Zombie Facts</a>
+    <span class="ed"><span>Vol. 1 · <b id="edDate">—</b></span><span>Retraction Watch × English Wikipedia</span></span>
+    <button class="iconbtn" id="theme" aria-label="Switch light or dark"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+  </header>
+  <nav class="nav" aria-label="Sections"><div><a href="/">Home</a><a href="/register/">Register</a><a href="/desk/">Correction desk</a><a href="/autopsy/">Autopsy</a><a href="/check/">Check a page</a><a href="/method/" aria-current="page">Method</a></div></nav>
+
+  <section class="sec" id="method">
+    <div class="sh"><h2>How this works</h2><p>Built from two open sources, rebuilt every week by a script anyone can read.</p></div>
+    <div class="method">
+      <div><h4>The record</h4><ol>
+        <li>The Retraction Watch database, now published openly by Crossref, lists every known retraction. We keep only full retractions, not corrections.</li>
+        <li>We walk every link to doi.org on English Wikipedia (<span id="mLinks">millions</span> of them) and match each one to that list.</li>
+        <li>For each match we read the article, find the sentence the citation supports, and check the citation and its surroundings for any mention of the retraction.</li></ol></div>
+      <div><h4>Zombie or flagged</h4><p><b style="background:var(--acid);color:#141412;padding:0 4px">Zombie</b> means the retracted paper is cited and nothing near it says so. <b style="color:var(--flag)">Flagged</b> means the article already warns readers, usually with Wikipedia's Retracted template. A citation on the biography of one of the paper's own authors is listed separately, since it is there to describe their work.</p><p>A zombie is not an accusation. Some articles cite a retracted paper to discuss it, and some retractions were for reasons that don't touch the cited claim. A person should read the context before editing. Every entry links to the article and the official notice.</p><p>We leave out, by default, reviews withdrawn only because a newer version replaced them (common with Cochrane). Those are outdated, not discredited. One switch in the register brings them back.</p></div>
+      <div><h4>Note to editors</h4><pre id="tpl">A note from Zombie Facts, a free public tracker of retracted research.
+
+The article "{PAGE}" ({SECTION}) cites
+  {TITLE}
+  https://doi.org/{DOI}
+which was retracted on {DATE}: https://doi.org/{NOTICE}
+
+It supports this sentence: "{SAID}"
+
+If the citation is there to discuss the retraction, nothing to do. Otherwise it may need replacing, or marking with {{tl|Retracted}}. ~~~~</pre></div>
+    </div>
+  </section>
+
+  <a class="nextpage" href="/"><span>Back to</span>The most-read zombies →</a>
+  <footer>
+    <div><a class="np" href="/">Zombie Facts</a><br><span id="built">—</span></div>
+    <div class="fnav"><a href="/">Home</a><a href="/register/">Register</a><a href="/desk/">Correction desk</a><a href="/autopsy/">Autopsy</a><a href="/check/">Check a page</a><a href="/method/">Method</a></div>
+    <div style="max-width:60ch">Data: Retraction Watch database via Crossref (CC0), Wikipedia (CC BY-SA), Crossref REST API. Not affiliated with any of them. Built by Colin Robinson. <a href="https://github.com/colinrobinson-labs/zombie-facts">Source code</a>.</div>
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle"><div class="dh"><span class="grab"></span><span id="dKind">Case file</span><button class="iconbtn" id="dClose" aria-label="Close">✕</button></div><div class="db" id="db"></div></aside>
+<div class="toast" id="toast"></div>
+
+<script src="/assets/app.js" defer></script>
+</body>
+</html>

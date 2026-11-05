@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Check a page · Zombie Facts</title>
+<meta name="description" content="Scan any Wikipedia article for retracted sources, live in your browser.">
+<meta property="og:title" content="Check a page · Zombie Facts">
+<meta property="og:description" content="The paper died. The fact kept walking. See the sentences on Wikipedia still resting on retracted science.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://zombiefacts.org/check/">
+<meta property="og:image" content="https://zombiefacts.org/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Zombie Facts: the paper was retracted, the fact kept walking on Wikipedia.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Check a page · Zombie Facts">
+<meta name="twitter:description" content="The paper died. The fact kept walking. See the sentences on Wikipedia still resting on retracted science.">
+<meta name="twitter:image" content="https://zombiefacts.org/og.png">
+<meta name="theme-color" content="#ece7da">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23121210'/%3E%3Cpath d='M2 18h7l2-6 3 12 3-16 2 10h3' fill='none' stroke='%23c6f432' stroke-width='2.4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=UnifrakturMaguntia&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,700;1,6..72,400;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="canonical" href="https://zombiefacts.org/check/">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body data-page="check">
+<div class="wrap">
+  <header class="top">
+    <a class="np" href="/">Zombie Facts</a>
+    <span class="ed"><span>Vol. 1 · <b id="edDate">—</b></span><span>Retraction Watch × English Wikipedia</span></span>
+    <button class="iconbtn" id="theme" aria-label="Switch light or dark"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg></button>
+  </header>
+  <nav class="nav" aria-label="Sections"><div><a href="/">Home</a><a href="/register/">Register</a><a href="/desk/">Correction desk</a><a href="/autopsy/">Autopsy</a><a href="/check/" aria-current="page">Check a page</a><a href="/method/">Method</a></div></nav>
+
+  <section class="sec" id="check">
+    <div class="sh"><h2>Check it yourself, live</h2><p>These run in your browser against Crossref and Wikipedia right now, so they catch anything newer than the register.</p></div>
+    <div class="live">
+      <div class="panel">
+        <h3>Scan a Wikipedia article</h3>
+        <p>Paste a title or link. We pull every DOI it cites and ask Crossref whether any were retracted.</p>
+        <div class="row2"><input id="qScan" placeholder="e.g. Ivermectin" enterkeyhint="go"><button class="go" id="bScan">Scan</button></div>
+        <div class="try" id="tryScan"></div>
+        <div class="status" id="sScan"></div><div class="out" id="oScan"></div>
+      </div>
+      <div class="panel">
+        <h3>Freshly dead</h3>
+        <p>The newest retraction notices filed with Crossref, and whether Wikipedia already cites any of them.</p>
+        <button class="go" id="bFresh" style="width:100%">Load the latest 25</button>
+        <div class="status" id="sFresh"></div><div class="out" id="oFresh"></div>
+      </div>
+    </div>
+  </section>
+
+  <a class="nextpage" href="/method/"><span>Next</span>Method →</a>
+  <footer>
+    <div><a class="np" href="/">Zombie Facts</a><br><span id="built">—</span></div>
+    <div class="fnav"><a href="/">Home</a><a href="/register/">Register</a><a href="/desk/">Correction desk</a><a href="/autopsy/">Autopsy</a><a href="/check/">Check a page</a><a href="/method/">Method</a></div>
+    <div style="max-width:60ch">Data: Retraction Watch database via Crossref (CC0), Wikipedia (CC BY-SA), Crossref REST API. Not affiliated with any of them. Built by Colin Robinson. <a href="https://github.com/colinrobinson-labs/zombie-facts">Source code</a>.</div>
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dTitle"><div class="dh"><span class="grab"></span><span id="dKind">Case file</span><button class="iconbtn" id="dClose" aria-label="Close">✕</button></div><div class="db" id="db"></div></aside>
+<div class="toast" id="toast"></div>
+
+<script src="/assets/app.js" defer></script>
+</body>
+</html>

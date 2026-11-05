@@ -1,0 +1,18 @@
+  <section class="sec" id="check">
+    <div class="sh"><h2>Check it yourself, live</h2><p>These run in your browser against Crossref and Wikipedia right now, so they catch anything newer than the register.</p></div>
+    <div class="live">
+      <div class="panel">
+        <h3>Scan a Wikipedia article</h3>
+        <p>Paste a title or link. We pull every DOI it cites and ask Crossref whether any were retracted.</p>
+        <div class="row2"><input id="qScan" placeholder="e.g. Ivermectin" enterkeyhint="go"><button class="go" id="bScan">Scan</button></div>
+        <div class="try" id="tryScan"></div>
+        <div class="status" id="sScan"></div><div class="out" id="oScan"></div>
+      </div>
+      <div class="panel">
+        <h3>Freshly dead</h3>
+        <p>The newest retraction notices filed with Crossref, and whether Wikipedia already cites any of them.</p>
+        <button class="go" id="bFresh" style="width:100%">Load the latest 25</button>
+        <div class="status" id="sFresh"></div><div class="out" id="oFresh"></div>
+      </div>
+    </div>
+  </section>

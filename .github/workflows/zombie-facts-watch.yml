@@ -1,0 +1,80 @@
+name: Zombie Facts watch
+# Daily: re-check open cases + read talk-page replies, then redeploy.
+# On feature branches: run the tests and a dry recheck (no commit), and upload the
+# wikitext around every open citation for review.
+on:
+  schedule:
+    - cron: "15 14 * * *"   # daily
+  workflow_dispatch:
+    inputs:
+      post:
+        description: "Also post approved notes (needs WIKI_USER / WIKI_PASS secrets)"
+        type: boolean
+        default: false
+  push:
+    branches-ignore: [main]
+    paths: ["**", ".github/workflows/*.yml"]
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: ${{ github.ref == 'refs/heads/main' && 'zombie-facts-data' || github.ref }}
+  cancel-in-progress: false
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Unit tests
+        run: python -m unittest discover -v build/tests
+      - name: Pages are built from src/ and the script parses
+        run: |
+          python build/make_pages.py --check
+          node --check assets/app.js
+      - name: JSON files parse
+        run: for f in *.json; do python -m json.tool "$f" > /dev/null && echo "ok $f"; done
+  watch:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Post approved notes
+        if: github.event_name == 'workflow_dispatch' && inputs.post
+        env:
+          WIKI_USER: ${{ secrets.WIKI_USER }}
+          WIKI_PASS: ${{ secrets.WIKI_PASS }}
+        run: python build/post_notes.py
+      - name: Recheck open cases and talk pages
+        env:
+          ZF_DUMP_CONTEXT: ${{ github.ref != 'refs/heads/main' && '/tmp/contexts.json' || '' }}
+        run: python build/recheck.py
+      - name: Print review contexts
+        if: github.ref != 'refs/heads/main'
+        run: test -f /tmp/contexts.json && python -c "import json;d=json.load(open('/tmp/contexts.json'));[print('CTX', json.dumps({'k':k,**v})) for k,v in d.items()]" || true
+      - name: Upload review contexts
+        if: github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zombie-facts-review
+          path: |
+            /tmp/contexts.json
+            data.json
+            outreach.json
+          if-no-files-found: ignore
+      - name: Commit and redeploy
+        if: always() && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "zombie-facts-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data.json outreach.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "Zombie Facts: daily recheck"
+          for i in 1 2 3 4 5; do git pull --rebase origin main && git push && break; sleep $((i*5)); done
+          gh workflow run pages.yml --ref main
