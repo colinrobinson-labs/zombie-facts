@@ -81,9 +81,18 @@ def href(slug):
     return "/" + (slug + "/" if slug else "")
 
 
+SHORT = {"Correction desk": "Desk", "Check a page": "Check"}
+
+
+def navlabel(label):
+    if label not in SHORT:
+        return label
+    return f'<span class="lg">{label}</span><span class="sm">{SHORT[label]}</span>'
+
+
 def masthead(active):
     links = "".join(
-        f'<a href="{href(s)}"{" aria-current=\"page\"" if s == active else ""}>{label}</a>'
+        f'<a href="{href(s)}"{" aria-current=\"page\"" if s == active else ""}>{navlabel(label)}</a>'
         for s, label, *_ in PAGES)
     return f'''<header class="top">
     <a class="np" href="/" aria-label="Zombie Facts home">{MARK}<span>Zombie Facts</span></a>
