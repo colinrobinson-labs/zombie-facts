@@ -1,10 +1,10 @@
 name: Zombie Facts watch
-# Daily: re-check open cases + read talk-page replies, then redeploy.
+# Every 6 hours: re-check open cases + read talk-page replies, then redeploy.
 # On feature branches: run the tests and a dry recheck (no commit), and upload the
 # wikitext around every open citation for review.
 on:
   schedule:
-    - cron: "15 14 * * *"   # daily
+    - cron: "17 */6 * * *"   # every 6 hours, so replies show up the same day and one skipped run doesn't matter
   workflow_dispatch:
     inputs:
       post:

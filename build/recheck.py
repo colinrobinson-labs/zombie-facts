@@ -91,6 +91,8 @@ def parse_replies(body, ours):
             ts = datetime.strptime(m.group(2), "%H:%M, %d %B %Y (UTC)").strftime("%Y-%m-%dT%H:%MZ")
         except ValueError:
             ts = ""
+        # the signature's own [[User:X|X]] ( ... part sits before the matched talk link
+        chunk = re.sub(r"(?:\[\[\s*User\s*:[^\]]*\]\]|[\s(\-–—~])*$", "", chunk)
         text = strip_wiki(chunk)
         out.append({"user": user, "at": ts, "said": text[-280:]})
     return out
