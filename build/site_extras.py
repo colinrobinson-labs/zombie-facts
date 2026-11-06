@@ -10,7 +10,6 @@ from datetime import date, datetime, timedelta, timezone
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 SITE = "https://zombiefacts.org"
-REPO = "https://github.com/colinrobinson-labs/zombie-facts"
 
 # Switches the owner can turn on once an account exists (all free). Empty means off.
 GOATCOUNTER = "zombiefacts"  # e.g. "zombiefacts" for https://zombiefacts.goatcounter.com
@@ -293,13 +292,13 @@ def case_body(c, M):
            "fixed": "The fix is checked every day. If the citation comes back, the case reopens here.",
            "ok": "We read the article and the retraction notice and decided no change is needed. The reason is in the case log below."}[st]
     from urllib.parse import quote as q
-    contest = f"{REPO}/issues/new?template=contest.yml&title={q('Contest: ' + lead['page'])}&case={q(c['url'])}"
+    contest = "mailto:tips@zombiefacts.org?subject=" + q("Contest: " + lead["page"]) + "&body=" + q(f"Case: {c['url']}\n\nWhat's wrong with it:\n\nEvidence (links):\n")
     share_t = plain_title(c)
     acts = (f'<div class="acts">'
             f'<a class="p" href="https://doi.org/{esc(c["notice"] or c["doi"])}" target="_blank" rel="noopener">Retraction notice</a>'
             f'<a href="https://doi.org/{esc(c["doi"])}" target="_blank" rel="noopener">The paper</a>'
             f'<button type="button" class="cf-share" data-url="{esc(c["url"])}" data-text="{esc(share_t)}">Share</button>'
-            f'<a href="{esc(contest)}" target="_blank" rel="noopener">Contest this case</a></div>')
+            f'<a href="{esc(contest)}">Contest this case</a></div>')
     return f'''  <article class="sec pagehead cf cf-{st}">
     <div class="kicker">{esc(kick)}</div>
     <h1 class="cf-h">{esc(headline(c))}</h1>

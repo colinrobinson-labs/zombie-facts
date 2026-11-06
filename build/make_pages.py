@@ -159,7 +159,7 @@ def shell(head, drawer, slug, active, title, desc, og_title, og_desc, body, nxt,
             '    <div class="fnav">' + "".join(f'<a href="{href(s)}">{l}</a>' for s, l in FOOT_LINKS) + '<a href="/feed.xml">Feed</a>'
             + (f'<a href="{X.esc(X.NEWSLETTER)}">By email</a>' if X.NEWSLETTER else "") + '</div>\n'
             '    <div style="max-width:60ch">Data: Retraction Watch database via Crossref (CC0), Wikipedia (CC BY-SA), Crossref REST API, fact-checkers\' ClaimReview data via Data Commons. '
-            'Not affiliated with any of them. Independent and ad-free. <a href="https://github.com/colinrobinson-labs/zombie-facts">Source code</a>.</div>\n  </footer>\n</div>\n\n'
+            'Not affiliated with any of them. Independent and ad-free.</div>\n  </footer>\n</div>\n\n'
             f'{drawer}<script src="/assets/app.js" defer></script>\n</body>\n</html>\n')
 
 
@@ -175,7 +175,7 @@ def build():
         if desc == "@results":
             desc = X.results_desc(M)
         body = "\n".join(X.results_body(M) if f == "@results" else open(os.path.join(SRC, "pages", f + ".html")).read().rstrip() for f in frags)
-        if X.TIPS_EMAIL:
+        if False:
             body = body.replace('<p class="rs-fine" id="tipMail" hidden></p>',
                                 f'<p class="rs-fine" id="tipMail">No GitHub account? Email the same three things to <a href="mailto:{X.esc(X.TIPS_EMAIL)}">{X.esc(X.TIPS_EMAIL)}</a>.</p>')
         st, sd = share_text()
