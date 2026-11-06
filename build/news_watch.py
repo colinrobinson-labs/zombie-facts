@@ -17,7 +17,7 @@ Everything found lands in news.json as "unreviewed". Nothing is public, and
 nothing is sent to anyone, until a person has read it and marked it
 "confirmed" (or "dismissed"). Reviews are kept from run to run.
 
-Etiquette (Colin's rule: never get blocked): official feeds and APIs only, the
+Etiquette (house rule: never get blocked): official feeds and APIs only, the
 zombiefacts.org User-Agent, GDELT paced at one request per 6 s with long
 back-off on 429, robots.txt honoured for every story we read, one request per
 host at a time, no paywalled or anti-bot sites.

@@ -12,7 +12,7 @@ ROOT = os.path.join(os.path.dirname(__file__), "..")
 SITE = "https://zombiefacts.org"
 REPO = "https://github.com/colinrobinson-labs/zombie-facts"
 
-# Switches Colin can turn on once an account exists (all free). Empty means off.
+# Switches the owner can turn on once an account exists (all free). Empty means off.
 GOATCOUNTER = "zombiefacts"  # e.g. "zombiefacts" for https://zombiefacts.goatcounter.com
 NEWSLETTER = ""       # sign-up page of a free newsletter service, shown next to the feed
 TIPS_EMAIL = "tips@zombiefacts.org"  # e.g. "tips@zombiefacts.org" (Porkbun email forwarding is free)
@@ -320,7 +320,7 @@ def case_jsonld(c, M):
     j = {"@context": "https://schema.org", "@type": "Article", "headline": plain_title(c)[:110],
          "description": describe(c), "url": c["url"], "datePublished": c["opened"],
          "dateModified": (M["D"].get("checked") or M["D"].get("built") or M["today"])[:10],
-         "author": {"@type": "Person", "name": "Colin Robinson", "url": f"{SITE}/about/"},
+         "author": {"@type": "Organization", "name": "Zombie Facts", "url": f"{SITE}/about/"},
          "publisher": {"@type": "Organization", "name": "Zombie Facts", "url": SITE + "/"},
          "about": {"@type": "ScholarlyArticle", "name": c["title"], "sameAs": f"https://doi.org/{c['doi']}"}}
     if card_exists(c):
@@ -574,7 +574,7 @@ def feed(M):
            f'  <link href="{SITE}/feed.xml" rel="self" type="application/atom+xml"/>',
            f'  <link href="{SITE}/" rel="alternate" type="text/html"/>',
            f'  <id>{SITE}/</id>', f'  <updated>{updated}</updated>',
-           '  <author><name>Colin Robinson</name><uri>https://zombiefacts.org/about/</uri></author>',
+           '  <author><name>Zombie Facts</name><uri>https://zombiefacts.org/about/</uri></author>',
            f'  <icon>{SITE}/assets/icon.png</icon>']
     for e in E:
         ts, key, title, link, summ = e[:5]

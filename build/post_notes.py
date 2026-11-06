@@ -5,10 +5,10 @@ Only notes in outreach.json with status "approved" are posted, at most
 ZF_POST_LIMIT per run (default 3), and only when the account's credentials are
 present as environment variables (GitHub secrets):
 
-  WIKI_USER  bot-password login of Colin's personal account, e.g. "ColinRobinson@poster"
+  WIKI_USER  bot-password login of the owner's Wikipedia account, e.g. "Name@poster"
   WIKI_PASS  bot password
 
-Without them the script does nothing. Policy: never scheduled. Colin starts each
+Without them the script does nothing. Policy: never scheduled. The owner starts each
 run by hand (workflow_dispatch) for notes he has read and approved, posted from his
 own account, with a plain edit summary and no site credit.
 Each note is re-checked against the live article first, so a citation fixed in
