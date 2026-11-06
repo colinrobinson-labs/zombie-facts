@@ -12,7 +12,8 @@
 | `build/site_extras.py` | Case pages (`/case/<slug>/`, slugs kept forever in `case/slugs.json`), the Results scoreboard, `feed.xml`, `sitemap.xml`. Called by `make_pages.py`. Switches for GoatCounter analytics, a newsletter link and a tips email are at the top | Every page build |
 | `build/cards.py` | Draws each case's 1200×630 share image with headless Chrome; redraws only cards whose content changed (`case/cards.json`) | Before `make_pages.py` in the data workflows |
 | `.github/ISSUE_TEMPLATE/` | "Report a zombie" and "Contest a case" forms; the site's Report page pre-fills the first | |
-| `assets/site.css`, `assets/app.js` | Shared styles and script; the script reads `data.json` and `outreach.json` | |
+| `assets/site.css`, `assets/app.js` | Shared styles and script; the script reads `data.json` and `outreach.json`. Colours, type and components are documented in `docs/design-system.md` | |
+| `build/og-card.html`, `assets/feed.css` | Source of the site-wide share image `og.png`, and the stylesheet that makes `feed.xml` readable in a browser | |
 
 A note in `outreach.json` moves through these statuses: `queued` → `approved` → `posted` → `replied`, or ends as `dismissed`, which means we reviewed it and no fix is needed.
 

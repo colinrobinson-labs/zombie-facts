@@ -38,14 +38,19 @@ PAGES = [  # slug, nav label, <title>, description, fragments, next slug
 
 # Pages linked from the footer (and from other pages), not the top nav.
 EXTRA = [
-    ("about", "About", "About · Zombie Facts", "Who runs Zombie Facts, how it is paid for, how we correct our own mistakes, and how to contest a case.",
+    ("about", "About", "About · Zombie Facts", "How Zombie Facts is paid for, what a case means, how we correct our own mistakes, and how to contest a case.",
      ["_about"], "report"),
     ("report", "Report a zombie", "Report a zombie · Zombie Facts", "Seen a retracted, debunked or outdated fact still in circulation? Send it in. Every tip is read by a person.",
      ["_report"], ""),
 ]
 
-NAV_ICON = '<svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/></svg>'
+NAV_ICON = '<svg width="18" height="18" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.75a6.25 6.25 0 0 1 0 12.5z" fill="currentColor"/></svg>'
+MENU_ICON = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>'
 
+# One line under each section in the phone menu, so the labels explain themselves.
+NAV_NOTE = {"": "The most-read zombie facts", "register": "Every retracted paper Wikipedia still cites",
+            "desk": "Every case, from note to fix", "news": "Zombie facts in the news", "results": "Fix rates and outcomes",
+            "autopsy": "Why the papers were retracted", "check": "Scan any Wikipedia article, live", "method": "How cases are found and judged"}
 
 MARK = ('<svg class="mark" viewBox="0 0 40 40" aria-hidden="true">'
         '<path class="hd" d="M8 9.5C10 4.5 17 3 23 3.6c7.4.8 11.6 5.3 11.3 12.6-.2 4.7.9 8.7-.6 13.2-1.6 4.7-6.3 7.4-12.6 7.6-6.9.2-12.4-2.2-14-7.6C5.6 24.6 6 14.3 8 9.5z"/>'
@@ -109,14 +114,17 @@ def navlabel(label):
 
 def masthead(active):
     links = "".join(
-        f'<a href="{href(s)}"{" aria-current=\"page\"" if s == active else ""}>{navlabel(label)}</a>'
+        f'<li><a href="{href(s)}"{" aria-current=\"page\"" if s == active else ""}>{navlabel(label)}<small>{NAV_NOTE.get(s, "")}</small></a></li>'
         for s, label, *_ in PAGES)
-    return f'''<header class="top">
+    return f'''<header class="mast">
     <a class="np" href="/" aria-label="Zombie Facts home">{MARK}<span>Zombie Facts</span></a>
-    <span class="ed"><span>Vol. 1 · <b id="edDate">—</b></span><span>Retracted · Debunked · Out of date</span></span>
-    <button class="iconbtn" id="theme" aria-label="Switch light or dark">{NAV_ICON}</button>
-  </header>
-  <nav class="nav" aria-label="Sections"><div>{links}</div></nav>'''
+    <nav class="nav" id="nav" aria-label="Sections"><ul>{links}</ul></nav>
+    <div class="mact">
+      <a class="btn tipbtn" href="/report/"{" aria-current=\"page\"" if active == "report" else ""}>Report<span class="lg">&nbsp;a zombie</span></a>
+      <button class="iconbtn" id="theme" type="button" aria-label="Switch light or dark">{NAV_ICON}</button>
+      <button class="iconbtn menubtn" id="menuBtn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">{MENU_ICON}</button>
+    </div>
+  </header>'''
 
 
 def nextlink(slug):
@@ -127,7 +135,12 @@ def nextlink(slug):
 
 
 BUILT = "—"
-FOOT_LINKS = [(s, l) for s, l, *_ in PAGES] + [(s, l) for s, l, *_ in EXTRA]
+FOOT_GROUPS = [
+    ("Track", [("/register/", "Register"), ("/desk/", "Correction desk"), ("/news/", "Newsroom"), ("/results/", "Results")]),
+    ("Understand", [("/autopsy/", "Autopsy"), ("/method/", "Method"), ("/about/", "About")]),
+    ("Take part", [("/check/", "Check a page"), ("/report/", "Report a zombie"), ("/feed.xml", "Feed")]
+     + ([(X.NEWSLETTER, "By email")] if X.NEWSLETTER else [])),
+]
 
 
 def shell(head, drawer, slug, active, title, desc, og_title, og_desc, body, nxt, image=None, extra_head=""):
@@ -155,11 +168,13 @@ def shell(head, drawer, slug, active, title, desc, og_title, og_desc, body, nxt,
             f'<link rel="stylesheet" href="/assets/site.css">\n{extra_head}</head>\n'
             f'<body data-page="{slug.split("/")[0] or "home"}">\n<div class="wrap">\n  {masthead(active)}\n\n{body}\n\n'
             f'  {nextlink(nxt) if nxt is not None else ""}\n'
-            '  <footer>\n    <div><a class="np" href="/">' + MARK + f'<span>Zombie Facts</span></a><br><span id="built">{X.esc(BUILT)}</span></div>\n'
-            '    <div class="fnav">' + "".join(f'<a href="{href(s)}">{l}</a>' for s, l in FOOT_LINKS) + '<a href="/feed.xml">Feed</a>'
-            + (f'<a href="{X.esc(X.NEWSLETTER)}">By email</a>' if X.NEWSLETTER else "") + '</div>\n'
-            '    <div style="max-width:60ch">Data: Retraction Watch database via Crossref (CC0), Wikipedia (CC BY-SA), Crossref REST API, fact-checkers\' ClaimReview data via Data Commons. '
-            'Not affiliated with any of them. Independent and ad-free.</div>\n  </footer>\n</div>\n\n'
+            '  <footer class="foot">\n    <div class="fbrand"><a class="np" href="/">' + MARK + '<span>Zombie Facts</span></a>'
+            '<p>Tracks retracted, debunked and out-of-date facts that are still in circulation, and logs every fix.</p>'
+            f'<p class="fmeta" id="built">{X.esc(BUILT)}</p></div>\n'
+            '    <nav class="fnav" aria-label="All pages">' + "".join(
+                f'<div><p class="fh">{g}</p>' + "".join(f'<a href="{u}">{l}</a>' for u, l in items) + '</div>' for g, items in FOOT_GROUPS) + '</nav>\n'
+            '    <p class="fine">Data: Retraction Watch database via Crossref (CC0), Wikipedia (CC BY-SA), Crossref REST API, fact-checkers\' ClaimReview data via Data Commons. '
+            'Not affiliated with any of them. Independent and ad-free.</p>\n  </footer>\n</div>\n\n'
             f'{drawer}<script src="/assets/app.js" defer></script>\n</body>\n</html>\n')
 
 

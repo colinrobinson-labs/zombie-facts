@@ -490,7 +490,7 @@ def results_body(M):
               f'<div><b>{pct(len(nfixed), len(sent))}</b><span>Outlet fix rate</span></div></div>')
     built = (M["D"].get("checked") or M["D"].get("built") or "")
     return f'''  <section class="sec pagehead" id="results">
-    <div class="sh"><h2>Results</h2><p>Finding zombie facts is the easy part. This is the scoreboard for getting them fixed: every case we open, every note we send and every fix, counted from the same files the rest of the site runs on. It updates every day. Tracking began {esc(nice(M["since"]))}.</p></div>
+    <div class="sh"><h1>Results</h1><p>Finding zombie facts is the easy part. This is the scoreboard for getting them fixed: every case we open, every note we send and every fix, counted from the same files the rest of the site runs on. It updates every day. Tracking began {esc(nice(M["since"]))}.</p></div>
     {board}
     <div class="desk">
       <div class="dcol"><h4>Do notes work?</h4>{rate}
@@ -566,7 +566,7 @@ def feed(M):
     E.sort(key=lambda e: e[0], reverse=True)
     E = E[:60]
     updated = E[0][0] if E else stamp(M["today"])
-    out = ['<?xml version="1.0" encoding="utf-8"?>',
+    out = ['<?xml version="1.0" encoding="utf-8"?>', '<?xml-stylesheet type="text/css" href="/assets/feed.css"?>',
            '<feed xmlns="http://www.w3.org/2005/Atom">',
            '  <title>Zombie Facts</title>',
            '  <subtitle>Retracted, debunked and outdated facts still in circulation, and the fixes.</subtitle>',
