@@ -177,6 +177,12 @@ x
         self.assertIsNone(R.find_section(self.TXT, "Missing"))
 
 
+    def test_standard_signature_not_in_quote(self):
+        body = ("Note. [[User:Us|Us]] ([[User talk:Us|talk]]) 17:24, 6 November 2026 (UTC)\n"
+                ":We don't need it. [[User:Ed|Ed]] ([[User talk:Ed|talk]]) 17:36, 6 November 2026 (UTC)\n")
+        rs = R.parse_replies(body, [])
+        self.assertEqual([(r["user"], r["said"]) for r in rs], [("Ed", "We don't need it.")])
+
     def test_ip_reply(self):
         body = ("Note. [[User:ZombieFacts|ZombieFacts]] 12:00, 6 November 2026 (UTC)\n"
                 ":Fixed it. <small>[[Special:Contributions/203.0.113.7|203.0.113.7]]</small> 08:00, 9 November 2026 (UTC)\n")
