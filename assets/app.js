@@ -357,14 +357,14 @@ async function newsroom(){
 if(has("nBoard"))newsroom();
 /* ---------- case pages: share button ---------- */
 document.querySelectorAll(".cf-share").forEach(b=>b.onclick=async()=>{const u=b.dataset.url,t=b.dataset.text;if(navigator.share){try{await navigator.share({title:"Zombie Facts",text:t,url:u})}catch(_){}}else copy(u,"Link copied")});
-/* ---------- report a zombie: hand the tip to a pre-filled GitHub issue form ---------- */
+/* ---------- report a zombie: hand the tip to a pre-filled email ---------- */
 if(has("tipForm"))$("tipForm").onsubmit=e=>{e.preventDefault();
   const st=$("tipSt"),w=$("tWhere").value.trim(),c=$("tClaim").value.trim(),y=$("tWhy").value.trim();
   if($("tHp").value){st.textContent="Thanks.";return}
   if(!/^https?:\/\/\S+\.\S+/.test(w)){st.textContent="Add a link to where you saw it (starting with https://).";$("tWhere").focus();return}
   if(c.length<10||y.length<10){st.textContent="Tell us what it says and why it's wrong, a sentence each is plenty.";return}
   let host="";try{host=new URL(w).hostname.replace(/^www\./,"")}catch(_){}
-  const u="https://github.com/colinrobinson-labs/zombie-facts/issues/new?"+new URLSearchParams({template:"tip.yml",title:"Tip: "+(host||"zombie fact")+" · "+c.slice(0,60),where:w,claim:c.slice(0,3000),why:y.slice(0,3000)});
-  st.textContent="Opening GitHub. Press Create on the next page to send it.";setTimeout(()=>{location.href=u},400)};
+  const u="mailto:tips@zombiefacts.org?subject="+encodeURIComponent("Tip: "+(host||"zombie fact")+" · "+c.slice(0,60))+"&body="+encodeURIComponent("Where: "+w+"\n\nWhat it says:\n"+c.slice(0,3000)+"\n\nWhy it's wrong:\n"+y.slice(0,3000)+"\n");
+  st.textContent="Opening your email app. Press send to deliver the tip.";setTimeout(()=>{location.href=u},300)};
 if(document.body.dataset.page!=="case")load();
 })();

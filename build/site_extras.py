@@ -10,9 +10,8 @@ from datetime import date, datetime, timedelta, timezone
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 SITE = "https://zombiefacts.org"
-REPO = "https://github.com/colinrobinson-labs/zombie-facts"
 
-# Switches Colin can turn on once an account exists (all free). Empty means off.
+# Switches the owner can turn on once an account exists (all free). Empty means off.
 GOATCOUNTER = "zombiefacts"  # e.g. "zombiefacts" for https://zombiefacts.goatcounter.com
 NEWSLETTER = ""       # sign-up page of a free newsletter service, shown next to the feed
 TIPS_EMAIL = "tips@zombiefacts.org"  # e.g. "tips@zombiefacts.org" (Porkbun email forwarding is free)
@@ -293,13 +292,13 @@ def case_body(c, M):
            "fixed": "The fix is checked every day. If the citation comes back, the case reopens here.",
            "ok": "We read the article and the retraction notice and decided no change is needed. The reason is in the case log below."}[st]
     from urllib.parse import quote as q
-    contest = f"{REPO}/issues/new?template=contest.yml&title={q('Contest: ' + lead['page'])}&case={q(c['url'])}"
+    contest = "mailto:tips@zombiefacts.org?subject=" + q("Contest: " + lead["page"]) + "&body=" + q(f"Case: {c['url']}\n\nWhat's wrong with it:\n\nEvidence (links):\n")
     share_t = plain_title(c)
     acts = (f'<div class="acts">'
             f'<a class="p" href="https://doi.org/{esc(c["notice"] or c["doi"])}" target="_blank" rel="noopener">Retraction notice</a>'
             f'<a href="https://doi.org/{esc(c["doi"])}" target="_blank" rel="noopener">The paper</a>'
             f'<button type="button" class="cf-share" data-url="{esc(c["url"])}" data-text="{esc(share_t)}">Share</button>'
-            f'<a href="{esc(contest)}" target="_blank" rel="noopener">Contest this case</a></div>')
+            f'<a href="{esc(contest)}">Contest this case</a></div>')
     return f'''  <article class="sec pagehead cf cf-{st}">
     <div class="kicker">{esc(kick)}</div>
     <h1 class="cf-h">{esc(headline(c))}</h1>
@@ -320,7 +319,7 @@ def case_jsonld(c, M):
     j = {"@context": "https://schema.org", "@type": "Article", "headline": plain_title(c)[:110],
          "description": describe(c), "url": c["url"], "datePublished": c["opened"],
          "dateModified": (M["D"].get("checked") or M["D"].get("built") or M["today"])[:10],
-         "author": {"@type": "Person", "name": "Colin Robinson", "url": f"{SITE}/about/"},
+         "author": {"@type": "Organization", "name": "Zombie Facts", "url": f"{SITE}/about/"},
          "publisher": {"@type": "Organization", "name": "Zombie Facts", "url": SITE + "/"},
          "about": {"@type": "ScholarlyArticle", "name": c["title"], "sameAs": f"https://doi.org/{c['doi']}"}}
     if card_exists(c):
@@ -574,7 +573,7 @@ def feed(M):
            f'  <link href="{SITE}/feed.xml" rel="self" type="application/atom+xml"/>',
            f'  <link href="{SITE}/" rel="alternate" type="text/html"/>',
            f'  <id>{SITE}/</id>', f'  <updated>{updated}</updated>',
-           '  <author><name>Colin Robinson</name><uri>https://zombiefacts.org/about/</uri></author>',
+           '  <author><name>Zombie Facts</name><uri>https://zombiefacts.org/about/</uri></author>',
            f'  <icon>{SITE}/assets/icon.png</icon>']
     for e in E:
         ts, key, title, link, summ = e[:5]
