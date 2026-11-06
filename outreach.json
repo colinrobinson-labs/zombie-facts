@@ -13,7 +13,7 @@
    "posted": "2026-11-05T19:47Z",
    "revid": 1383949510,
    "diff": "https://en.wikipedia.org/w/index.php?diff=1383949510",
-   "checked": "2026-11-06T17:02Z",
+   "checked": "2026-11-06T17:46Z",
    "replies": []
   },
   {
@@ -39,7 +39,7 @@
    "posted": "2026-11-05T19:47Z",
    "revid": 1383949524,
    "diff": "https://en.wikipedia.org/w/index.php?diff=1383949524",
-   "checked": "2026-11-06T17:02Z",
+   "checked": "2026-11-06T17:46Z",
    "replies": []
   },
   {
@@ -54,7 +54,7 @@
    "posted": "2026-11-05T19:47Z",
    "revid": 1383949539,
    "diff": "https://en.wikipedia.org/w/index.php?diff=1383949539",
-   "checked": "2026-11-06T17:02Z",
+   "checked": "2026-11-06T17:46Z",
    "replies": []
   },
   {
@@ -71,7 +71,7 @@
    "key": "10.1002/14651858.cd002766.pub4|Gary Null",
    "doi": "10.1002/14651858.cd002766.pub4",
    "page": "Gary Null",
-   "status": "posted",
+   "status": "replied",
    "verdict": "This version of the Cochrane review on therapeutic touch was withdrawn over concerns about the underlying data.",
    "reviewed": "2026-11-06",
    "section": "Retracted source: withdrawn Cochrane review on therapeutic touch",
@@ -79,7 +79,15 @@
    "posted": "2026-11-06T17:24Z",
    "revid": 1384111584,
    "diff": "https://en.wikipedia.org/w/index.php?diff=1384111584",
-   "wait": "An editor agreed the citation can go (2026-11-06). The article is semi-protected; remove the ref once our account can edit it (~2026-11-09)."
+   "wait": "An editor agreed the citation can go (2026-11-06). The article is semi-protected; remove the ref once our account can edit it (~2026-11-09).",
+   "checked": "2026-11-06T17:46Z",
+   "replies": [
+    {
+     "user": "Slatersteven",
+     "at": "2026-11-06T17:36Z",
+     "said": "We don't need it, as there are other sources. Slatersteven ("
+    }
+   ]
   },
   {
    "key": "10.1080/1462740500061160|North Koreans in Russia",
@@ -93,7 +101,7 @@
    "posted": "2026-11-05T20:28Z",
    "revid": 1383955248,
    "diff": "https://en.wikipedia.org/w/index.php?diff=1383955248",
-   "checked": "2026-11-06T17:02Z",
+   "checked": "2026-11-06T17:46Z",
    "replies": []
   },
   {
@@ -108,7 +116,7 @@
    "posted": "2026-11-05T20:28Z",
    "revid": 1383955251,
    "diff": "https://en.wikipedia.org/w/index.php?diff=1383955251",
-   "checked": "2026-11-06T17:02Z",
+   "checked": "2026-11-06T17:46Z",
    "replies": []
   },
   {
@@ -124,7 +132,7 @@
    "posted": "2026-11-05T20:28Z",
    "revid": 1383955265,
    "diff": "https://en.wikipedia.org/w/index.php?diff=1383955265",
-   "checked": "2026-11-06T17:02Z",
+   "checked": "2026-11-06T17:46Z",
    "replies": []
   },
   {
@@ -140,7 +148,7 @@
    "posted": "2026-11-05T20:28Z",
    "revid": 1383955265,
    "diff": "https://en.wikipedia.org/w/index.php?diff=1383955265",
-   "checked": "2026-11-06T17:02Z",
+   "checked": "2026-11-06T17:46Z",
    "replies": []
   },
   {
@@ -154,7 +162,9 @@
    "text": "The section \"Cancer\" cites ''MicroRNA-876 is Sponged by Long Noncoding RNA LINC00707 and Directly Targets Metadherin to Inhibit Breast Cancer Malignancy'' ([https://doi.org/10.2147/cmar.s210845 doi:10.2147/cmar.s210845]) for \"Linc00707 is upregulated and sponges miRNAs in ... breast cancer\". ''Cancer Management and Research'' retracted the paper on 18 September 2021 over duplicated images ([https://doi.org/10.2147/cmar.s339426 retraction notice]). The other citations on the sentence still support the gastric-cancer and stem-cell parts. Suggest replacing the source or marking the citation with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, please disregard. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~",
    "posted": "2026-11-06T17:41Z",
    "revid": 1384114244,
-   "diff": "https://en.wikipedia.org/w/index.php?diff=1384114244"
+   "diff": "https://en.wikipedia.org/w/index.php?diff=1384114244",
+   "checked": "2026-11-06T17:46Z",
+   "replies": []
   },
   {
    "key": "10.1353/sho.2011.0038|Maus",
@@ -167,7 +177,9 @@
    "text": "The list in \"Journals and magazines\" includes ''Art Spiegelman's Maus: A Survivor's Tale: A Bibliographic Essay'' (''Shofar'', [https://doi.org/10.1353/sho.2011.0038 doi:10.1353/sho.2011.0038]). The journal retracted this essay for plagiarism in 2011, and its publisher page marks it as retracted. Suggest removing it from the list or marking it with {{tl|Retracted}}. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~",
    "posted": "2026-11-06T17:24Z",
    "revid": 1384111600,
-   "diff": "https://en.wikipedia.org/w/index.php?diff=1384111600"
+   "diff": "https://en.wikipedia.org/w/index.php?diff=1384111600",
+   "checked": "2026-11-06T17:46Z",
+   "replies": []
   },
   {
    "key": "10.1002/ajpa.24139|Douz",
@@ -180,7 +192,9 @@
    "text": "The section \"Demography\" cites ''Berbers and Arabs: Tracing the genetic diversity and history of Southern Tunisia through genome wide analysis'' ([https://doi.org/10.1002/ajpa.24139 doi:10.1002/ajpa.24139]) for \"The majority of inhabitants of Douz are from Arab descent (Banu Sulaym)\". The ''American Journal of Biological Anthropology'' retracted the study on 4 March 2026 over a lack of ethics approval ([https://doi.org/10.1002/ajpa.70226 retraction notice]). Suggest replacing the source or marking the citation with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, please disregard. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~",
    "posted": "2026-11-06T17:25Z",
    "revid": 1384111609,
-   "diff": "https://en.wikipedia.org/w/index.php?diff=1384111609"
+   "diff": "https://en.wikipedia.org/w/index.php?diff=1384111609",
+   "checked": "2026-11-06T17:46Z",
+   "replies": []
   },
   {
    "key": "10.1016/j.amc.2007.03.011|SCIgen",
