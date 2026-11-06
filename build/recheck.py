@@ -78,6 +78,9 @@ def parse_replies(body, ours):
     """Signed comments in a talk section, excluding our own account."""
     out, prev = [], 0
     ours_l = {o.strip().lower().replace("_", " ") for o in ours if o}
+    first = SIG.search(body)  # our note opens the section, so its signer is us
+    if first:
+        ours_l.add(first.group(1).strip().replace("_", " ").lower())
     for m in SIG.finditer(body):
         user = m.group(1).strip().replace("_", " ")
         chunk = body[prev:m.start()]

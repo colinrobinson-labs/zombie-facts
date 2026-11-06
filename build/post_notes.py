@@ -74,7 +74,7 @@ def main():
             n["status"] = "skipped"; n["why_skipped"] = "citation already gone before posting"
             log("skip, already fixed:", n["page"]); continue
         if talk_has_section(n["page"], n["section"]):
-            n["status"] = "posted"; n.setdefault("by", "unknown"); n.setdefault("posted", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"))
+            n["status"] = "posted"; n.setdefault("posted", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"))
             save(OUTREACH, out, pretty=True); log("already on talk page, marking posted:", n["page"]); continue
         if DRY:
             log("DRY RUN would post to Talk:" + n["page"], "|", n["section"]); continue
