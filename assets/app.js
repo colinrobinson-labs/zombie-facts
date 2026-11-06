@@ -25,6 +25,13 @@ const toast=m=>{const e=$("toast");e.textContent=m;e.classList.add("on");clearTi
 $("edDate").textContent=NOW.toLocaleDateString("en-US",innerWidth<641?{month:"short",day:"numeric",year:"numeric"}:{weekday:"long",month:"long",day:"numeric",year:"numeric"});
 $("theme").onclick=()=>{const r=document.documentElement,d=r.dataset.theme?r.dataset.theme==="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.dataset.theme=d?"light":"dark";try{localStorage.zfTheme=r.dataset.theme}catch(_){}};
 try{if(localStorage.zfTheme)document.documentElement.dataset.theme=localStorage.zfTheme}catch(_){}
+/* phone menu: the section list opens as a sheet under the masthead */
+(()=>{const b=document.getElementById("menuBtn"),n=document.getElementById("nav");if(!b||!n)return;
+  const set=o=>{b.setAttribute("aria-expanded",o);document.body.classList.toggle("menu-on",o);if(o){const a=n.querySelector("a");a&&a.focus()}};
+  b.onclick=()=>set(b.getAttribute("aria-expanded")!=="true");
+  addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("menu-on")){set(false);b.focus()}});
+  n.addEventListener("click",e=>{if(e.target.closest("a"))set(false)});
+  matchMedia("(min-width:1100px)").addEventListener("change",e=>{if(e.matches)set(false)});})();
 
 /* cause of death: group Retraction Watch's ~100 reason codes */
 const CAUSES=[
@@ -100,7 +107,7 @@ async function load(){
   $("kick").textContent=`Updated ${new Date(D.checked||D.built).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})} · ${full(ZP.filter(p=>p._z).length)} retracted papers still cited with no warning`;
   $("built").textContent="data rebuilt "+D.built.replace("T"," ").replace("Z"," UTC");
   $("mLinks").textContent=fmt(S.links_scanned);
-  if(has("tick"))ticker();if(has("feat"))featured();if(has("toetag"))toetag();if(has("reg")){chips();render()}if(has("reasons"))autopsy();if(has("board"))desk();
+  if(has("toetag"))toetag();if(has("feat"))featured();if(has("reg")){chips();render()}if(has("reasons"))autopsy();if(has("board"))desk();
   if(has("xReg"))$("xReg").textContent=`${full(ZP.filter(p=>p._z).length)} retracted papers Wikipedia still cites, searchable by topic, journal and cause.`;
   const m=location.hash.match(/^#p=(.+)/);if(m)openP(decodeURIComponent(m[1]));
 }
@@ -113,14 +120,15 @@ function ticker(){
 }
 
 let HOLD=new Set();const held=p=>HOLD.has(p.doi+"|"+z1(p).page);
-function toetag(){const p=ZP.find(p=>p._z&&!held(p)&&said(z1(p),200));if(!p)return;const w=z1(p),t=$("toetag");
-  t.innerHTML=`<div class="tn"><span>Case No. 1</span><span>Undead ${ago(p)}</span></div><q>${esc(said(w,190))}</q><p>Still on Wikipedia in <b>${esc(w.page)}</b>. Source: ${esc(p.title.slice(0,80))}${p.title.length>80?"…":""}, retracted ${esc(fmtDate(p.retracted))}.</p>`;
-  t.hidden=false;t.onclick=()=>show(p)}
+let TOE=null;
+function toetag(){const p=ZP.find(p=>p._z&&!held(p)&&said(z1(p),200));if(!p)return;TOE=p;const w=z1(p),t=$("toetag");
+  t.innerHTML=`<p class="sp-h"><span>Most-read zombie</span><span>Undead ${ago(p)}</span></p><blockquote><p>“${esc(said(w,190))}”</p></blockquote><p class="sp-src">Still in the Wikipedia article <b>${esc(w.page)}</b> · ${fmt(w.views)} reads a month</p><div class="sp-paper"><span class="stamp">Retracted ${esc(fmtDate(p.retracted))}</span><p>${esc(p.title.slice(0,110))}${p.title.length>110?"…":""}</p></div><span class="sp-go">Open the case file →</span>`;
+  t.hidden=false;t.tabIndex=0;t.setAttribute("role","button");t.onclick=()=>show(p);t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();show(p)}}}
 function quoteHTML(w,max){const s=said(w,max);return s?`<p class="quote"><mark>${esc(s)}</mark><sup>[retracted]</sup></p>`:""}
 function featured(){
-  const list=ZP.filter(p=>p._z&&!held(p)&&said(z1(p))).slice(0,innerWidth<641?8:11);
+  const off=TOE?1:0,list=ZP.filter(p=>p._z&&!held(p)&&said(z1(p))&&p!==TOE).slice(0,innerWidth<641?6:9);
   $("feat").innerHTML=list.map((p,k)=>{const w=z1(p);return `<article class="f${k===0?" big":""}" data-i="${p.i}" tabindex="0">
-    <div class="rank"><span>No. ${k+1} · ${fmt(p.reach)} reads/mo</span><span class="cod">${esc(primary(p))}</span></div>
+    <div class="rank"><span>No. ${k+1+off} · ${fmt(p.reach)} reads/mo</span><span class="cod">${esc(primary(p))}</span></div>
     ${quoteHTML(w,k===0?380:220)}
     <p class="src">Wikipedia · <a href="${wurl(w.page,w.section)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${esc(w.page)}</a>${w.section&&w.section!=="Lead"?" › "+esc(w.section):""}</p>
     <div class="dead"><h3>${esc(p.title)}</h3><p>${esc([p.journal,(p.published||"").slice(0,4)].filter(Boolean).join(" · "))} · retracted ${esc(fmtDate(p.retracted))}, undead ${ago(p)}</p>${lifeSVG(p)}
@@ -224,11 +232,11 @@ document.querySelectorAll(".reveal").forEach(e=>ro.observe(e));
 async function shareCard(p,w,btn){
   btn.disabled=true;const lbl=btn.textContent;btn.textContent="Drawing…";
   try{
-    await Promise.all(['400 40px "UnifrakturMaguntia"','400 40px "Anton"','italic 400 40px "Newsreader"','500 20px "IBM Plex Mono"','600 20px "IBM Plex Mono"'].map(f=>document.fonts.load(f).catch(()=>0)));
+    await Promise.all(['850 40px "Archivo"','italic 400 40px "Source Serif 4"','600 40px "Source Serif 4"','500 20px "IBM Plex Mono"','600 20px "IBM Plex Mono"'].map(f=>document.fonts.load(f).catch(()=>0)));
     const W=1080,H=1350,M=84,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
-    const INK="#141412",PAPER="#ece7da",ACID="#c6f432",BLOOD="#b42318",MUTE="#6c675b";
+    const INK="#17181a",PAPER="#f2f0e9",ACID="#c8f031",BLOOD="#b3261e",MUTE="#625f57";
     g.fillStyle=PAPER;g.fillRect(0,0,W,H);
-    g.fillStyle=INK;g.font='400 52px "UnifrakturMaguntia",serif';g.textBaseline="alphabetic";g.fillText("Zombie Facts",M,M+40);
+    g.fillStyle=INK;g.font='850 52px "Archivo",sans-serif';g.textBaseline="alphabetic";g.fillText("ZOMBIE FACTS",M,M+40);
     g.font='600 20px "IBM Plex Mono",monospace';g.textAlign="right";g.fillStyle=BLOOD;g.fillText("SOURCE RETRACTED "+(p.retracted||"").slice(0,4),W-M,M+34);g.textAlign="left";
     g.fillStyle=INK;g.fillRect(M,M+66,W-2*M,3);
     g.font='600 22px "IBM Plex Mono",monospace';g.fillStyle=MUTE;
@@ -236,17 +244,17 @@ async function shareCard(p,w,btn){
     // quote, auto-sized to fit
     const q="“"+said(w,420).replace(/"([^"]*)"/g,"‘$1’")+"”";let fs=80,lines;
     const wrap=(t,max)=>{const out=[];let cur="";t.split(/\s+/).forEach(x=>{const tr=cur?cur+" "+x:x;if(g.measureText(tr).width>max&&cur){out.push(cur);cur=x}else cur=tr});if(cur)out.push(cur);return out};
-    for(;fs>=34;fs-=4){g.font=`italic 400 ${fs}px "Newsreader",Georgia,serif`;lines=wrap(q,W-2*M-16);if(lines.length*fs*1.3<=640)break}
+    for(;fs>=34;fs-=4){g.font=`italic 400 ${fs}px "Source Serif 4",Georgia,serif`;lines=wrap(q,W-2*M-16);if(lines.length*fs*1.3<=640)break}
     const lh=fs*1.3,top=M+170,bot=H-460;let y=top+Math.max(0,(bot-top-lines.length*lh)/2)+fs;
-    lines.forEach(l=>{const tw=g.measureText(l).width;g.fillStyle=ACID;g.fillRect(M-6,y+fs*.22-lh+fs*.38,tw+12,lh*.78);g.fillStyle=INK;g.fillText(l,M,y+fs*.12);y+=lh});
+    lines.forEach(l=>{const tw=g.measureText(l).width;g.fillStyle=ACID;g.fillRect(M-4,y+fs*.12-fs*.36,tw+8,fs*.36);g.fillStyle=INK;g.fillText(l,M,y+fs*.12);y+=lh});
     // source block
     y=Math.max(y+40,H-420);g.strokeStyle=INK;g.setLineDash([8,8]);g.lineWidth=2;g.beginPath();g.moveTo(M,y);g.lineTo(W-M,y);g.stroke();g.setLineDash([]);
-    g.font='500 36px "Newsreader",Georgia,serif';g.fillStyle=INK;const tl=wrap(p.title,W-2*M).slice(0,3);if(wrap(p.title,W-2*M).length>3)tl[2]=tl[2].replace(/\s*\S+$/,"…");
+    g.font='600 36px "Source Serif 4",Georgia,serif';g.fillStyle=INK;const tl=wrap(p.title,W-2*M).slice(0,3);if(wrap(p.title,W-2*M).length>3)tl[2]=tl[2].replace(/\s*\S+$/,"…");
     tl.forEach((l,i)=>g.fillText(l,M,y+56+i*46));y+=56+tl.length*46;
     g.font='500 22px "IBM Plex Mono",monospace';g.fillStyle=MUTE;
     const meta=[p.journal,"retracted "+fmtDate(p.retracted)].filter(Boolean).join(" · ");wrap(meta,W-2*M).slice(0,2).forEach((l,i)=>g.fillText(l,M,y+10+i*32));
     // footer
-    g.fillStyle=INK;g.fillRect(0,H-118,W,118);g.fillStyle=ACID;g.font='400 46px "Anton",Impact,sans-serif';g.fillText("THE PAPER DIED. THE FACT KEPT WALKING.",M,H-46);
+    g.fillStyle=INK;g.fillRect(0,H-118,W,118);g.fillStyle=ACID;g.font='600 34px "IBM Plex Mono",monospace';g.fillText("zombiefacts.org",M,H-48);g.textAlign="right";g.fillStyle=PAPER;g.font='500 22px "IBM Plex Mono",monospace';g.fillText("Retracted · still cited",W-M,H-52);g.textAlign="left";
     const blob=await new Promise(r=>c.toBlob(r,"image/png"));const name="zombie-facts-"+w.page.replace(/[^a-z0-9]+/gi,"-").toLowerCase().slice(0,40)+".png";
     const file=new File([blob],name,{type:"image/png"});
     if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],text:`Wikipedia still cites a retracted paper on “${w.page}”. ${casePath(p.doi)?location.origin+casePath(p.doi):location.href}`})}catch(_){}}

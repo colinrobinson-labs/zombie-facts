@@ -16,32 +16,32 @@ sys.path.insert(0, os.path.dirname(__file__))
 import site_extras as X  # noqa: E402
 
 ROOT = X.ROOT
-VERSION = "1"  # bump to redraw every card after a design change
+VERSION = "2"  # bump to redraw every card after a design change
 
 from make_pages import MARK  # noqa: E402  the same zombie-head svg the site uses
 
 CSS = """*{box-sizing:border-box}html,body{margin:0}
-body{width:1200px;height:630px;overflow:hidden;background:#ece7da;color:#141412;position:relative;padding:44px 60px 0}
-.top{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #141412;padding-bottom:14px}
-.np{display:flex;align-items:center;gap:12px;font:400 34px/1 Anton;text-transform:uppercase;letter-spacing:.02em}
+body{width:1200px;height:630px;overflow:hidden;background:#f2f0e9;color:#17181a;position:relative;padding:42px 60px 0}
+.top{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #17181a;padding-bottom:14px}
+.np{display:flex;align-items:center;gap:12px;font:850 34px/1 Archivo;font-stretch:62%;text-transform:uppercase;letter-spacing:.01em}
 .np svg{width:48px;height:48px;overflow:visible}
-.mark .hd{fill:#c6f432;stroke:#141412;stroke-width:2;stroke-linejoin:round}.mark .ln{fill:none;stroke:#141412;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.mark .wh{fill:#f6f2e8;stroke:#141412;stroke-width:2}.mark .pu{fill:#141412}.mark .dr{fill:#c6f432;stroke:#141412;stroke-width:1.2}
-.tg{font:600 17px 'IBM Plex Mono';letter-spacing:.1em;text-transform:uppercase;color:#b42318}
-.ok .tg{color:#3c6b00}
-.kick{margin:26px 0 0;font:600 17px 'IBM Plex Mono';letter-spacing:.1em;text-transform:uppercase;color:#6c675b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kick b{color:#141412}
-#q{margin:14px 0 0;height:300px;display:flex;align-items:center}
-#q p{margin:0;font:italic 400 56px/1.28 Newsreader;max-width:1080px}
-#q mark{background:#c6f432;color:#141412;padding:0 .08em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
-.ok #q mark{background:none;text-decoration:line-through;text-decoration-color:#b42318;text-decoration-thickness:4px}
-#q h1{margin:0;font:400 76px/1.04 Anton;text-transform:uppercase;max-width:1080px}
-#q h1 mark{background:#c6f432;color:#141412;padding:0 .06em}
-.src{position:absolute;left:60px;right:60px;bottom:0;height:150px;border-top:2px dashed #141412;padding-top:18px;display:flex;justify-content:space-between;gap:30px}
-.src .t{font:500 26px/1.25 Newsreader;max-height:66px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.src .m{margin-top:8px;font:600 16px 'IBM Plex Mono';letter-spacing:.06em;text-transform:uppercase;color:#b42318}
-.src .u{flex:none;align-self:flex-start;font:600 16px 'IBM Plex Mono';letter-spacing:.06em;color:#141412;background:#c6f432;padding:8px 12px}
-.stamp{position:absolute;right:70px;top:140px;transform:rotate(-8deg);border:5px solid #3c6b00;color:#3c6b00;font:400 54px/1 Anton;text-transform:uppercase;padding:10px 18px 6px;background:#ece7dacc}
+.mark .hd{fill:#c8f031;stroke:#17181a;stroke-width:2;stroke-linejoin:round}.mark .ln{fill:none;stroke:#17181a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.mark .wh{fill:#fbfaf6;stroke:#17181a;stroke-width:2}.mark .pu{fill:#17181a}.mark .dr{fill:#c8f031;stroke:#17181a;stroke-width:1.2}
+.tg{color:#b3261e;border:3px solid currentColor;padding:7px 12px 6px;font:700 16px 'IBM Plex Mono';letter-spacing:.12em;text-transform:uppercase;transform:rotate(-3deg)}
+.ok .tg{color:#17181a}
+.kick{margin:24px 0 0;font:600 17px 'IBM Plex Mono';letter-spacing:.06em;text-transform:uppercase;color:#625f57;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kick b{color:#17181a}
+#q{margin:12px 0 0;height:300px;display:flex;align-items:center}
+#q p{margin:0;font:italic 400 54px/1.3 'Source Serif 4';max-width:1080px}
+#q mark{background:linear-gradient(transparent 62%,#c8f031 62% 94%,transparent 94%);color:#17181a;padding:0 .04em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.ok #q mark{background:none;text-decoration:line-through;text-decoration-color:#b3261e;text-decoration-thickness:4px}
+#q h1{margin:0;font:850 88px/.95 Archivo;font-stretch:62%;max-width:1080px}
+#q h1 mark{background:linear-gradient(transparent 60%,#c8f031 60% 95%,transparent 95%);color:#17181a}
+.src{position:absolute;left:60px;right:60px;bottom:0;height:150px;border-top:2px solid #17181a;padding-top:18px;display:flex;justify-content:space-between;gap:30px}
+.src .t{font:600 26px/1.25 'Source Serif 4';max-height:66px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.src .m{margin-top:8px;font:600 16px 'IBM Plex Mono';letter-spacing:.06em;text-transform:uppercase;color:#b3261e}
+.src .u{flex:none;align-self:flex-start;font:600 18px 'IBM Plex Mono';color:#17181a;background:#c8f031;padding:7px 11px}
+.stamp{position:absolute;right:70px;top:150px;transform:rotate(-6deg);border:4px solid #17181a;color:#17181a;font:850 50px/1 Archivo;font-stretch:62%;text-transform:uppercase;padding:10px 18px 8px;background:#fbfaf6}
 """
 
 FIT = """<script>document.fonts.ready.then(()=>{const b=document.getElementById('q'),e=b.firstElementChild;
@@ -62,8 +62,8 @@ def card_html(c):
     kick = ("Was on Wikipedia · " if ok else "Still on Wikipedia · ") + f'<b>{e(i["page"])}</b>'
     meta = " · ".join(x for x in [f'Retracted {i["retracted"]}', i["journal"]] if x)
     return (f'<!doctype html><html><head><meta charset="utf-8">'
-            '<link href="https://fonts.googleapis.com/css2?family=Anton&family=Newsreader:ital,opsz,wght@0,6..72,500;1,6..72,400'
-            '&family=IBM+Plex+Mono:wght@600&display=block" rel="stylesheet">'
+            '<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,500..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;1,8..60,400'
+            '&family=IBM+Plex+Mono:wght@600;700&display=block" rel="stylesheet">'
             f'<style>{CSS}</style></head><body class="{"ok" if ok else ""}">'
             f'<div class="top"><div class="np">{MARK}<span>Zombie Facts</span></div><div class="tg">{e(tag)}</div></div>'
             f'<div class="kick">{kick}</div><div id="q">{body}</div>{stamp}'
