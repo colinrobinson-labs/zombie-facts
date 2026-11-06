@@ -71,11 +71,16 @@
    "key": "10.1002/14651858.cd002766.pub4|Gary Null",
    "doi": "10.1002/14651858.cd002766.pub4",
    "page": "Gary Null",
-   "status": "approved",
+   "status": "posted",
    "verdict": "This version of the Cochrane review on therapeutic touch was withdrawn over concerns about the underlying data.",
    "reviewed": "2026-11-06",
    "section": "Retracted source: withdrawn Cochrane review on therapeutic touch",
-   "text": "The section \"Career\" cites ''Therapeutic touch for healing acute wounds'' (Cochrane, May 2016 version, [https://doi.org/10.1002/14651858.cd002766.pub4 doi:10.1002/14651858.CD002766.pub4]) for: \"Null has been also a supporter of touch therapy and magnet therapy, both of which have been long determined to not provide any tangible health benefits.\" Cochrane withdrew that version on 1 September 2016 over concerns about the underlying data ([https://doi.org/10.1002/14651858.cd002766.pub6 withdrawal notice]). The other citations on the sentence still support it, so only this one needs attention. Suggest removing it or marking it with {{tl|Retracted}}. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~"
+   "text": "The section \"Career\" cites ''Therapeutic touch for healing acute wounds'' (Cochrane, May 2016 version, [https://doi.org/10.1002/14651858.cd002766.pub4 doi:10.1002/14651858.CD002766.pub4]) for: \"Null has been also a supporter of touch therapy and magnet therapy, both of which have been long determined to not provide any tangible health benefits.\" Cochrane withdrew that version on 1 September 2016 over concerns about the underlying data ([https://doi.org/10.1002/14651858.cd002766.pub6 withdrawal notice]). The other citations on the sentence still support it, so only this one needs attention. Suggest removing it or marking it with {{tl|Retracted}}. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~",
+   "by": "XavierCatastrophe",
+   "posted": "2026-11-06T17:24Z",
+   "revid": 1384111584,
+   "diff": "https://en.wikipedia.org/w/index.php?diff=1384111584",
+   "wait": "Editor agreed the citation can go (Slatersteven, 2026-11-06). Article is semi-protected; remove the ref once XavierCatastrophe is autoconfirmed (~2026-11-09)."
   },
   {
    "key": "10.1080/1462740500061160|North Koreans in Russia",
@@ -143,31 +148,43 @@
    "key": "10.2147/cmar.s210845|Non-coding RNA",
    "doi": "10.2147/cmar.s210845",
    "page": "Non-coding RNA",
-   "status": "approved",
+   "status": "posted",
    "verdict": "Cancer Management and Research retracted this paper in 2021 over duplicated images. Other citations on the sentence still support it.",
    "reviewed": "2026-11-06",
    "section": "Retracted source: MicroRNA-876 is Sponged by Long Noncoding RNA LINC00707…",
-   "text": "The section \"Cancer\" cites ''MicroRNA-876 is Sponged by Long Noncoding RNA LINC00707 and Directly Targets Metadherin to Inhibit Breast Cancer Malignancy'' ([https://doi.org/10.2147/cmar.s210845 doi:10.2147/cmar.s210845]) for \"Linc00707 is upregulated and sponges miRNAs in ... breast cancer\". ''Cancer Management and Research'' retracted the paper on 18 September 2021 over duplicated images ([https://doi.org/10.2147/cmar.s339426 retraction notice]). The other citations on the sentence still support the gastric-cancer and stem-cell parts. Suggest replacing the source or marking the citation with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, please disregard. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~"
+   "text": "The section \"Cancer\" cites ''MicroRNA-876 is Sponged by Long Noncoding RNA LINC00707 and Directly Targets Metadherin to Inhibit Breast Cancer Malignancy'' ([https://doi.org/10.2147/cmar.s210845 doi:10.2147/cmar.s210845]) for \"Linc00707 is upregulated and sponges miRNAs in ... breast cancer\". ''Cancer Management and Research'' retracted the paper on 18 September 2021 over duplicated images ([https://doi.org/10.2147/cmar.s339426 retraction notice]). The other citations on the sentence still support the gastric-cancer and stem-cell parts. Suggest replacing the source or marking the citation with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, please disregard. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~",
+   "by": "XavierCatastrophe",
+   "posted": "2026-11-06T17:41Z",
+   "revid": 1384114244,
+   "diff": "https://en.wikipedia.org/w/index.php?diff=1384114244"
   },
   {
    "key": "10.1353/sho.2011.0038|Maus",
    "doi": "10.1353/sho.2011.0038",
    "page": "Maus",
-   "status": "approved",
+   "status": "posted",
    "verdict": "Shofar retracted this essay for plagiarism. It is listed in the article's list of scholarship on Maus.",
    "reviewed": "2026-11-06",
    "section": "Retracted source: Art Spiegelman’s Maus: A Survivor’s Tale: A Bibliographic…",
-   "text": "The list in \"Journals and magazines\" includes ''Art Spiegelman's Maus: A Survivor's Tale: A Bibliographic Essay'' (''Shofar'', [https://doi.org/10.1353/sho.2011.0038 doi:10.1353/sho.2011.0038]). The journal retracted this essay for plagiarism in 2011, and its publisher page marks it as retracted. Suggest removing it from the list or marking it with {{tl|Retracted}}. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~"
+   "text": "The list in \"Journals and magazines\" includes ''Art Spiegelman's Maus: A Survivor's Tale: A Bibliographic Essay'' (''Shofar'', [https://doi.org/10.1353/sho.2011.0038 doi:10.1353/sho.2011.0038]). The journal retracted this essay for plagiarism in 2011, and its publisher page marks it as retracted. Suggest removing it from the list or marking it with {{tl|Retracted}}. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~",
+   "by": "XavierCatastrophe",
+   "posted": "2026-11-06T17:24Z",
+   "revid": 1384111600,
+   "diff": "https://en.wikipedia.org/w/index.php?diff=1384111600"
   },
   {
    "key": "10.1002/ajpa.24139|Douz",
    "doi": "10.1002/ajpa.24139",
    "page": "Douz",
-   "status": "approved",
+   "status": "posted",
    "verdict": "The American Journal of Biological Anthropology retracted this study in March 2026 over a lack of ethics approval.",
    "reviewed": "2026-11-06",
    "section": "Retracted source: Berbers and Arabs: Tracing the genetic diversity and…",
-   "text": "The section \"Demography\" cites ''Berbers and Arabs: Tracing the genetic diversity and history of Southern Tunisia through genome wide analysis'' ([https://doi.org/10.1002/ajpa.24139 doi:10.1002/ajpa.24139]) for \"The majority of inhabitants of Douz are from Arab descent (Banu Sulaym)\". The ''American Journal of Biological Anthropology'' retracted the study on 4 March 2026 over a lack of ethics approval ([https://doi.org/10.1002/ajpa.70226 retraction notice]). Suggest replacing the source or marking the citation with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, please disregard. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~"
+   "text": "The section \"Demography\" cites ''Berbers and Arabs: Tracing the genetic diversity and history of Southern Tunisia through genome wide analysis'' ([https://doi.org/10.1002/ajpa.24139 doi:10.1002/ajpa.24139]) for \"The majority of inhabitants of Douz are from Arab descent (Banu Sulaym)\". The ''American Journal of Biological Anthropology'' retracted the study on 4 March 2026 over a lack of ethics approval ([https://doi.org/10.1002/ajpa.70226 retraction notice]). Suggest replacing the source or marking the citation with {{tl|Retracted}}; if it is cited on purpose to discuss the retraction, please disregard. (Disclosure: I found this with a tracker of retracted papers that I run.) ~~~~",
+   "by": "XavierCatastrophe",
+   "posted": "2026-11-06T17:25Z",
+   "revid": 1384111609,
+   "diff": "https://en.wikipedia.org/w/index.php?diff=1384111609"
   },
   {
    "key": "10.1016/j.amc.2007.03.011|SCIgen",

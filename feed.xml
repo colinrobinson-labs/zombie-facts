@@ -6,9 +6,37 @@
   <link href="https://zombiefacts.org/feed.xml" rel="self" type="application/atom+xml"/>
   <link href="https://zombiefacts.org/" rel="alternate" type="text/html"/>
   <id>https://zombiefacts.org/</id>
-  <updated>2026-11-05T20:28:00Z</updated>
+  <updated>2026-11-06T17:41:00Z</updated>
   <author><name>Zombie Facts</name><uri>https://zombiefacts.org/about/</uri></author>
   <icon>https://zombiefacts.org/assets/icon.png</icon>
+  <entry>
+    <title>Note posted: Non-coding RNA</title>
+    <link href="https://zombiefacts.org/case/microrna-876-is-sponged-by-long-noncoding-rna/"/>
+    <id>tag:zombiefacts.org,2026:note:10.2147/cmar.s210845|Non-coding RNA</id>
+    <updated>2026-11-06T17:41:00Z</updated>
+    <summary>We told Wikipedia&#x27;s editors that “Non-coding RNA” cites a retracted paper. Cancer Management and Research retracted this paper in 2021 over duplicated images. Other citations on the sentence still support it.</summary>
+  </entry>
+  <entry>
+    <title>Note posted: Douz</title>
+    <link href="https://zombiefacts.org/case/berbers-and-arabs-tracing-the-genetic-diversity-and/"/>
+    <id>tag:zombiefacts.org,2026:note:10.1002/ajpa.24139|Douz</id>
+    <updated>2026-11-06T17:25:00Z</updated>
+    <summary>We told Wikipedia&#x27;s editors that “Douz” cites a retracted paper. The American Journal of Biological Anthropology retracted this study in March 2026 over a lack of ethics approval.</summary>
+  </entry>
+  <entry>
+    <title>Note posted: Gary Null</title>
+    <link href="https://zombiefacts.org/case/therapeutic-touch-for-healing-acute-wounds-pub-4/"/>
+    <id>tag:zombiefacts.org,2026:note:10.1002/14651858.cd002766.pub4|Gary Null</id>
+    <updated>2026-11-06T17:24:00Z</updated>
+    <summary>We told Wikipedia&#x27;s editors that “Gary Null” cites a retracted paper. This version of the Cochrane review on therapeutic touch was withdrawn over concerns about the underlying data.</summary>
+  </entry>
+  <entry>
+    <title>Note posted: Maus</title>
+    <link href="https://zombiefacts.org/case/art-spiegelman-s-maus-a-survivor-s-tale/"/>
+    <id>tag:zombiefacts.org,2026:note:10.1353/sho.2011.0038|Maus</id>
+    <updated>2026-11-06T17:24:00Z</updated>
+    <summary>We told Wikipedia&#x27;s editors that “Maus” cites a retracted paper. Shofar retracted this essay for plagiarism. It is listed in the article&#x27;s list of scholarship on Maus.</summary>
+  </entry>
   <entry>
     <title>Note posted: North Koreans in Russia</title>
     <link href="https://zombiefacts.org/case/fraternal-socialism-the-international-reconstruction-of-north/"/>
