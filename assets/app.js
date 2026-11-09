@@ -314,6 +314,9 @@ async function works(dois){const out={};for(let i=0;i<dois.length;i+=40){const c
 const retr=w=>{const r=(w&&w["updated-by"]||[]).filter(u=>/retract/i.test(u.type||""));if(!r.length)return null;return {notice:(r.find(x=>x.DOI)||{}).DOI||"",date:dp(r[0].updated)}};
 ["Ivermectin","Hydroxychloroquine","Amyloid beta","Stem cell","Superconductivity","Graphene","Microbiome","Placebo"].forEach(t=>{if(!has("tryScan"))return;const b=document.createElement("button");b.className="chip";b.textContent=t;b.onclick=()=>{$("qScan").value=t;$("bScan").click()};$("tryScan").appendChild(b)});
 $("qScan").onkeydown=e=>{if(e.key==="Enter")$("bScan").click()};
+if(has("bmkCopy"))$("bmkCopy").onclick=()=>copy(document.querySelector(".bmkbtn").getAttribute("href"),"Bookmarklet copied");
+/* /check/?page=Title (from the bookmarklet) scans straight away */
+if(has("qScan")){const q=new URLSearchParams(location.search).get("page");if(q){$("qScan").value=q.slice(0,300);setTimeout(()=>$("bScan").click(),0)}}
 $("bScan").onclick=async()=>{
   const st=$("sScan"),o=$("oScan"),b=$("bScan");let q=$("qScan").value.trim();if(!q)return;const m=q.match(/wikipedia\.org\/wiki\/([^?#]+)/);if(m)q=decodeURIComponent(m[1]).replace(/_/g," ");
   b.disabled=true;o.innerHTML="";st.innerHTML="<i></i>Reading the article…";

@@ -24,3 +24,6 @@ jobs:
           path: .
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Tell search engines what changed (IndexNow)
+        continue-on-error: true
+        run: sleep 30 && python3 build/indexnow.py

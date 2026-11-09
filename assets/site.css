@@ -488,3 +488,18 @@ a.cp{display:inline}
 .opts input{width:24px;height:24px}
 .fcs .m a{display:inline-block;padding:4px 0}
 .src a,.cf-q footer a{display:inline-block;padding:4px 0}
+
+/* open data page */
+.dl{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:22px}
+.dl li{border-top:1px solid var(--rule);padding-top:4px}
+.dl .golink{margin-top:8px}
+.dl span{margin-left:12px;font:400 13px/1.4 var(--mono);color:var(--mute)}
+.dl p{margin:8px 0 0}
+.cols{margin:8px 0 0;padding-left:18px}
+.cols li{margin:6px 0}
+.cols code{font:600 14px var(--mono);overflow-wrap:anywhere}
+.bmk{margin-top:22px;padding-top:16px;border-top:1px dashed var(--rule)}
+.bmk h4{margin:0 0 6px}
+.bmk p{margin:6px 0}
+.bmkbtn{cursor:grab}
+.linkbtn{background:none;border:0;padding:4px 0;font:inherit;color:var(--ink);text-decoration:underline;cursor:pointer;min-height:24px}

@@ -640,3 +640,99 @@ def feed(M):
 def sitemap(urls):
     rows = "".join(f"  <url><loc>{esc(u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
     return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{rows}</urlset>\n'
+
+
+# ───────────────────────── open data ─────────────────────────
+
+DATA_LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+CITE_COLS = ["doi", "title", "journal", "published", "retracted", "retraction_notice", "reasons", "superseded",
+             "wikipedia_article", "section", "status", "quoted_sentence", "monthly_views"]
+CASE_COLS = ["case_url", "doi", "title", "wikipedia_article", "state", "opened", "closed", "how_closed", "note_posted"]
+
+
+def _csv(cols, rows):
+    import csv, io
+    b = io.StringIO()
+    w = csv.writer(b, lineterminator="\n")
+    w.writerow(cols)
+    w.writerows(rows)
+    return b.getvalue()
+
+
+def data_files(M):
+    """CSV downloads: every Wikipedia citation of a retracted paper, and every case."""
+    cites = []
+    gone = {n["key"] for n in M["notes"] if n.get("status") == "dismissed"}
+    for p in M["D"].get("papers", []):
+        for w in p.get("wiki", []):
+            st = "superseded" if superseded(p) else "reviewed" if f'{p["doi"]}|{w["page"]}' in gone and w.get("status") == "zombie" else w.get("status") or ""
+            cites.append([p["doi"], clean_title(p.get("title")), p.get("journal") or "", p.get("published") or "",
+                          p.get("retracted") or "", p.get("notice") or "", "; ".join(p.get("reasons") or []),
+                          "yes" if superseded(p) else "no", w["page"], w.get("section") or "", st,
+                          said(w, 10000), w.get("views") or 0])
+    cites.sort(key=lambda r: (r[10] != "zombie", -r[12], r[0], r[8]))
+    cases = []
+    for c in M["cases"]:
+        for x in c["cites_on"]:
+            cc, n = x["c"], x["n"] or {}
+            cases.append([c["url"], c["doi"], c["title"], x["page"], x["st"], cc.get("o") or "", (cc.get("c") or "")[:10],
+                          cc.get("how") or ("dismissed" if n.get("status") == "dismissed" else ""), (n.get("posted") or "")[:10]])
+    cases.sort(key=lambda r: (r[0], r[3]))
+    return {"data/citations.csv": _csv(CITE_COLS, cites), "data/cases.csv": _csv(CASE_COLS, cases)}, len(cites), len(cases)
+
+
+def data_body(M):
+    files, nc, nk = data_files(M)
+    size = lambda k: f"{max(1, round(len(files[k].encode()) / 1024)):,} KB"
+    cols = lambda rows: "".join(f"<li><code>{esc(a)}</code> {esc(b)}</li>" for a, b in rows)
+    when = nice((M["D"].get("checked") or M["D"].get("built") or "")[:10])
+    return f'''  <section class="sec pagehead" id="data">
+    <div class="sh"><h1>Download the data</h1><p>Everything on this site comes from open data, and everything we add is open too. Use it for research, reporting or your own tools. Updated daily; last update {esc(when)}.</p></div>
+    <div class="ab">
+      <div class="ab-main">
+        <h3>Files</h3>
+        <ul class="dl">
+          <li><a class="golink" href="/data/citations.csv" download>citations.csv</a><span>{nc:,} rows · {size("data/citations.csv")}</span><p>Every citation of a retracted paper we found on English Wikipedia, with the sentence it supports and whether the article warns readers.</p></li>
+          <li><a class="golink" href="/data/cases.csv" download>cases.csv</a><span>{nk:,} rows · {size("data/cases.csv")}</span><p>Every case on the correction desk: when we found it, whether editors were told, and when and how it was fixed.</p></li>
+          <li><a class="golink" href="/data.json">data.json</a><span>full record</span><p>The file the site itself reads, with authors, subjects and scholarly citation counts.</p></li>
+        </ul>
+        <h3>citations.csv columns</h3>
+        <ul class="cols">{cols([("doi", "the retracted paper"), ("retraction_notice", "DOI of the official notice"), ("reasons", "Retraction Watch's reason codes"),
+                                ("superseded", "yes when the paper was only replaced by a newer version (out of date, not discredited)"),
+                                ("status", "zombie: no warning near it · flagged: the article mentions the retraction · reviewed: read by hand, cited on purpose · author or subject: the article is about the author or the scandal · superseded: replaced by a newer version"),
+                                ("quoted_sentence", "the sentence the citation supports, when it is readable"), ("monthly_views", "article views in the last 30 days")])}</ul>
+        <h3>cases.csv columns</h3>
+        <ul class="cols">{cols([("state", "open, fixed, or ok (reviewed, no fix needed)"), ("how_closed", "flagged: the citation was marked as retracted · removed: the source was taken out · dismissed: reviewed and kept on purpose"),
+                                ("note_posted", "the day a note went up on the article's talk page")])}</ul>
+      </div>
+      <aside class="ab-side">
+        <h4>License</h4>
+        <p class="rs-fine">Our data is free to reuse under <a href="{DATA_LICENSE}" target="_blank" rel="noopener">CC BY 4.0</a>. Credit “Zombie Facts (zombiefacts.org)”.</p>
+        <p class="rs-fine">The quoted sentences come from Wikipedia and stay under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>, credited to Wikipedia's contributors. Retraction records come from the Retraction Watch database, released by Crossref under CC0.</p>
+        <h4 class="h4b">Found a mistake?</h4>
+        <p class="rs-fine">Tell us at <a href="mailto:tips@zombiefacts.org">tips@zombiefacts.org</a>. Fixes go in the <a href="/about/#corrections">corrections log</a>.</p>
+      </aside>
+    </div>
+  </section>'''
+
+
+def dataset_jsonld(M):
+    when = (M["D"].get("checked") or M["D"].get("built") or M["today"])[:10]
+    return '<script type="application/ld+json">' + json.dumps({
+        "@context": "https://schema.org", "@type": "Dataset", "name": "Zombie Facts: retracted research still cited on Wikipedia",
+        "description": "Every citation of a retracted paper on English Wikipedia, the sentence it supports, whether readers are warned, and what happened after editors were told.",
+        "url": f"{SITE}/data/", "license": DATA_LICENSE, "isAccessibleForFree": True, "dateModified": when,
+        "creator": {"@type": "Organization", "name": "Zombie Facts", "url": SITE + "/"},
+        "isBasedOn": ["https://gitlab.com/crossref/retraction-watch-data", "https://en.wikipedia.org/"],
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{SITE}/data/citations.csv"},
+                         {"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{SITE}/data/cases.csv"},
+                         {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": f"{SITE}/data.json"}]},
+        ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") + "</script>"
+
+
+def website_jsonld():
+    return '<script type="application/ld+json">' + json.dumps({
+        "@context": "https://schema.org", "@type": "WebSite", "name": "Zombie Facts", "url": SITE + "/",
+        "description": "Retracted, debunked and outdated facts that are still in circulation, and the fight to fix them.",
+        "publisher": {"@type": "Organization", "name": "Zombie Facts", "url": SITE + "/", "logo": f"{SITE}/assets/icon.png", "email": TIPS_EMAIL}},
+        ensure_ascii=False, separators=(",", ":")) + "</script>"
