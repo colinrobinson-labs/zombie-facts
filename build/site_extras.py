@@ -63,7 +63,7 @@ def said(w, mx=260):
     s = re.sub(r"\{\{.*$", "", s)
     s = re.sub(r'^[\s|\]\[}"]+', "", s)
     s = re.sub(r"^[\s*#:;]+", "", s).strip()
-    if re.search(r"https?:|\[|\]", s) or len(s.split()) < 8:
+    if re.search(r"https?:|\[|\]", re.sub(r"\[[^\[\]|]{1,40}\]", "", s)) or len(s.split()) < 8:
         return ""
     if re.search(r"\|\s*[\w-]+\s*=|^\W*title\s*=", s):
         return ""
@@ -72,6 +72,36 @@ def said(w, mx=260):
     if len(s) > mx:
         s = "…" + re.sub(r"^\S*\s", "", s[-mx:])
     return s
+
+
+# Home page lead quote. An editor's pick wins while it is an open case with a whole sentence;
+# otherwise the most-read open zombie whose quote is a whole sentence.
+PICK = {"doi": "10.1002/14651858.cd002766.pub3", "page": "List of pseudoscience topics"}
+
+
+def whole(s):
+    """A full sentence: starts with a capital (or a quote mark), ends with a stop, not cut off."""
+    return bool(s) and not s.startswith("…") and bool(re.match(r'^["“‘(\[]?[A-Z0-9]', s)) and bool(re.search(r'[.!?]["”’)]?$', s))
+
+
+def lead_quote(D, notes, mx=240):
+    """(paper, citation, is_pick) for the home page, or None."""
+    gone = {n["key"] for n in notes if n.get("status") == "dismissed" or n.get("hold")}
+    def ok(p, w):
+        q = said(w, 10000)
+        return (w.get("status") == "zombie" and f'{p["doi"]}|{w["page"]}' not in gone and whole(q) and len(q) <= mx)
+    papers = [p for p in D.get("papers", []) if not superseded(p)]
+    for p in papers:
+        if p["doi"] == PICK["doi"]:
+            w = next((w for w in p.get("wiki", []) if w["page"] == PICK["page"]), None)
+            if w and ok(p, w):
+                return p, w, True
+    best = None
+    for p in papers:
+        for w in p.get("wiki", []):
+            if ok(p, w) and (best is None or (w.get("views") or 0) > (best[1].get("views") or 0)):
+                best = (p, w, False)
+    return best
 
 
 def d(s):

@@ -99,6 +99,59 @@ def share_text():
                    f"On Wikipedia alone: {cites} citations of retracted research with no warning, on pages read {r}+ times a month.")
 
 
+def ago(retracted, today):
+    """How long a paper has been dead, worded like assets/app.js."""
+    try:
+        y, m = int(retracted[:4]), int(retracted[5:7] or 1)
+    except (TypeError, ValueError):
+        return ""
+    u = max(0.0, int(today[:4]) + (int(today[5:7]) - 1) / 12 - (y + (m - 1) / 12))
+    return f"{max(1, round(u * 12))} months" if u < 1 else "1 year" if u < 2 else f"{int(u)} years"
+
+
+def toetag_html(M):
+    """The lead quote on the home page, in the HTML so it shows before the script runs."""
+    got = X.lead_quote(M["D"], M["notes"])
+    if not got:
+        return None
+    p, w, pick = got
+    title = re.sub(r"\s*\(Pub \d+\)$", "", X.clean_title(p.get("title")))  # Cochrane version tag
+    slug = M["slugs"].get(p["doi"])
+    href_ = f"/case/{slug}/" if slug else f"/register/#p={p['doi']}"
+    ret = X.d(p.get("retracted"))
+    return (f'<aside class="specimen" id="toetag" data-doi="{X.esc(p["doi"])}" aria-label="{"Editor’s pick" if pick else "The most-read zombie citation right now"}">'
+            f'<p class="sp-h"><span>{"Editor’s pick" if pick else "Most-read zombie"}</span><span>Undead {ago(p.get("retracted"), M["today"])}</span></p>'
+            f'<blockquote><p>“{X.esc(re.sub(r'"([^"]*)"', "‘\\1’", X.said(w, 10000)))}”</p></blockquote>'
+            f'<p class="sp-src">Still in the Wikipedia article <b>{X.esc(w["page"])}</b> · {X.fmt_k(w.get("views"))} reads a month</p>'
+            f'<div class="sp-paper"><span class="stamp">Retracted {f"{ret:%b} {ret.year}" if ret else ""}</span>'
+            f'<p>{X.esc(title[:110])}{"…" if len(title) > 110 else ""}</p></div>'
+            f'<a class="sp-go" href="{href_}">Open the case file →</a></aside>')
+
+
+def home_body(body, M):
+    """Fill the home page's numbers, date line and lead quote at build time (the script refreshes them)."""
+    c = live_counts()
+    D = M["D"]
+    if c and c[0]:
+        cites, arts, reads = c
+        vals = {'data-c="zc"': f"{cites:,}", 'data-c="zp"': f"{arts:,}",
+                'data-c="mr"': X.fmt_k(reads) if reads >= 1e6 else f"{reads:,}",
+                'data-n="retractions"': f"{(D.get('stats') or {}).get('retractions') or 0:,}"}
+        for attr, v in vals.items():
+            body = body.replace(f"<dd {attr}>—</dd>", f"<dd {attr} data-pre>{v}</dd>")
+        papers = sum(1 for p in D.get("papers", []) if not X.superseded(p) and any(
+            w.get("status") == "zombie" and f'{p["doi"]}|{w["page"]}' not in {n["key"] for n in M["notes"] if n.get("status") == "dismissed"}
+            for w in p.get("wiki", [])))
+        when = X.d((D.get("checked") or D.get("built") or "")[:10])
+        if when:
+            body = body.replace('<p class="kicker" id="kick">Reading the record…</p>',
+                                f'<p class="kicker" id="kick">Updated {when:%B} {when.day}, {when.year} · {papers:,} retracted papers still cited with no warning</p>')
+    t = toetag_html(M)
+    if t:
+        body = body.replace('<aside class="specimen" id="toetag" hidden aria-label="The most-read zombie citation right now"></aside>', t)
+    return body
+
+
 def href(slug):
     return "/" + (slug + "/" if slug else "")
 
@@ -190,6 +243,8 @@ def build():
         if desc == "@results":
             desc = X.results_desc(M)
         body = "\n".join(X.results_body(M) if f == "@results" else open(os.path.join(SRC, "pages", f + ".html")).read().rstrip() for f in frags)
+        if not slug:
+            body = home_body(body, M)
         st, sd = share_text()
         page = shell(head, drawer, slug + "/" if slug else "", slug, title, sd if not slug else desc,
                      st if not slug else title, sd if not slug else desc, body, nxt)

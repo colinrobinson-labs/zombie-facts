@@ -78,7 +78,7 @@ const undeadYears=p=>{const r=yr(p.retracted);return r?Math.max(0,NY-r):0};
 const ago=p=>{const u=undeadYears(p);return u<1?Math.max(1,Math.round(u*12))+" months":(u<2?"1 year":Math.floor(u)+" years")};
 const z1=p=>(p.wiki||[]).find(w=>w.status==="zombie"&&said(w))||(p.wiki||[]).find(w=>w.status==="zombie")||p.wiki[0];
 const LISTSEC=/^(references|further reading|bibliography|sources|notes|external links|citations|works cited|literature)/i;
-const said=(w,max=260)=>{if(!w||LISTSEC.test(w.section||"")||/^\d{4} in /.test(w.page||""))return "";let s=(w.said||"").replace(/^.*\}\}\s*/,"").replace(/\{\{.*$/,"").replace(/^[\s|\]\[}"]+/,"").replace(/^[\s*#:;]+/,"").trim();if(/https?:|\[|\]/.test(s)||s.split(/\s+/).length<8)return "";if(/\|\s*[\w-]+\s*=|^\W*title\s*=/.test(s))return "";if(s.length<25||/^[\W\d]+$/.test(s)||/^(doi|isbn|pmid)\b/i.test(s))return "";if(s.length>max)s="…"+s.slice(-max).replace(/^\S*\s/,"");return s};
+const said=(w,max=260)=>{if(!w||LISTSEC.test(w.section||"")||/^\d{4} in /.test(w.page||""))return "";let s=(w.said||"").replace(/^.*\}\}\s*/,"").replace(/\{\{.*$/,"").replace(/^[\s|\]\[}"]+/,"").replace(/^[\s*#:;]+/,"").trim();if(/https?:|\[|\]/.test(s.replace(/\[[^\[\]|]{1,40}\]/g,""))||s.split(/\s+/).length<8)return "";if(/\|\s*[\w-]+\s*=|^\W*title\s*=/.test(s))return "";if(s.length<25||/^[\W\d]+$/.test(s)||/^(doi|isbn|pmid)\b/i.test(s))return "";if(s.length>max)s="…"+s.slice(-max).replace(/^\S*\s/,"");return s};
 
 /* ---------- data ---------- */
 let D=null,ZP=[],OUT=[],CASEIX={};
@@ -104,7 +104,7 @@ async function load(){
   if(has("xReg"))$("xReg").textContent=`${full(ZP.filter(p=>p._z).length)} retracted papers Wikipedia still cites, searchable by topic, journal and cause.`;
   const m=location.hash.match(/^#p=(.+)/);if(m)openP(decodeURIComponent(m[1]));
 }
-function countUp(el,v){if(v==null)return;const dur=1600,t0=performance.now(),f=v>=1e6?fmt:full;
+function countUp(el,v){if(v==null)return;if(el.hasAttribute("data-pre")){el.textContent=(v>=1e6?fmt:full)(v);return}const dur=1600,t0=performance.now(),f=v>=1e6?fmt:full;
   const io=new IntersectionObserver(es=>{if(!es[0].isIntersecting)return;io.disconnect();(function s(now){const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,4);el.textContent=f(Math.round(v*e));if(k<1)requestAnimationFrame(s)})(performance.now())});io.observe(el)}
 
 function ticker(){
@@ -114,7 +114,10 @@ function ticker(){
 
 let HOLD=new Set();const held=p=>HOLD.has(p.doi+"|"+z1(p).page);
 let TOE=null;
-function toetag(){const p=ZP.find(p=>p._z&&!held(p)&&said(z1(p),200));if(!p)return;TOE=p;const w=z1(p),t=$("toetag");
+const whole=s=>!!s&&s[0]!=="…"&&/^["“‘(\[]?[A-Z0-9]/.test(s)&&/[.!?]["”’)]?$/.test(s);
+function toetag(){const t=$("toetag");
+  if(t.dataset.doi){const p=ZP.find(x=>x.doi===t.dataset.doi),a=t.querySelector("a");if(p)TOE=p;if(a)t.onclick=e=>{if(!e.target.closest("a"))a.click()};return}
+  const p=ZP.find(p=>p._z&&!held(p)&&whole(said(z1(p),240)))||ZP.find(p=>p._z&&!held(p)&&said(z1(p),200));if(!p)return;TOE=p;const w=z1(p);
   t.innerHTML=`<p class="sp-h"><span>Most-read zombie</span><span>Undead ${ago(p)}</span></p><blockquote><p>“${esc(said(w,190))}”</p></blockquote><p class="sp-src">Still in the Wikipedia article <b>${esc(w.page)}</b> · ${fmt(w.views)} reads a month</p><div class="sp-paper"><span class="stamp">Retracted ${esc(fmtDate(p.retracted))}</span><p>${esc(p.title.slice(0,110))}${p.title.length>110?"…":""}</p></div><span class="sp-go">Open the case file →</span>`;
   t.hidden=false;t.tabIndex=0;t.setAttribute("role","button");t.onclick=()=>show(p);t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();show(p)}}}
 function quoteHTML(w,max){const s=said(w,max);return s?`<p class="quote"><mark>${esc(s)}</mark><sup>[retracted]</sup></p>`:""}
@@ -360,13 +363,20 @@ if(has("nBoard"))newsroom();
 /* ---------- case pages: share button ---------- */
 document.querySelectorAll(".cf-share").forEach(b=>b.onclick=async()=>{const u=b.dataset.url,t=b.dataset.text;if(navigator.share){try{await navigator.share({title:"Zombie Facts",text:t,url:u})}catch(_){}}else copy(u,"Link copied")});
 /* ---------- report a zombie: hand the tip to a pre-filled email ---------- */
-if(has("tipForm"))$("tipForm").onsubmit=e=>{e.preventDefault();
-  const st=$("tipSt"),w=$("tWhere").value.trim(),c=$("tClaim").value.trim(),y=$("tWhy").value.trim();
-  if($("tHp").value){st.textContent="Thanks.";return}
-  if(!/^https?:\/\/\S+\.\S+/.test(w)){st.textContent="Add a link to where you saw it (starting with https://).";$("tWhere").focus();return}
-  if(c.length<10||y.length<10){st.textContent="Tell us what it says and why it's wrong, a sentence each is plenty.";return}
-  let host="";try{host=new URL(w).hostname.replace(/^www\./,"")}catch(_){}
-  const u="mailto:tips@zombiefacts.org?subject="+encodeURIComponent("Tip: "+(host||"zombie fact")+" · "+c.slice(0,60))+"&body="+encodeURIComponent("Where: "+w+"\n\nWhat it says:\n"+c.slice(0,3000)+"\n\nWhy it's wrong:\n"+y.slice(0,3000)+"\n");
-  st.textContent="Opening your email app. Press send to deliver the tip.";setTimeout(()=>{location.href=u},300)};
+if(has("tipForm")){
+  /* returns the tip as {subject, body}, or null after saying what is missing */
+  const tip=()=>{const st=$("tipSt"),w=$("tWhere").value.trim(),c=$("tClaim").value.trim(),y=$("tWhy").value.trim();
+    if($("tHp").value){st.textContent="Thanks.";return null}
+    if(!/^https?:\/\/\S+\.\S+/.test(w)){st.textContent="Add a link to where you saw it (starting with https://).";$("tWhere").focus();return null}
+    if(c.length<10||y.length<10){st.textContent="Tell us what it says and why it's wrong, a sentence each is plenty.";return null}
+    let host="";try{host=new URL(w).hostname.replace(/^www\./,"")}catch(_){}
+    return {subject:"Tip: "+(host||"zombie fact")+" · "+c.slice(0,60),body:"Where: "+w+"\n\nWhat it says:\n"+c.slice(0,3000)+"\n\nWhy it's wrong:\n"+y.slice(0,3000)+"\n"}};
+  $("tipForm").onsubmit=e=>{e.preventDefault();const t=tip();if(!t)return;
+    $("tipSt").textContent="Opening your email app. Press send to deliver the tip. Nothing opened? Use Copy the tip.";
+    setTimeout(()=>{location.href="mailto:tips@zombiefacts.org?subject="+encodeURIComponent(t.subject)+"&body="+encodeURIComponent(t.body)},300)};
+  $("tipCopy").onclick=async()=>{const t=tip();if(!t)return;
+    try{await navigator.clipboard.writeText(t.subject+"\n\n"+t.body);$("tipSt").textContent="Copied. Paste it into any email to tips@zombiefacts.org, from any address."}
+    catch(_){prompt("Copy this and email it to tips@zombiefacts.org:",t.subject+"\n\n"+t.body)}};
+}
 if(document.body.dataset.page!=="case")load();
 })();
