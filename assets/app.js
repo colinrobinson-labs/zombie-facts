@@ -309,7 +309,7 @@ function feed(all){
   $("feed").querySelectorAll("button[data-doi]").forEach(b=>b.onclick=()=>openP(b.dataset.doi));
 }
 /* ---------- live tools (browser → Crossref + Wikipedia) ---------- */
-const CR="https://api.crossref.org",MAILTO="&mailto=zombiefacts@users.noreply.github.com",WP="https://en.wikipedia.org/w/api.php";
+const CR="https://api.crossref.org",MAILTO="&mailto=tips@zombiefacts.org",WP="https://en.wikipedia.org/w/api.php";
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function getJSON(u,t=2){for(let i=0;i<=t;i++){try{const r=await fetch(u);if(r.status===429){await sleep(1500*(i+1));continue}if(!r.ok)throw new Error("HTTP "+r.status);return await r.json()}catch(e){if(i===t)throw e;await sleep(700)}}}
 const dp=x=>x&&x["date-parts"]&&x["date-parts"][0]?x["date-parts"][0].map(v=>String(v).padStart(2,"0")).join("-"):"";

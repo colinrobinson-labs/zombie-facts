@@ -99,7 +99,7 @@ def report(path):
     live = [p for p in data["papers"] if p["zombies"] and not p.get("superseded")]
     lines = [f"Data built {data.get('built')}, checked {data.get('checked') or 'n/a'}.",
              f"**{sum(p['zombies'] for p in live)} zombie citations on {len(live)} papers** "
-             f"({sum(1 for p in data['papers'] if p['zombies'] and p.get('superseded'))} superseded Cochrane reviews excluded).", "",
+             f"({sum(1 for p in data['papers'] if p['zombies'] and p.get('superseded'))} superseded papers excluded: retracted-and-replaced or Cochrane procedural withdrawals).", "",
              f"### Flag check\nRe-read {read}/{nflag} flagged citations; {len(loose)} flagged only by a loose word."]
     lines += [f"- {x['page']} (`{x['doi']}`), matched \"{x['matched']}\", {x['views']} views/mo" for x in loose[:30]]
     lines += ["", f"### Consistency\n{len(issues)} issue(s)."] + [f"- {i}" for i in issues[:50]]

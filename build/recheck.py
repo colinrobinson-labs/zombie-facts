@@ -15,7 +15,7 @@ import json, os, re, sys, urllib.parse
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
-from build_data import OUT, log, read_pages, context_for, is_author_page, clean_said, superseded  # noqa: E402
+from build_data import OUT, log, read_pages, context_for, is_author_page, clean_said, superseded, replaced  # noqa: E402
 
 OUTREACH = os.path.join(os.path.dirname(__file__), "..", "outreach.json")
 CONTEXT_DUMP = os.environ.get("ZF_DUMP_CONTEXT")  # optional path: write raw wikitext around each open citation
@@ -99,6 +99,19 @@ def parse_replies(body, ours):
 
 
 # ---------------------------------------------------------------- main
+def material(data):
+    """data.json minus the parts that change on every run (views, check times)."""
+    led = {k: {x: v for x, v in c.items() if x != "v"} for k, c in ((data.get("ledger") or {}).get("cases") or {}).items()}
+    ps = [(p["doi"], p.get("superseded"), p.get("replaced"), p.get("zombies"),
+           [(w["page"], w["status"], w.get("said")) for w in p.get("wiki", [])]) for p in data.get("papers", [])]
+    return json.dumps([led, ps], sort_keys=True)
+
+
+def material_notes(outreach):
+    return json.dumps([{k: v for k, v in n.items() if k != "checked"} for n in outreach.get("notes", [])], sort_keys=True)
+
+
+
 def recheck_cases(data, pages, now):
     ledger = data.get("ledger") or {}
     cases = ledger.get("cases") or {}
@@ -197,6 +210,7 @@ def main():
         sys.exit(f"read only {got}/{len(want)} pages; Wikipedia unreachable? leaving data unchanged")
     now = today()
     now_ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
+    before_d, before_o = material(data), material_notes(outreach)
     still_open = len([1 for c in cases.values() if not c.get("c")])
     closed = recheck_cases(data, pages, now)
     if still_open and len(closed) > max(10, 0.5 * still_open):
@@ -205,9 +219,9 @@ def main():
     retire_notes(outreach, cases, now)
     for p in data["papers"]:  # older builds stored list rows and markup as quotes
         p["superseded"] = superseded(p)
+        p["replaced"] = replaced(p)
         for w in p["wiki"]:
             w["said"] = clean_said(w.get("said"))
-    data["checked"] = now_ts
     s = data["stats"]
     s["zombie_citations"] = sum(p["zombies"] for p in data["papers"])
     s["zombie_papers"] = sum(1 for p in data["papers"] if p["zombies"])
@@ -215,10 +229,19 @@ def main():
     s["flagged_citations"] = sum(len(p["wiki"]) - p["zombies"] for p in data["papers"])
     s["zombie_pages"] = len({w["page"] for p in data["papers"] for w in p["wiki"] if w["status"] == "zombie"})
     s["pages"] = len({w["page"] for p in data["papers"] for w in p["wiki"]})
+    # Commit only real news. Page views and "checked" times move on every run; on their own they are
+    # written at most once a day, so the site isn't redeployed four times a day for nothing.
+    fresh = material(data) != before_d or material_notes(outreach) != before_o
+    last = data.get("checked") or ""
+    stale = not last or (datetime.now(timezone.utc) - datetime.strptime(last, "%Y-%m-%dT%H:%MZ").replace(tzinfo=timezone.utc)).total_seconds() > 20 * 3600
+    if not (fresh or stale):
+        log("nothing changed since", last, "; leaving files as they are")
+        return
+    data["checked"] = now_ts
     save(OUT, data)
     if outreach.get("notes"):
         save(OUTREACH, outreach, pretty=True)
-    log("closed", closed, "new reply events", replies)
+    log("closed", closed, "new reply events", replies, "changed" if fresh else "daily refresh")
 
 
 if __name__ == "__main__":

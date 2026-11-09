@@ -190,9 +190,6 @@ def build():
         if desc == "@results":
             desc = X.results_desc(M)
         body = "\n".join(X.results_body(M) if f == "@results" else open(os.path.join(SRC, "pages", f + ".html")).read().rstrip() for f in frags)
-        if False:
-            body = body.replace('<p class="rs-fine" id="tipMail" hidden></p>',
-                                f'<p class="rs-fine" id="tipMail">No GitHub account? Email the same three things to <a href="mailto:{X.esc(X.TIPS_EMAIL)}">{X.esc(X.TIPS_EMAIL)}</a>.</p>')
         st, sd = share_text()
         page = shell(head, drawer, slug + "/" if slug else "", slug, title, sd if not slug else desc,
                      st if not slug else title, sd if not slug else desc, body, nxt)

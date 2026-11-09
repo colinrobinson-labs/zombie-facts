@@ -26,6 +26,7 @@ CAUSES = [
     ("Ethics or consent", r"ethic|consent|irb|iacuc"),
     ("Authorship or legal", r"authorship|author unaware|legal|copyright|third party|objections")]
 SUP = re.compile(r"out of date|retract and replace", re.I)
+SUP_REPLACE = re.compile(r"retract and replace", re.I)
 
 
 def causes_of(p):
@@ -145,12 +146,18 @@ def model():
     for k, c in ledger.items():
         doi, page = k.split("|", 1)
         p = papers.get(doi)
-        if p and superseded(p):
-            continue
+        if p and superseded(p) and doi not in slugs:
+            continue  # never shown as a case; one that already had a page keeps it, marked reviewed
         if c.get("how") == "author":
             continue
         n = note.get(k)
-        if n and n.get("status") == "dismissed":
+        if p and superseded(p):
+            st = "ok"
+            n = n or {"status": "dismissed", "reviewed": "2026-11-09",  # the day this rule shipped
+                      "verdict": ("The publisher retracted this paper and republished a corrected version, so it is out of date rather than discredited. Citing the newer version is the fix."
+                                  if any(SUP_REPLACE.search(r) for r in p.get("reasons") or []) else
+                                  "Withdrawn because a newer version replaced it, not because it was discredited.")}
+        elif n and n.get("status") == "dismissed":
             st = "ok"
         elif c.get("c"):
             st = "fixed"

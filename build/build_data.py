@@ -14,12 +14,13 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from collections import Counter, defaultdict
 
-UA = "ZombieFacts/1.0 (https://zombiefacts.org/; retraction tracker)"
+CONTACT = "tips@zombiefacts.org"  # a working inbox, so a source that has a problem with us can write instead of blocking
+UA = f"ZombieFacts/1.1 (https://zombiefacts.org/; {CONTACT}) retraction tracker"
 WP = "https://en.wikipedia.org/w/api.php"
 OUT = os.path.join(os.path.dirname(__file__), "..", "data.json")
 RW_URLS = [
     "https://gitlab.com/crossref/retraction-watch-data/-/raw/main/retraction_watch.csv",
-    "https://api.labs.crossref.org/data/retractionwatch?mailto=zombiefacts@users.noreply.github.com",
+    "https://api.labs.crossref.org/data/retractionwatch?mailto=tips@zombiefacts.org",
 ]
 MAX_PAGES_READ = int(os.environ.get("ZF_MAX_PAGES", "6000"))
 
@@ -122,28 +123,6 @@ def load_rw():
 
 
 # ---------------------------------------------------------------- 2. Wikipedia links
-def exturl(query, protocol):
-    """All mainspace pages linking to URLs that start with protocol://query."""
-    res, cont = [], {}
-    while True:
-        p = {"action": "query", "list": "exturlusage", "euquery": query, "euprotocol": protocol,
-             "eunamespace": "0", "eulimit": "500", "euprop": "title|url", "format": "json",
-             "formatversion": "2", "maxlag": "5"}
-        p.update(cont)
-        j = get(WP + "?" + urllib.parse.urlencode(p))
-        if "error" in j:
-            if j["error"].get("code") == "maxlag":
-                time.sleep(5); continue
-            log("api error", j["error"]); break
-        for x in j.get("query", {}).get("exturlusage", []):
-            res.append((x["title"], x["url"]))
-        if "continue" in j:
-            cont = {k: v for k, v in j["continue"].items()}
-        else:
-            break
-    return res
-
-
 DUMPS = [
     "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-externallinks.sql.gz",
     "https://mirror.accum.se/mirror/wikimedia.org/dumps/enwiki/latest/enwiki-latest-externallinks.sql.gz",
@@ -223,13 +202,27 @@ PROCEDURAL = re.compile(r"out of date|retract and replace|^removed$|temporary re
                         r"date of (?:article|retraction)|notice unknown|upgrade/update", re.I)
 
 
-def superseded(p):
-    """A Cochrane review withdrawn for procedural reasons (out of date, handed to new authors, replaced).
+REPLACED = re.compile(r"retract and replace", re.I)
 
-    PubMed's withdrawal notices for these say e.g. "This review is to be passed onto a new group of
-    authors". The review is outdated, not discredited, so it is not presented as a zombie. Withdrawals
-    with any substantive reason (data concerns, conflict of interest, misconduct) are kept.
+
+def replaced(p):
+    """Retracted and republished in corrected form ("retract and replace"): a newer version stands."""
+    return any(REPLACED.search(r) for r in p.get("reasons") or [])
+
+
+def superseded(p):
+    """Not presented as a zombie, because a newer version of the work stands.
+
+    1. Retract and replace, from any journal: the publisher retracted the paper and republished a
+       corrected version (PREDIMED in NEJM, 2018, is the famous one). Citing it is out of date, not
+       citing a dead fact; the case page says to cite the new version instead.
+    2. A Cochrane review withdrawn for procedural reasons (out of date, handed to new authors).
+       PubMed's withdrawal notices for these say e.g. "This review is to be passed onto a new group of
+       authors". Withdrawals with any substantive reason (data concerns, conflict of interest,
+       misconduct) are kept.
     """
+    if replaced(p):
+        return True
     if not p["doi"].startswith("10.1002/14651858"):
         return False
     rs = p.get("reasons") or []
@@ -338,7 +331,7 @@ def crossref_counts(dois):
         f = ",".join("doi:" + d for d in chunk)
         u = "https://api.crossref.org/works?" + urllib.parse.urlencode(
             {"filter": f, "rows": len(chunk), "select": "DOI,is-referenced-by-count,title,container-title,issued",
-             "mailto": "zombiefacts@users.noreply.github.com"})
+             "mailto": CONTACT})
         try:
             return get(u)["message"]["items"]
         except Exception as e:
@@ -475,6 +468,7 @@ def main():
         if not cites:
             continue
         rec["superseded"] = superseded(rec)
+        rec["replaced"] = replaced(rec)
         rec["wiki"] = sorted(cites, key=lambda c: (c["status"] != "zombie", -c["views"]))
         rec["zombies"] = sum(c["status"] == "zombie" for c in cites)
         rec["reach"] = sum(c["views"] for c in cites if c["status"] == "zombie")
