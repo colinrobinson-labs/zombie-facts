@@ -4,16 +4,9 @@ const has=id=>!!document.getElementById(id);
 const BASE=new URL("../",document.currentScript&&document.currentScript.src||location.href).href;
 /* old one-page links (/#register etc.) now live on their own pages */
 (()=>{const m={"#worst":"/","#register":"/register/","#desk":"/desk/","#autopsy":"/autopsy/","#check":"/check/","#method":"/method/"}[location.hash];if(m&&location.pathname!==m)location.replace(m)})();
-const TPL=`A note from Zombie Facts, a free public tracker of retracted research.
+const TPL=`The section "{SECTION}" cites ''{TITLE}'' ([https://doi.org/{DOI} doi:{DOI}]), which was retracted on {DATE} ([https://doi.org/{NOTICE} retraction notice]). It is cited for: "{SAID}"
 
-The article "{PAGE}" ({SECTION}) cites
-  {TITLE}
-  https://doi.org/{DOI}
-which was retracted on {DATE}: https://doi.org/{NOTICE}
-
-It supports this sentence: "{SAID}"
-
-If the citation is there to discuss the retraction, nothing to do. Otherwise it may need replacing, or marking with {{tl|Retracted}}. ~~~~`;
+If it is cited on purpose to discuss the retraction, please disregard. Otherwise it may need replacing, or marking with {{tl|Retracted}}. ~~~~`;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const fmt=n=>n==null?"—":n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+"M":n>=1e4?Math.round(n/1e3)+"K":n.toLocaleString("en-US");
 const full=n=>(n||0).toLocaleString("en-US");
@@ -85,7 +78,7 @@ const undeadYears=p=>{const r=yr(p.retracted);return r?Math.max(0,NY-r):0};
 const ago=p=>{const u=undeadYears(p);return u<1?Math.max(1,Math.round(u*12))+" months":(u<2?"1 year":Math.floor(u)+" years")};
 const z1=p=>(p.wiki||[]).find(w=>w.status==="zombie"&&said(w))||(p.wiki||[]).find(w=>w.status==="zombie")||p.wiki[0];
 const LISTSEC=/^(references|further reading|bibliography|sources|notes|external links|citations|works cited|literature)/i;
-const said=(w,max=260)=>{if(!w||LISTSEC.test(w.section||"")||/^\d{4} in /.test(w.page||""))return "";let s=(w.said||"").replace(/^.*\}\}\s*/,"").replace(/\{\{.*$/,"").replace(/^[\s|\]\[}"]+/,"").replace(/^[\s*#:;]+/,"").trim();if(/https?:|\[|\]/.test(s)||s.split(/\s+/).length<8)return "";if(/\|\s*[\w-]+\s*=|^\W*title\s*=/.test(s))return "";if(s.length<25||/^[\W\d]+$/.test(s)||/^(doi|isbn|pmid)\b/i.test(s))return "";if(s.length>max)s="…"+s.slice(-max).replace(/^\S*\s/,"");return s};
+const said=(w,max=260)=>{if(!w||LISTSEC.test(w.section||"")||/^\d{4} in /.test(w.page||""))return "";let s=(w.said||"").replace(/^.*\}\}\s*/,"").replace(/\{\{.*$/,"").replace(/^[\s|\]\[}"]+/,"").replace(/^[\s*#:;]+/,"").trim();if(/https?:|\[|\]/.test(s.replace(/\[[^\[\]|]{1,40}\]/g,""))||s.split(/\s+/).length<8)return "";if(/\|\s*[\w-]+\s*=|^\W*title\s*=/.test(s))return "";if(s.length<25||/^[\W\d]+$/.test(s)||/^(doi|isbn|pmid)\b/i.test(s))return "";if(s.length>max)s="…"+s.slice(-max).replace(/^\S*\s/,"");return s};
 
 /* ---------- data ---------- */
 let D=null,ZP=[],OUT=[],CASEIX={};
@@ -111,7 +104,7 @@ async function load(){
   if(has("xReg"))$("xReg").textContent=`${full(ZP.filter(p=>p._z).length)} retracted papers Wikipedia still cites, searchable by topic, journal and cause.`;
   const m=location.hash.match(/^#p=(.+)/);if(m)openP(decodeURIComponent(m[1]));
 }
-function countUp(el,v){if(v==null)return;const dur=1600,t0=performance.now(),f=v>=1e6?fmt:full;
+function countUp(el,v){if(v==null)return;if(el.hasAttribute("data-pre")){el.textContent=(v>=1e6?fmt:full)(v);return}const dur=1600,t0=performance.now(),f=v>=1e6?fmt:full;
   const io=new IntersectionObserver(es=>{if(!es[0].isIntersecting)return;io.disconnect();(function s(now){const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,4);el.textContent=f(Math.round(v*e));if(k<1)requestAnimationFrame(s)})(performance.now())});io.observe(el)}
 
 function ticker(){
@@ -121,7 +114,10 @@ function ticker(){
 
 let HOLD=new Set();const held=p=>HOLD.has(p.doi+"|"+z1(p).page);
 let TOE=null;
-function toetag(){const p=ZP.find(p=>p._z&&!held(p)&&said(z1(p),200));if(!p)return;TOE=p;const w=z1(p),t=$("toetag");
+const whole=s=>!!s&&s[0]!=="…"&&/^["“‘(\[]?[A-Z0-9]/.test(s)&&/[.!?]["”’)]?$/.test(s);
+function toetag(){const t=$("toetag");
+  if(t.dataset.doi){const p=ZP.find(x=>x.doi===t.dataset.doi),a=t.querySelector("a");if(p)TOE=p;if(a)t.onclick=e=>{if(!e.target.closest("a"))a.click()};return}
+  const p=ZP.find(p=>p._z&&!held(p)&&whole(said(z1(p),240)))||ZP.find(p=>p._z&&!held(p)&&said(z1(p),200));if(!p)return;TOE=p;const w=z1(p);
   t.innerHTML=`<p class="sp-h"><span>Most-read zombie</span><span>Undead ${ago(p)}</span></p><blockquote><p>“${esc(said(w,190))}”</p></blockquote><p class="sp-src">Still in the Wikipedia article <b>${esc(w.page)}</b> · ${fmt(w.views)} reads a month</p><div class="sp-paper"><span class="stamp">Retracted ${esc(fmtDate(p.retracted))}</span><p>${esc(p.title.slice(0,110))}${p.title.length>110?"…":""}</p></div><span class="sp-go">Open the case file →</span>`;
   t.hidden=false;t.tabIndex=0;t.setAttribute("role","button");t.onclick=()=>show(p);t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();show(p)}}}
 function quoteHTML(w,max){const s=said(w,max);return s?`<p class="quote"><mark>${esc(s)}</mark><sup>[retracted]</sup></p>`:""}
@@ -190,7 +186,7 @@ function openI(i){const p=ZP[i];if(p)show(p)}
 function openP(doi){const p=ZP.find(x=>x.doi===doi.toLowerCase());if(p)show(p)}
 function reviewBlock(p,w){const n=noteOf(p.doi+"|"+w.page);if(!n)return "";
   const st={queued:"Reviewed · note queued",approved:"Reviewed · note goes up next",posted:"Note posted",replied:"Note posted · editors replied",dismissed:"Reviewed · no fix needed",skipped:"Fixed before we posted"}[n.status]||n.status;
-  return `<div class="review"><b>Our review · ${esc(st)}</b>${esc(n.verdict)}${n.posted?` <a href="https://en.wikipedia.org/wiki/${encodeURIComponent("Talk:"+w.page)}" target="_blank" rel="noopener">Read the talk page</a>`:""}${(n.replies||[]).map(r=>`<div class="rp"><span>${esc(r.user)} · ${esc(shortD((r.at||"").slice(0,10)||n.posted.slice(0,10)))}</span>${esc(r.said)}</div>`).join("")}</div>`}
+  return `<div class="review"><b>Our review · ${esc(st)}</b>${esc(n.verdict)}${(n.replies||[]).map(r=>`<div class="rp"><span>${esc(r.user)} · ${esc(shortD((r.at||"").slice(0,10)||n.posted.slice(0,10)))}</span>${esc(r.said)}</div>`).join("")}</div>`}
 function fixRow(p,w,wi){const c=caseOf(p,w);
   const n=noteOf(p.doi+"|"+w.page);
   if(n&&n.status!=="dismissed"&&n.status!=="skipped")return reviewBlock(p,w)+`<div class="wcase">${c?`Case open since ${esc(shortD(c.o))}`:""} · We're handling the note on this one. <a href="${editURL(w)}" target="_blank" rel="noopener">Fix it yourself</a> if you edit Wikipedia.</div>`;
@@ -204,7 +200,7 @@ function show(p){
    <p class="by">${esc((p.authors||[]).slice(0,4).join(", "))}${(p.authors||[]).length>4?" et al.":""}<br>${esc(p.journal)}${p.publisher?" · "+esc(p.publisher):""}${p.cites?` · cited ${full(p.cites)} times by other papers`:""}</p>
    <div class="tl">${lifeSVG(p,56,1)}<div class="ty"><span>Published ${esc(fmtDate(p.published)||"?")}</span><span style="color:var(--blood)">Retracted ${esc(fmtDate(p.retracted))}</span><span style="color:var(--acidInk)">Now · ${ago(p)} undead</span></div></div>
    ${p.reasons&&p.reasons.length?`<div class="cause">${p.reasons.slice(0,8).map(r=>`<span>${esc(r)}</span>`).join("")}</div>`:""}
-   <div class="ws"><h4>Where Wikipedia still uses it</h4>${ws.map((w,wi)=>`<div class="w ${w.status==="zombie"?"":"fl"}"><div class="wt"><a href="${wurl(w.page,w.section)}" target="_blank" rel="noopener">${esc(w.page)}</a><span class="pill ${w.status==="zombie"?"z":"fl"}">${w.status==="author"?"author's own page":w.status==="reviewed"?"reviewed · ok":w.status}</span></div>
+   <div class="ws"><h4>Where Wikipedia still uses it</h4>${ws.map((w,wi)=>`<div class="w ${w.status==="zombie"?"":"fl"}"><div class="wt"><a href="${wurl(w.page,w.section)}" target="_blank" rel="noopener">${esc(w.page)}</a><span class="pill ${w.status==="zombie"?"z":"fl"}">${w.status==="author"?"author's own page":w.status==="subject"?"article is about the retraction":w.status==="reviewed"?"reviewed · ok":w.status}</span></div>
      ${said(w,500)?`<blockquote>${esc(said(w,500))}</blockquote>`:""}<div class="wm">${w.section?esc(w.section)+" · ":""}${full(w.views)} views in the last 30 days</div>${w.status==="zombie"?fixRow(p,w,wi):""}</div>`).join("")}</div>
    <div class="acts"><a class="p" href="https://doi.org/${esc(p.notice||p.doi)}" target="_blank" rel="noopener">Retraction notice</a><a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">The paper</a>${p.zombies?`<button id="cpy">Copy note to editors</button>`:""}${casePath(p.doi)?`<a href="${casePath(p.doi)}">Case page</a>`:""}<button id="shr">Share</button>${p.zombies&&said(z1(p))?`<button id="card">Save share image</button>`:""}</div>`;
   const z=ws.find(w=>w.status==="zombie");
@@ -270,7 +266,7 @@ const daysBetween=(a,b)=>Math.max(0,Math.round((dd(b)-dd(a))/dayMs));
 const shortD=s=>dd(s).toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
 const talkURL=(p,w)=>"https://en.wikipedia.org/w/index.php?title="+encodeURIComponent("Talk:"+w.page)+"&action=edit&section=new&preloadtitle="+encodeURIComponent("Retracted source cited: "+(p.title.length>70?p.title.slice(0,68)+"…":p.title));
 const editURL=w=>"https://en.wikipedia.org/w/index.php?title="+encodeURIComponent(w.page)+"&action=edit";
-const noteFor=(p,w)=>{let t=TPL.replace("{PAGE}",w.page).replace("{SECTION}",w.section||"Lead").replace("{TITLE}",p.title).replace("{DOI}",p.doi).replace("{DATE}",fmtDate(p.retracted)).replace("{NOTICE}",p.notice||p.doi);const sd=said(w,400);return sd?t.replace("{SAID}",sd):t.replace(/\n\nIt supports this sentence: "\{SAID\}"/,"")};
+const noteFor=(p,w)=>{const r={PAGE:w.page,SECTION:w.section||"Lead",TITLE:p.title,DOI:p.doi,DATE:fmtDate(p.retracted),NOTICE:p.notice||p.doi};let t=TPL.replace(/\{(PAGE|SECTION|TITLE|DOI|DATE|NOTICE)\}/g,(_,k)=>r[k]);const sd=said(w,400);return sd?t.replace("{SAID}",sd):t.replace(/ It is cited for: "\{SAID\}"/,"")};
 function nextCheck(){const b=dd(D.built.slice(0,10));const n=new Date(b);n.setUTCDate(b.getUTCDate()+((8-b.getUTCDay())%7||7));return n.toISOString().slice(0,10)}
 const noteOf=k=>OUT.find(n=>n.key===k);
 const toldS=n=>n&&(n.status==="posted"||n.status==="replied");
@@ -280,26 +276,27 @@ function desk(){
   const all=Object.entries(L.cases).map(([k,c])=>{const doi=k.slice(0,k.indexOf("|"));return {...c,k,doi,p:byDoi[doi],n:noteOf(k)}}).filter(c=>!(c.p&&c.p._sup));
   const open=all.filter(c=>!c.c).sort((a,b)=>(b.v||0)-(a.v||0));
   const kept=all.filter(c=>c.n&&c.n.status==="dismissed"),told=open.filter(c=>toldS(c.n)),waiting=open.filter(c=>!kept.includes(c)&&!told.includes(c));
-  const shut=all.filter(c=>c.c&&c.how!=="author"&&!(c.n&&c.n.status==="dismissed")).sort((a,b)=>b.c.localeCompare(a.c));
+  const shut=all.filter(c=>c.c&&c.how!=="author"&&c.how!=="subject"&&!(c.n&&c.n.status==="dismissed")).sort((a,b)=>b.c.localeCompare(a.c));
   const ds=shut.map(c=>daysBetween(c.o,c.c)).sort((a,b)=>a-b),med=ds.length?ds[Math.floor(ds.length/2)]:null;
+  const ours=shut.filter(c=>c.n&&c.n.edited).length,first=OUT.filter(n=>n.posted).map(n=>n.posted.slice(0,10)).sort()[0];
   const fixedReads=shut.reduce((a,c)=>a+(c.v||0),0),posted=OUT.filter(toldS),replies=posted.reduce((a,n)=>a+(n.replies||[]).length,0);
-  $("board").innerHTML=`<div><b>${full(waiting.length+told.length)}</b><span>Open cases</span></div><div><b>${full(posted.length)}</b><span>Notes posted${replies?` · ${replies} ${replies>1?"replies":"reply"}`:""}</span></div><div class="fx"><b>${full(shut.length)}</b><span>Fixed${fixedReads?` · ${fmt(fixedReads)} reads/mo now clean`:""}</span></div><div><b>${med==null?"—":med+" d"}</b><span>Median days to fix · tracking since ${esc(shortD(L.since))}</span></div>`;
+  $("board").innerHTML=`<div><b>${full(waiting.length+told.length)}</b><span>Open cases</span></div><div><b>${full(posted.length)}</b><span>Notes posted${replies?` · ${replies} ${replies>1?"replies":"reply"}`:""}</span></div>${shut.length?`<div class="fx"><b>${full(shut.length)}</b><span>Fixed${ours?` · ${ours} by our own edit`:""}${fixedReads?` · ${fmt(fixedReads)} reads/mo now clean`:""}</span></div><div><b>${med==null?"—":med+" d"}</b><span>Median days to fix · tracking since ${esc(shortD(L.since))}</span></div>`:`<div><b>${full(OUT.filter(n=>n.reviewed).length)}</b><span>Cases read by hand</span></div><div><b>${first?daysBetween(first,today)+" d":"—"}</b><span>Since the first note · editors often take weeks</span></div>`}`;
   const cap=innerWidth<641?6:10;
   const row=(c,right,sub)=>`<li><button class="cp" data-doi="${esc(c.doi)}">${esc(c.pg)}</button><span class="cd${right[1]?" ok":""}">${right[0]}</span><span class="ca">${sub}</span></li>`;
   const titleBit=c=>`${esc(cleanT(c.t).slice(0,80))}${(c.t||"").length>80?"…":""} · retracted ${esc((c.r||"").slice(0,4))}`;
   const nil=t=>`<li class="nil">${t}</li>`;
   $("openCases").innerHTML=waiting.slice(0,cap).map(c=>row(c,[`${daysBetween(c.o,today)?"Open "+daysBetween(c.o,today)+" d":"Opened "+esc(shortD(c.o))}<small>${fmt(c.v)} reads/mo</small>`],titleBit(c)+(c.n&&c.n.status==="approved"?`<span class="tag2 a">Note next</span>`:c.n&&c.n.status==="queued"?`<span class="tag2 q">Reviewed</span>`:""))).join("")+(waiting.length>cap?`<li><a class="ca" href="/register/">+ ${waiting.length-cap} more in the register →</a></li>`:"")||nil("Every open case has a note.");
   $("toldCases").innerHTML=told.map(c=>{const r=(c.n.replies||[]).length;return row(c,[`${r?r+" "+(r>1?"replies":"reply"):"No reply yet"}<small>posted ${esc(shortD(c.n.posted.slice(0,10)))}</small>`],titleBit(c))}).join("")||nil("The first notes go up this week. Each one shows here with the editors' replies.");
-  $("fixedCases").innerHTML=shut.slice(0,cap).map(c=>row(c,[`${c.how==="flagged"?"Now flagged":"Citation removed"}<small>${esc(shortD(c.c))} · ${daysBetween(c.o,c.c)} d</small>`,1],titleBit(c))).join("")||nil(`Nothing fixed yet. Fixes show here with the date and how they were made.`);
+  $("fixedCases").innerHTML=shut.slice(0,cap).map(c=>row(c,[`${c.n&&c.n.edited?"Fixed by our edit":c.how==="flagged"?"Now flagged":"Citation removed"}<small>${esc(shortD(c.c))} · ${daysBetween(c.o,c.c)} d</small>`,1],titleBit(c))).join("")||nil(`Nothing fixed yet. Fixes show here with the date and how they were made.`);
   $("keptCases").innerHTML=kept.map(c=>row(c,["Reviewed<small>"+esc(shortD(c.n.reviewed))+"</small>"],esc(c.n.verdict))).join("")||nil("None yet.");
   $("desk").querySelectorAll(".cp").forEach(b=>b.onclick=()=>openP(b.dataset.doi));
   feed(all);
 }
 function feed(all){
   const ev=[],pg=k=>k.slice(k.indexOf("|")+1),doi=k=>k.slice(0,k.indexOf("|")),btn=k=>`<button data-doi="${esc(doi(k))}">${esc(pg(k))}</button>`;
-  all.forEach(c=>{if(c.c&&c.how!=="author"&&!(c.n&&c.n.status==="dismissed"))ev.push([c.c,"fix","Fixed",`${btn(c.k)}: ${c.how==="flagged"?"an editor marked the retracted source":"the retracted source was removed"}, ${daysBetween(c.o,c.c)} days after we found it.`])});
+  all.forEach(c=>{if(c.c&&c.how!=="author"&&c.how!=="subject"&&!(c.n&&c.n.status==="dismissed"))ev.push([c.c,"fix","Fixed",`${btn(c.k)}: ${c.how==="flagged"?"an editor marked the retracted source":"the retracted source was removed"}, ${daysBetween(c.o,c.c)} days after we found it.`])});
   OUT.forEach(n=>{
-    if(n.posted)ev.push([n.posted.slice(0,10),"post","Note posted",`${btn(n.key)}: <a href="https://en.wikipedia.org/wiki/${encodeURIComponent("Talk:"+n.page)}" target="_blank" rel="noopener">talk page</a>`]);
+    if(n.posted)ev.push([n.posted.slice(0,10),"post","Note posted",`${btn(n.key)}: a sourced note is on the article's talk page`]);
     (n.replies||[]).forEach(r=>ev.push([(r.at||"").slice(0,10),"rep","Reply",`${btn(n.key)}: ${esc(r.user)} wrote <q>${esc(r.said.slice(-160))}</q>`]));
   });
   const rv={};OUT.forEach(n=>{if(n.reviewed)(rv[n.reviewed]=rv[n.reviewed]||[]).push(n)});
@@ -309,7 +306,7 @@ function feed(all){
   $("feed").querySelectorAll("button[data-doi]").forEach(b=>b.onclick=()=>openP(b.dataset.doi));
 }
 /* ---------- live tools (browser → Crossref + Wikipedia) ---------- */
-const CR="https://api.crossref.org",MAILTO="&mailto=zombiefacts@users.noreply.github.com",WP="https://en.wikipedia.org/w/api.php";
+const CR="https://api.crossref.org",MAILTO="&mailto=tips@zombiefacts.org",WP="https://en.wikipedia.org/w/api.php";
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function getJSON(u,t=2){for(let i=0;i<=t;i++){try{const r=await fetch(u);if(r.status===429){await sleep(1500*(i+1));continue}if(!r.ok)throw new Error("HTTP "+r.status);return await r.json()}catch(e){if(i===t)throw e;await sleep(700)}}}
 const dp=x=>x&&x["date-parts"]&&x["date-parts"][0]?x["date-parts"][0].map(v=>String(v).padStart(2,"0")).join("-"):"";
@@ -317,6 +314,9 @@ async function works(dois){const out={};for(let i=0;i<dois.length;i+=40){const c
 const retr=w=>{const r=(w&&w["updated-by"]||[]).filter(u=>/retract/i.test(u.type||""));if(!r.length)return null;return {notice:(r.find(x=>x.DOI)||{}).DOI||"",date:dp(r[0].updated)}};
 ["Ivermectin","Hydroxychloroquine","Amyloid beta","Stem cell","Superconductivity","Graphene","Microbiome","Placebo"].forEach(t=>{if(!has("tryScan"))return;const b=document.createElement("button");b.className="chip";b.textContent=t;b.onclick=()=>{$("qScan").value=t;$("bScan").click()};$("tryScan").appendChild(b)});
 $("qScan").onkeydown=e=>{if(e.key==="Enter")$("bScan").click()};
+if(has("bmkCopy"))$("bmkCopy").onclick=()=>copy(document.querySelector(".bmkbtn").getAttribute("href"),"Bookmarklet copied");
+/* /check/?page=Title (from the bookmarklet) scans straight away */
+if(has("qScan")){const q=new URLSearchParams(location.search).get("page");if(q){$("qScan").value=q.slice(0,300);setTimeout(()=>$("bScan").click(),0)}}
 $("bScan").onclick=async()=>{
   const st=$("sScan"),o=$("oScan"),b=$("bScan");let q=$("qScan").value.trim();if(!q)return;const m=q.match(/wikipedia\.org\/wiki\/([^?#]+)/);if(m)q=decodeURIComponent(m[1]).replace(/_/g," ");
   b.disabled=true;o.innerHTML="";st.innerHTML="<i></i>Reading the article…";
@@ -355,7 +355,7 @@ async function newsroom(){
   const S=(N&&N.stats)||{},items=(N&&N.items)||[];
   const ok=items.filter(i=>i.review==="confirmed"),fixed=ok.filter(i=>i.outcome==="fixed");
   const nd=s=>s?new Date(s+"T00:00:00Z").toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}):"";
-  if(!N||!S.factchecks){$("nBoard").style.display="none"}else $("nBoard").innerHTML=`<div><b>${N?full(S.factchecks):"—"}</b><span>Fact-checks read · last ${S.days>=700?"2 years":S.days>=360?"year":Math.round((S.days||120)/30)+" months"}</span></div>${S.titlesSearched>=50?`<div><b>${full(S.titlesSearched)}</b><span>Retracted papers searched in the news</span></div>`:`<div><b>${full(S.checkers)}</b><span>Fact-checking teams followed</span></div>`}<div><b>${N?full(ok.length):"—"}</b><span>Confirmed news cases${S.unreviewed?` · ${full(S.unreviewed)} being read`:""}</span></div><div class="fx"><b>${N?full(fixed.length):"—"}</b><span>Fixed by the outlet</span></div>`;
+  if(!N||!S.factchecks){$("nBoard").style.display="none"}else $("nBoard").innerHTML=`<div><b>${N?full(S.factchecks):"—"}</b><span>Fact-checks read · last ${S.days>=700?"2 years":S.days>=360?"year":Math.round((S.days||120)/30)+" months"}</span></div>${S.titlesSearched>=50?`<div><b>${full(S.titlesSearched)}</b><span>Retracted papers searched in the news</span></div>`:`<div><b>${full(S.checkers)}</b><span>Fact-checking teams followed</span></div>`}${ok.length?`<div><b>${full(ok.length)}</b><span>Confirmed news cases${S.unreviewed?` · ${full(S.unreviewed)} being read`:""}</span></div><div class="fx"><b>${full(fixed.length)}</b><span>Fixed by the outlet</span></div>`:`<div><b>${full(S.unreviewed||0)}</b><span>Leads being read by hand</span></div><div><b>${full(S.storiesMentionRetraction||0)}</b><span>Stories that already flag the retraction</span></div>`}`;
   $("nCases").innerHTML=ok.length?ok.map(i=>`<li><a class="cp" href="${esc(i.url)}" target="_blank" rel="noopener">${esc(i.headline||i.url)}</a><span class="cd${i.outcome==="fixed"?" ok":""}">${esc(i.outcome||"open")}<small>${esc(nd(i.first))}</small></span><span class="ca">${esc(i.outlet||i.domain)} · ${i.kind==="paper"?`cites a paper retracted ${esc(nd(i.retracted))}`:`repeats a claim ${esc(i.checker)} rated “${esc(i.verdict)}”`}</span></li>`).join("")
     :`<li><span class="nil">${S.unreviewed?`No confirmed cases yet. ${full(S.unreviewed)} ${S.unreviewed>1?"leads are":"lead is"} being read by hand.`:"No confirmed cases yet. Leads are read by hand before anything is posted here."}</span></li>`;
   const F=(N&&N.factchecks)||[];
@@ -366,13 +366,20 @@ if(has("nBoard"))newsroom();
 /* ---------- case pages: share button ---------- */
 document.querySelectorAll(".cf-share").forEach(b=>b.onclick=async()=>{const u=b.dataset.url,t=b.dataset.text;if(navigator.share){try{await navigator.share({title:"Zombie Facts",text:t,url:u})}catch(_){}}else copy(u,"Link copied")});
 /* ---------- report a zombie: hand the tip to a pre-filled email ---------- */
-if(has("tipForm"))$("tipForm").onsubmit=e=>{e.preventDefault();
-  const st=$("tipSt"),w=$("tWhere").value.trim(),c=$("tClaim").value.trim(),y=$("tWhy").value.trim();
-  if($("tHp").value){st.textContent="Thanks.";return}
-  if(!/^https?:\/\/\S+\.\S+/.test(w)){st.textContent="Add a link to where you saw it (starting with https://).";$("tWhere").focus();return}
-  if(c.length<10||y.length<10){st.textContent="Tell us what it says and why it's wrong, a sentence each is plenty.";return}
-  let host="";try{host=new URL(w).hostname.replace(/^www\./,"")}catch(_){}
-  const u="mailto:tips@zombiefacts.org?subject="+encodeURIComponent("Tip: "+(host||"zombie fact")+" · "+c.slice(0,60))+"&body="+encodeURIComponent("Where: "+w+"\n\nWhat it says:\n"+c.slice(0,3000)+"\n\nWhy it's wrong:\n"+y.slice(0,3000)+"\n");
-  st.textContent="Opening your email app. Press send to deliver the tip.";setTimeout(()=>{location.href=u},300)};
+if(has("tipForm")){
+  /* returns the tip as {subject, body}, or null after saying what is missing */
+  const tip=()=>{const st=$("tipSt"),w=$("tWhere").value.trim(),c=$("tClaim").value.trim(),y=$("tWhy").value.trim();
+    if($("tHp").value){st.textContent="Thanks.";return null}
+    if(!/^https?:\/\/\S+\.\S+/.test(w)){st.textContent="Add a link to where you saw it (starting with https://).";$("tWhere").focus();return null}
+    if(c.length<10||y.length<10){st.textContent="Tell us what it says and why it's wrong, a sentence each is plenty.";return null}
+    let host="";try{host=new URL(w).hostname.replace(/^www\./,"")}catch(_){}
+    return {subject:"Tip: "+(host||"zombie fact")+" · "+c.slice(0,60),body:"Where: "+w+"\n\nWhat it says:\n"+c.slice(0,3000)+"\n\nWhy it's wrong:\n"+y.slice(0,3000)+"\n"}};
+  $("tipForm").onsubmit=e=>{e.preventDefault();const t=tip();if(!t)return;
+    $("tipSt").textContent="Opening your email app. Press send to deliver the tip. Nothing opened? Use Copy the tip.";
+    setTimeout(()=>{location.href="mailto:tips@zombiefacts.org?subject="+encodeURIComponent(t.subject)+"&body="+encodeURIComponent(t.body)},300)};
+  $("tipCopy").onclick=async()=>{const t=tip();if(!t)return;
+    try{await navigator.clipboard.writeText(t.subject+"\n\n"+t.body);$("tipSt").textContent="Copied. Paste it into any email to tips@zombiefacts.org, from any address."}
+    catch(_){prompt("Copy this and email it to tips@zombiefacts.org:",t.subject+"\n\n"+t.body)}};
+}
 if(document.body.dataset.page!=="case")load();
 })();

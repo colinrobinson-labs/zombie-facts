@@ -69,6 +69,16 @@ jobs:
             data.json
             outreach.json
           if-no-files-found: ignore
+      - name: Post one case to Bluesky and Mastodon (off until the account secrets exist)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'schedule'
+        continue-on-error: true
+        env:
+          BSKY_HANDLE: ${{ secrets.BSKY_HANDLE }}
+          BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
+          MASTODON_URL: ${{ secrets.MASTODON_URL }}
+          MASTODON_TOKEN: ${{ secrets.MASTODON_TOKEN }}
+        run: |
+          case "$(date -u +%H)" in 12|13) python build/social.py ;; *) echo "social posts once a day, on the 12:17 UTC run" ;; esac
       - name: Commit and redeploy
         if: always() && github.ref == 'refs/heads/main'
         env:
@@ -78,7 +88,7 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           python build/cards.py || true  # share images for new or changed cases
           python build/make_pages.py  # share-card counts follow the data
-          git add data.json outreach.json index.html 404.html */index.html case feed.xml sitemap.xml robots.txt 2>/dev/null || true
+          git add data.json outreach.json social.json index.html 404.html */index.html case share data feed.xml sitemap.xml robots.txt 2>/dev/null || true
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -m "Zombie Facts: daily recheck"
           for i in 1 2 3 4 5; do git pull --rebase origin main && git push && break; sleep $((i*5)); done

@@ -71,6 +71,43 @@ def card_html(c):
             f'<div class="u">zombiefacts.org</div></div>{FIT}</body></html>')
 
 
+def section_inputs(M):
+    """Share images for the section pages: a live number in the headline. slug -> (kicker, headline html, foot)."""
+    from make_pages import live_counts
+    c = live_counts() or (0, 0, 0)
+    R = X.results_numbers(M)
+    unread = ((M["news"] or {}).get("stats") or {}).get("unreviewed") or 0
+    out = {
+        "register": ("The register", f"<mark>{c[0]:,}</mark> citations of retracted research on Wikipedia, with no warning",
+                     f"On {c[1]:,} articles read {X.fmt_k(c[2])} times a month · searchable by topic, journal and cause"),
+        "desk": ("Correction desk", f"Every zombie citation is a case: <mark>{len(R['open']):,} open</mark>, tracked until fixed",
+                 "Read by hand, reported to the people who can fix it, logged when it's done"),
+        "news": ("Newsroom", "Retracted research, <mark>still in the news</mark>",
+                 (f"{unread:,} stories being read by hand · " if unread else "") + "what happens when we ask outlets to fix them"),
+        "results": ("Results", (f"<mark>{len(R['fixed']):,} fixed</mark> of {len(R['cites']):,} zombie citations found" if R["fixed"] else
+                                f"<mark>{len(R['cites']):,}</mark> zombie citations found. The fixes start here"),
+                    "Fix rates, days to fix, and whether telling editors makes a difference"),
+        "check": ("Check a page", "Scan any Wikipedia article for <mark>retracted sources</mark>", "Live in your browser, in a few seconds"),
+        "autopsy": ("Autopsy", "Why the papers Wikipedia still cites <mark>were retracted</mark>", "Fabricated data, manipulated images, paper mills and more"),
+    }
+    return out
+
+
+def section_html(kick, head, foot):
+    e = html.escape
+    return (f'<!doctype html><html><head><meta charset="utf-8">'
+            '<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,500..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;1,8..60,400'
+            '&family=IBM+Plex+Mono:wght@600;700&display=block" rel="stylesheet">'
+            f'<style>{CSS}</style></head><body>'
+            f'<div class="top"><div class="np">{MARK}<span>Zombie Facts</span></div><div class="tg">{e(kick)}</div></div>'
+            f'<div id="q"><h1>{head}</h1></div>'
+            f'<div class="src"><div><div class="t">{e(foot)}</div></div><div class="u">zombiefacts.org</div></div>{FIT}</body></html>')
+
+
+def section_path(slug):
+    return os.path.join(ROOT, "share", slug + ".png")
+
+
 def chrome():
     for b in [os.environ.get("CHROME"), "google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "/opt/pw-browsers/chromium"]:
         if b and shutil.which(b):
@@ -110,6 +147,22 @@ def main():
                 print("cards: failed", c["slug"], ex)
                 continue
             manifest[c["slug"]] = h
+            drawn += 1
+        for slug, (kick, head, foot) in section_inputs(M).items():
+            h = hashlib.sha1((VERSION + kick + head + foot).encode()).hexdigest()
+            out = section_path(slug)
+            key = "_section/" + slug
+            if manifest.get(key) == h and os.path.exists(out) and "--all" not in sys.argv:
+                continue
+            src = os.path.join(tmp, "card.html")
+            open(src, "w").write(section_html(kick, head, foot))
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            try:
+                shoot(binary, src, out)
+            except (subprocess.SubprocessError, OSError) as ex:
+                print("cards: failed", slug, ex)
+                continue
+            manifest[key] = h
             drawn += 1
     with open(os.path.join(ROOT, "case", "cards.json"), "w") as f:
         json.dump(dict(sorted(manifest.items())), f, indent=1)

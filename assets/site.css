@@ -91,7 +91,7 @@ button{font:inherit;color:inherit}
 @media (max-width:520px){.mast{gap:10px}.np{font-size:20px;gap:8px}.np .mark{width:30px;height:30px}.tipbtn .lg{display:none}.mact{gap:6px}}
 
 /* ── buttons ── */
-.btn,.go,.more,.tipgo,.acts a,.acts button,.wfix a,.wfix button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;
+.btn,.go,.more,.tipgo,.tipcopy,.acts a,.acts button,.wfix a,.wfix button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;
  font:600 15px/1.1 var(--ui);letter-spacing:0;text-transform:none;text-decoration:none;cursor:pointer;border-radius:var(--r);
  border:1.5px solid var(--ink);background:none;color:var(--ink);transition:background .15s,color .15s,border-color .15s}
 .btn,.go,.more,.tipgo,.acts .p,.wfix .p{background:var(--ink);color:var(--bg)}
@@ -471,10 +471,35 @@ a.cp{display:inline}
 .tip input:focus,.tip textarea:focus{outline:2.5px solid var(--focus);outline-offset:2px}
 .tip [aria-invalid=true]{border-color:var(--dead)}
 .tip .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-.tipgo{justify-self:start;min-height:48px;padding:0 22px}
+.tipbtns{display:flex;flex-wrap:wrap;gap:10px}
+.tipgo,.tipcopy{min-height:48px;padding:0 22px}
+.tip .addr{font:600 15px var(--mono);word-break:break-all}
 .tipst{margin:0;min-height:0;font:500 14px/1.45 var(--ui);color:var(--dead)}
 .tipst.ok{color:var(--ink)}
 
 @media (max-width:640px){body{font-size:17px}.quote{font-size:18px}.vitals dd{font-size:40px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}.reveal{opacity:1;transform:none}.bars li i::after,.hist div{transform:none}}
 @media print{.mast,.nav,.ekg,.nextpage,.foot .fnav,.acts,.scrim,.drawer,.toast{display:none!important}body{background:#fff;color:#000}}
+
+/* tap targets: every control at least 24px tall on touch screens (WCAG 2.2 target size) */
+.sp-go{padding:6px 0 3px}
+.cases .cp{min-height:32px;padding:4px 0}
+.cases a.ca,.cases .ca a{display:inline-block;padding:5px 0}
+.opts input{width:24px;height:24px}
+.fcs .m a{display:inline-block;padding:4px 0}
+.src a,.cf-q footer a{display:inline-block;padding:4px 0}
+
+/* open data page */
+.dl{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:22px}
+.dl li{border-top:1px solid var(--rule);padding-top:4px}
+.dl .golink{margin-top:8px}
+.dl span{margin-left:12px;font:400 13px/1.4 var(--mono);color:var(--mute)}
+.dl p{margin:8px 0 0}
+.cols{margin:8px 0 0;padding-left:18px}
+.cols li{margin:6px 0}
+.cols code{font:600 14px var(--mono);overflow-wrap:anywhere}
+.bmk{margin-top:22px;padding-top:16px;border-top:1px dashed var(--rule)}
+.bmk h4{margin:0 0 6px}
+.bmk p{margin:6px 0}
+.bmkbtn{cursor:grab}
+.linkbtn{background:none;border:0;padding:4px 0;font:inherit;color:var(--ink);text-decoration:underline;cursor:pointer;min-height:24px}

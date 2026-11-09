@@ -40,6 +40,8 @@ PAGES = [  # slug, nav label, <title>, description, fragments, next slug
 EXTRA = [
     ("about", "About", "About · Zombie Facts", "How Zombie Facts is paid for, what a case means, how we correct our own mistakes, and how to contest a case.",
      ["_about"], "report"),
+    ("data", "Download the data", "Download the data · Zombie Facts", "Free CSV downloads of every retracted paper still cited on English Wikipedia and every correction case, under CC BY 4.0.",
+     ["@data"], ""),
     ("report", "Report a zombie", "Report a zombie · Zombie Facts", "Seen a retracted, debunked or outdated fact still in circulation? Send it in. Every tip is read by a person.",
      ["_report"], ""),
 ]
@@ -99,6 +101,59 @@ def share_text():
                    f"On Wikipedia alone: {cites} citations of retracted research with no warning, on pages read {r}+ times a month.")
 
 
+def ago(retracted, today):
+    """How long a paper has been dead, worded like assets/app.js."""
+    try:
+        y, m = int(retracted[:4]), int(retracted[5:7] or 1)
+    except (TypeError, ValueError):
+        return ""
+    u = max(0.0, int(today[:4]) + (int(today[5:7]) - 1) / 12 - (y + (m - 1) / 12))
+    return f"{max(1, round(u * 12))} months" if u < 1 else "1 year" if u < 2 else f"{int(u)} years"
+
+
+def toetag_html(M):
+    """The lead quote on the home page, in the HTML so it shows before the script runs."""
+    got = X.lead_quote(M["D"], M["notes"])
+    if not got:
+        return None
+    p, w, pick = got
+    title = re.sub(r"\s*\(Pub \d+\)$", "", X.clean_title(p.get("title")))  # Cochrane version tag
+    slug = M["slugs"].get(p["doi"])
+    href_ = f"/case/{slug}/" if slug else f"/register/#p={p['doi']}"
+    ret = X.d(p.get("retracted"))
+    return (f'<aside class="specimen" id="toetag" data-doi="{X.esc(p["doi"])}" aria-label="{"Editor’s pick" if pick else "The most-read zombie citation right now"}">'
+            f'<p class="sp-h"><span>{"Editor’s pick" if pick else "Most-read zombie"}</span><span>Undead {ago(p.get("retracted"), M["today"])}</span></p>'
+            f'<blockquote><p>“{X.esc(re.sub(r'"([^"]*)"', "‘\\1’", X.said(w, 10000)))}”</p></blockquote>'
+            f'<p class="sp-src">Still in the Wikipedia article <b>{X.esc(w["page"])}</b> · {X.fmt_k(w.get("views"))} reads a month</p>'
+            f'<div class="sp-paper"><span class="stamp">Retracted {f"{ret:%b} {ret.year}" if ret else ""}</span>'
+            f'<p>{X.esc(title[:110])}{"…" if len(title) > 110 else ""}</p></div>'
+            f'<a class="sp-go" href="{href_}">Open the case file →</a></aside>')
+
+
+def home_body(body, M):
+    """Fill the home page's numbers, date line and lead quote at build time (the script refreshes them)."""
+    c = live_counts()
+    D = M["D"]
+    if c and c[0]:
+        cites, arts, reads = c
+        vals = {'data-c="zc"': f"{cites:,}", 'data-c="zp"': f"{arts:,}",
+                'data-c="mr"': X.fmt_k(reads) if reads >= 1e6 else f"{reads:,}",
+                'data-n="retractions"': f"{(D.get('stats') or {}).get('retractions') or 0:,}"}
+        for attr, v in vals.items():
+            body = body.replace(f"<dd {attr}>—</dd>", f"<dd {attr} data-pre>{v}</dd>")
+        papers = sum(1 for p in D.get("papers", []) if not X.superseded(p) and any(
+            w.get("status") == "zombie" and f'{p["doi"]}|{w["page"]}' not in {n["key"] for n in M["notes"] if n.get("status") == "dismissed"}
+            for w in p.get("wiki", [])))
+        when = X.d((D.get("checked") or D.get("built") or "")[:10])
+        if when:
+            body = body.replace('<p class="kicker" id="kick">Reading the record…</p>',
+                                f'<p class="kicker" id="kick">Updated {when:%B} {when.day}, {when.year} · {papers:,} retracted papers still cited with no warning</p>')
+    t = toetag_html(M)
+    if t:
+        body = body.replace('<aside class="specimen" id="toetag" hidden aria-label="The most-read zombie citation right now"></aside>', t)
+    return body
+
+
 def href(slug):
     return "/" + (slug + "/" if slug else "")
 
@@ -135,10 +190,11 @@ def nextlink(slug):
 
 
 BUILT = "—"
+SHARE = {}  # slug -> share image URL, filled by build() from build/cards.py output
 FOOT_GROUPS = [
     ("Track", [("/register/", "Register"), ("/desk/", "Correction desk"), ("/news/", "Newsroom"), ("/results/", "Results")]),
     ("Understand", [("/autopsy/", "Autopsy"), ("/method/", "Method"), ("/about/", "About")]),
-    ("Take part", [("/check/", "Check a page"), ("/report/", "Report a zombie"), ("/feed.xml", "Feed")]
+    ("Take part", [("/check/", "Check a page"), ("/report/", "Report a zombie"), ("/data/", "Download the data"), ("/feed.xml", "Feed")]
      + ([(X.NEWSLETTER, "By email")] if X.NEWSLETTER else [])),
 ]
 
@@ -186,23 +242,28 @@ def build():
     BUILT = "data rebuilt " + (M["D"].get("built") or "").replace("T", " ").replace("Z", " UTC") if M["D"].get("built") else "—"
     out, urls = {}, []
     lastmod = (M["D"].get("checked") or M["D"].get("built") or M["today"])[:10]
+    cards = X.load_cards()
+    for k, h in cards.items():
+        if k.startswith("_section/") and os.path.exists(os.path.join(ROOT, "share", k[9:] + ".png")):
+            SHARE[k[9:]] = f"{SITE}/share/{k[9:]}.png?v={h[:8]}"
     for slug, label, title, desc, frags, nxt in PAGES + EXTRA:
         if desc == "@results":
             desc = X.results_desc(M)
-        body = "\n".join(X.results_body(M) if f == "@results" else open(os.path.join(SRC, "pages", f + ".html")).read().rstrip() for f in frags)
-        if False:
-            body = body.replace('<p class="rs-fine" id="tipMail" hidden></p>',
-                                f'<p class="rs-fine" id="tipMail">No GitHub account? Email the same three things to <a href="mailto:{X.esc(X.TIPS_EMAIL)}">{X.esc(X.TIPS_EMAIL)}</a>.</p>')
+        body = "\n".join(X.results_body(M) if f == "@results" else X.data_body(M) if f == "@data"
+                         else open(os.path.join(SRC, "pages", f + ".html")).read().rstrip() for f in frags)
+        if not slug:
+            body = home_body(body, M)
         st, sd = share_text()
+        ld = X.website_jsonld() + "\n" if not slug else X.dataset_jsonld(M) + "\n" if slug == "data" else ""
         page = shell(head, drawer, slug + "/" if slug else "", slug, title, sd if not slug else desc,
-                     st if not slug else title, sd if not slug else desc, body, nxt)
+                     st if not slug else title, sd if not slug else desc, body, nxt, image=SHARE.get(slug), extra_head=ld)
         path = os.path.join(ROOT, slug, "index.html") if slug else os.path.join(ROOT, "index.html")
         out[path] = page
-        urls.append((SITE + href(slug), lastmod if slug in ("", "register", "desk", "results", "news") else None))
+        urls.append((SITE + href(slug), lastmod if slug in ("", "register", "desk", "results", "news", "data") else None))
         if not slug:  # 404 reuses the home shell with its own body, nothing marked current
             nf = page.replace(body, open(os.path.join(SRC, "pages", "_404.html")).read().rstrip())
             nf = nf.replace(' aria-current="page"', "").replace("<title>Zombie Facts</title>", "<title>Not found · Zombie Facts</title>")
-            nf = nf.replace(f'<link rel="canonical" href="{SITE}/">\n', "").replace(nextlink(nxt), "")
+            nf = nf.replace(f'<link rel="canonical" href="{SITE}/">\n', "").replace(nextlink(nxt), "").replace(X.website_jsonld() + "\n", "")
             out[os.path.join(ROOT, "404.html")] = nf
     for c in M["cases"]:
         slug = f"case/{c['slug']}/"
@@ -216,6 +277,8 @@ def build():
     out[os.path.join(ROOT, "case", "slugs.json")] = json.dumps(M["slugs"], indent=1, sort_keys=True) + "\n"
     out[os.path.join(ROOT, "case", "index.json")] = json.dumps(
         {c["doi"]: {"s": c["slug"], "st": c["st"]} for c in M["cases"]}, separators=(",", ":"), sort_keys=True) + "\n"
+    for k, v in X.data_files(M)[0].items():
+        out[os.path.join(ROOT, k)] = v
     out[os.path.join(ROOT, "feed.xml")] = X.feed(M)
     out[os.path.join(ROOT, "sitemap.xml")] = X.sitemap(urls)
     out[os.path.join(ROOT, "robots.txt")] = f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n"

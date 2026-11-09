@@ -26,6 +26,7 @@ CAUSES = [
     ("Ethics or consent", r"ethic|consent|irb|iacuc"),
     ("Authorship or legal", r"authorship|author unaware|legal|copyright|third party|objections")]
 SUP = re.compile(r"out of date|retract and replace", re.I)
+SUP_REPLACE = re.compile(r"retract and replace", re.I)
 
 
 def causes_of(p):
@@ -62,7 +63,7 @@ def said(w, mx=260):
     s = re.sub(r"\{\{.*$", "", s)
     s = re.sub(r'^[\s|\]\[}"]+', "", s)
     s = re.sub(r"^[\s*#:;]+", "", s).strip()
-    if re.search(r"https?:|\[|\]", s) or len(s.split()) < 8:
+    if re.search(r"https?:|\[|\]", re.sub(r"\[[^\[\]|]{1,40}\]", "", s)) or len(s.split()) < 8:
         return ""
     if re.search(r"\|\s*[\w-]+\s*=|^\W*title\s*=", s):
         return ""
@@ -71,6 +72,36 @@ def said(w, mx=260):
     if len(s) > mx:
         s = "…" + re.sub(r"^\S*\s", "", s[-mx:])
     return s
+
+
+# Home page lead quote. An editor's pick wins while it is an open case with a whole sentence;
+# otherwise the most-read open zombie whose quote is a whole sentence.
+PICK = {"doi": "10.1002/14651858.cd002766.pub3", "page": "List of pseudoscience topics"}
+
+
+def whole(s):
+    """A full sentence: starts with a capital (or a quote mark), ends with a stop, not cut off."""
+    return bool(s) and not s.startswith("…") and bool(re.match(r'^["“‘(\[]?[A-Z0-9]', s)) and bool(re.search(r'[.!?]["”’)]?$', s))
+
+
+def lead_quote(D, notes, mx=240):
+    """(paper, citation, is_pick) for the home page, or None."""
+    gone = {n["key"] for n in notes if n.get("status") == "dismissed" or n.get("hold")}
+    def ok(p, w):
+        q = said(w, 10000)
+        return (w.get("status") == "zombie" and f'{p["doi"]}|{w["page"]}' not in gone and whole(q) and len(q) <= mx)
+    papers = [p for p in D.get("papers", []) if not superseded(p)]
+    for p in papers:
+        if p["doi"] == PICK["doi"]:
+            w = next((w for w in p.get("wiki", []) if w["page"] == PICK["page"]), None)
+            if w and ok(p, w):
+                return p, w, True
+    best = None
+    for p in papers:
+        for w in p.get("wiki", []):
+            if ok(p, w) and (best is None or (w.get("views") or 0) > (best[1].get("views") or 0)):
+                best = (p, w, False)
+    return best
 
 
 def d(s):
@@ -145,12 +176,22 @@ def model():
     for k, c in ledger.items():
         doi, page = k.split("|", 1)
         p = papers.get(doi)
-        if p and superseded(p):
-            continue
-        if c.get("how") == "author":
+        if p and superseded(p) and doi not in slugs:
+            continue  # never shown as a case; one that already had a page keeps it, marked reviewed
+        if c.get("how") == "author" or (c.get("how") == "subject" and doi not in slugs):
             continue
         n = note.get(k)
-        if n and n.get("status") == "dismissed":
+        if c.get("how") == "subject":
+            st = "ok"
+            n = n or {"status": "dismissed", "auto": True, "reviewed": (c.get("c") or "")[:10] or "2026-11-09",
+                      "verdict": "The Wikipedia article is about the retraction itself, so it lists the paper on purpose. Not a zombie."}
+        elif p and superseded(p):
+            st = "ok"
+            n = n or {"status": "dismissed", "auto": True, "reviewed": "2026-11-09",  # the day this rule shipped
+                      "verdict": ("The publisher retracted this paper and republished a corrected version, so it is out of date rather than discredited. Citing the newer version is the fix."
+                                  if any(SUP_REPLACE.search(r) for r in p.get("reasons") or []) else
+                                  "Withdrawn because a newer version replaced it, not because it was discredited.")}
+        elif n and n.get("status") == "dismissed":
             st = "ok"
         elif c.get("c"):
             st = "fixed"
@@ -158,7 +199,8 @@ def model():
             st = "open"
         w = next((w for w in (p or {}).get("wiki", []) if w["page"] == page), None)
         by.setdefault(doi, []).append({"key": k, "page": page, "c": c, "n": n, "st": st, "w": w,
-                                      "told": bool(n and n.get("status") in TOLD) or bool(n and n.get("posted"))})
+                                      "told": bool(n and n.get("status") in TOLD) or bool(n and n.get("posted")),
+                                      "ours": bool(n and n.get("edited"))})
     cases = []
     for doi, cs in by.items():
         p = papers.get(doi) or {}
@@ -202,14 +244,16 @@ def events(c):
         cc, n, pg = x["c"], x["n"], x["page"]
         ev.append((cc["o"], "found", f"Found on <b>{esc(pg)}</b>: the citation is live and nothing near it mentions the retraction."))
         if n and n.get("reviewed"):
-            ev.append((n["reviewed"], "rev", f"Read by hand ({esc(pg)}). {esc(n.get('verdict') or '')}"))
+            ev.append((n["reviewed"], "rev", f"{'Rechecked under a stricter rule' if n.get('auto') else 'Read by hand'} ({esc(pg)}). {esc(n.get('verdict') or '')}"))
         if n and n.get("posted"):
-            link = f' <a href="{esc(n["diff"])}" target="_blank" rel="noopener">See the note</a>.' if n.get("diff") else ""
-            ev.append((n["posted"][:10], "post", f"Note posted on the talk page of <b>{esc(pg)}</b>.{link}"))
+            ev.append((n["posted"][:10], "post", f"Note posted on the talk page of <b>{esc(pg)}</b>."))
+        if n and n.get("edited"):
+            ev.append((n["edited"][:10], "post", f"We marked the citation on <b>{esc(pg)}</b> with Wikipedia's Retracted template ourselves."))
         for r in (n or {}).get("replies") or []:
             ev.append(((r.get("at") or n.get("posted") or "")[:10], "rep", f"{esc(r.get('user'))} replied: <q>{esc((r.get('said') or '')[-220:])}</q>"))
         if x["st"] == "fixed":
-            how = "an editor marked the citation as retracted" if cc.get("how") == "flagged" else "the retracted source was removed"
+            how = ("our edit marked the citation as retracted" if x["ours"] else
+                   "an editor marked the citation as retracted" if cc.get("how") == "flagged" else "the retracted source was removed")
             ev.append((cc["c"], "fix", f"Fixed on <b>{esc(pg)}</b>: {how}, {days(cc['o'], cc['c'])} days after we found it."))
     order = {"found": 0, "rev": 1, "post": 2, "rep": 3, "fix": 4}
     ev.sort(key=lambda e: (e[0], order[e[1]]))
@@ -373,14 +417,16 @@ def results_numbers(M):
     open_ = [x for x in cites if x["st"] == "open"]
     fixed = [x for x in cites if x["st"] == "fixed"]
     ok = [x for x in cites if x["st"] == "ok"]
-    told = [x for x in cites if x["told"]]
+    ours = [x for x in fixed if x["ours"]]   # fixed by our own edit: counted, but kept out of the note test
+    told = [x for x in cites if x["told"] and not x["ours"]]
     told_fixed = [x for x in told if x["st"] == "fixed"]
-    untold = [x for x in cites if not x["told"] and x["st"] != "ok"]
+    untold = [x for x in cites if not x["told"] and not x["ours"] and x["st"] != "ok"]
     untold_fixed = [x for x in untold if x["st"] == "fixed"]
     replies = sum(len((x["n"] or {}).get("replies") or []) for x in told)
     posted_notes = [n for n in M["notes"] if n.get("posted")]
     after_note = [days(x["n"]["posted"][:10], x["c"]["c"]) for x in told_fixed if x["n"].get("posted")]
-    return {"cites": cites, "open": open_, "fixed": fixed, "ok": ok, "told": told, "told_fixed": told_fixed,
+    return {"cites": cites, "open": open_, "fixed": fixed, "ours": ours,
+            "reviewed": [n for n in M["notes"] if n.get("reviewed")], "ok": ok, "told": told, "told_fixed": told_fixed,
             "untold": untold, "untold_fixed": untold_fixed, "replies": replies, "posted": posted_notes,
             "med_fix": median([days(x["c"]["o"], x["c"]["c"]) for x in fixed]),
             "med_after_note": median(after_note),
@@ -420,19 +466,22 @@ def results_body(M):
     sent = [i for i in confirmed if i.get("outcome")]
     nfixed = [i for i in confirmed if i.get("outcome") == "fixed"]
     med = lambda v: "—" if v is None else (f"{v:g} d")
+    first_note = min((n["posted"][:10] for n in M["notes"] if n.get("posted")), default=None)
+    ours_txt = f" · {len(R['ours'])} by our own edit" if R["ours"] else ""
     rep = f" · {R['replies']} repl{'ies' if R['replies'] > 1 else 'y'}" if R["replies"] else ""
     clean = f" · {fmt_k(R['clean_reads'])} reads a month now clean" if R["clean_reads"] else ""
     board = (f'<div class="board">'
              f'<div><b>{len(R["cites"]):,}</b><span>Zombie citations opened as cases</span></div>'
              f'<div><b>{len(R["posted"]):,}</b><span>Notes posted to Wikipedia editors{rep}</span></div>'
-             f'<div class="fx"><b>{len(R["fixed"]):,}</b><span>Fixed{clean}</span></div>'
-             f'<div><b>{med(R["med_fix"])}</b><span>Median time to fix</span></div></div>')
+             + (f'<div class="fx"><b>{len(R["fixed"]):,}</b><span>Fixed{ours_txt}{clean}</span></div>'
+                f'<div><b>{med(R["med_fix"])}</b><span>Median time to fix</span></div></div>' if R["fixed"] else
+                f'<div><b>{len(R["reviewed"]):,}</b><span>Cases read by hand</span></div>'
+                f'<div><b>{days(first_note, M["today"]) if first_note else "—"}{" d" if first_note else ""}</b><span>Since the first note · editors often take weeks</span></div></div>'))
 
     def bar(label, a, b, note):
         w = 0 if not b else max(2, round(100 * a / b)) if a else 0
         return (f'<li><div class="rs-l"><b>{esc(label)}</b><span>{a:,} of {b:,} fixed · {pct(a, b)}</span></div>'
                 f'<div class="rs-bar"><i style="width:{w}%"></i></div><p>{note}</p></li>')
-    first_note = min((n["posted"][:10] for n in M["notes"] if n.get("posted")), default=None)
     told_note = (f"No fixes yet on cases where we told editors. The first notes went up {nice(first_note)}; editors usually take days to weeks."
                  if R["told"] and not R["told_fixed"] else "Cases where a note is on the article's talk page.")
     if not R["told"]:
@@ -591,3 +640,99 @@ def feed(M):
 def sitemap(urls):
     rows = "".join(f"  <url><loc>{esc(u)}</loc>{f'<lastmod>{m}</lastmod>' if m else ''}</url>\n" for u, m in urls)
     return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n{rows}</urlset>\n'
+
+
+# ───────────────────────── open data ─────────────────────────
+
+DATA_LICENSE = "https://creativecommons.org/licenses/by/4.0/"
+CITE_COLS = ["doi", "title", "journal", "published", "retracted", "retraction_notice", "reasons", "superseded",
+             "wikipedia_article", "section", "status", "quoted_sentence", "monthly_views"]
+CASE_COLS = ["case_url", "doi", "title", "wikipedia_article", "state", "opened", "closed", "how_closed", "note_posted"]
+
+
+def _csv(cols, rows):
+    import csv, io
+    b = io.StringIO()
+    w = csv.writer(b, lineterminator="\n")
+    w.writerow(cols)
+    w.writerows(rows)
+    return b.getvalue()
+
+
+def data_files(M):
+    """CSV downloads: every Wikipedia citation of a retracted paper, and every case."""
+    cites = []
+    gone = {n["key"] for n in M["notes"] if n.get("status") == "dismissed"}
+    for p in M["D"].get("papers", []):
+        for w in p.get("wiki", []):
+            st = "superseded" if superseded(p) else "reviewed" if f'{p["doi"]}|{w["page"]}' in gone and w.get("status") == "zombie" else w.get("status") or ""
+            cites.append([p["doi"], clean_title(p.get("title")), p.get("journal") or "", p.get("published") or "",
+                          p.get("retracted") or "", p.get("notice") or "", "; ".join(p.get("reasons") or []),
+                          "yes" if superseded(p) else "no", w["page"], w.get("section") or "", st,
+                          said(w, 10000), w.get("views") or 0])
+    cites.sort(key=lambda r: (r[10] != "zombie", -r[12], r[0], r[8]))
+    cases = []
+    for c in M["cases"]:
+        for x in c["cites_on"]:
+            cc, n = x["c"], x["n"] or {}
+            cases.append([c["url"], c["doi"], c["title"], x["page"], x["st"], cc.get("o") or "", (cc.get("c") or "")[:10],
+                          cc.get("how") or ("dismissed" if n.get("status") == "dismissed" else ""), (n.get("posted") or "")[:10]])
+    cases.sort(key=lambda r: (r[0], r[3]))
+    return {"data/citations.csv": _csv(CITE_COLS, cites), "data/cases.csv": _csv(CASE_COLS, cases)}, len(cites), len(cases)
+
+
+def data_body(M):
+    files, nc, nk = data_files(M)
+    size = lambda k: f"{max(1, round(len(files[k].encode()) / 1024)):,} KB"
+    cols = lambda rows: "".join(f"<li><code>{esc(a)}</code> {esc(b)}</li>" for a, b in rows)
+    when = nice((M["D"].get("checked") or M["D"].get("built") or "")[:10])
+    return f'''  <section class="sec pagehead" id="data">
+    <div class="sh"><h1>Download the data</h1><p>Everything on this site comes from open data, and everything we add is open too. Use it for research, reporting or your own tools. Updated daily; last update {esc(when)}.</p></div>
+    <div class="ab">
+      <div class="ab-main">
+        <h3>Files</h3>
+        <ul class="dl">
+          <li><a class="golink" href="/data/citations.csv" download>citations.csv</a><span>{nc:,} rows · {size("data/citations.csv")}</span><p>Every citation of a retracted paper we found on English Wikipedia, with the sentence it supports and whether the article warns readers.</p></li>
+          <li><a class="golink" href="/data/cases.csv" download>cases.csv</a><span>{nk:,} rows · {size("data/cases.csv")}</span><p>Every case on the correction desk: when we found it, whether editors were told, and when and how it was fixed.</p></li>
+          <li><a class="golink" href="/data.json">data.json</a><span>full record</span><p>The file the site itself reads, with authors, subjects and scholarly citation counts.</p></li>
+        </ul>
+        <h3>citations.csv columns</h3>
+        <ul class="cols">{cols([("doi", "the retracted paper"), ("retraction_notice", "DOI of the official notice"), ("reasons", "Retraction Watch's reason codes"),
+                                ("superseded", "yes when the paper was only replaced by a newer version (out of date, not discredited)"),
+                                ("status", "zombie: no warning near it · flagged: the article mentions the retraction · reviewed: read by hand, cited on purpose · author or subject: the article is about the author or the scandal · superseded: replaced by a newer version"),
+                                ("quoted_sentence", "the sentence the citation supports, when it is readable"), ("monthly_views", "article views in the last 30 days")])}</ul>
+        <h3>cases.csv columns</h3>
+        <ul class="cols">{cols([("state", "open, fixed, or ok (reviewed, no fix needed)"), ("how_closed", "flagged: the citation was marked as retracted · removed: the source was taken out · dismissed: reviewed and kept on purpose"),
+                                ("note_posted", "the day a note went up on the article's talk page")])}</ul>
+      </div>
+      <aside class="ab-side">
+        <h4>License</h4>
+        <p class="rs-fine">Our data is free to reuse under <a href="{DATA_LICENSE}" target="_blank" rel="noopener">CC BY 4.0</a>. Credit “Zombie Facts (zombiefacts.org)”.</p>
+        <p class="rs-fine">The quoted sentences come from Wikipedia and stay under <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>, credited to Wikipedia's contributors. Retraction records come from the Retraction Watch database, released by Crossref under CC0.</p>
+        <h4 class="h4b">Found a mistake?</h4>
+        <p class="rs-fine">Tell us at <a href="mailto:tips@zombiefacts.org">tips@zombiefacts.org</a>. Fixes go in the <a href="/about/#corrections">corrections log</a>.</p>
+      </aside>
+    </div>
+  </section>'''
+
+
+def dataset_jsonld(M):
+    when = (M["D"].get("checked") or M["D"].get("built") or M["today"])[:10]
+    return '<script type="application/ld+json">' + json.dumps({
+        "@context": "https://schema.org", "@type": "Dataset", "name": "Zombie Facts: retracted research still cited on Wikipedia",
+        "description": "Every citation of a retracted paper on English Wikipedia, the sentence it supports, whether readers are warned, and what happened after editors were told.",
+        "url": f"{SITE}/data/", "license": DATA_LICENSE, "isAccessibleForFree": True, "dateModified": when,
+        "creator": {"@type": "Organization", "name": "Zombie Facts", "url": SITE + "/"},
+        "isBasedOn": ["https://gitlab.com/crossref/retraction-watch-data", "https://en.wikipedia.org/"],
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{SITE}/data/citations.csv"},
+                         {"@type": "DataDownload", "encodingFormat": "text/csv", "contentUrl": f"{SITE}/data/cases.csv"},
+                         {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": f"{SITE}/data.json"}]},
+        ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") + "</script>"
+
+
+def website_jsonld():
+    return '<script type="application/ld+json">' + json.dumps({
+        "@context": "https://schema.org", "@type": "WebSite", "name": "Zombie Facts", "url": SITE + "/",
+        "description": "Retracted, debunked and outdated facts that are still in circulation, and the fight to fix them.",
+        "publisher": {"@type": "Organization", "name": "Zombie Facts", "url": SITE + "/", "logo": f"{SITE}/assets/icon.png", "email": TIPS_EMAIL}},
+        ensure_ascii=False, separators=(",", ":")) + "</script>"

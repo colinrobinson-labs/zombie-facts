@@ -87,5 +87,14 @@ class Papers(unittest.TestCase):
         self.assertEqual(by["paper|10.1/b|https://n/2"]["review"], "unreviewed")
 
 
+class Triage(unittest.TestCase):
+    def test_off_beat_and_not_newsrooms(self):
+        import news_watch as N
+        self.assertIn("not a newsroom", N.triage({"kind": "factcheck", "domain": "gillibrand.senate.gov", "url": "https://gillibrand.senate.gov/x", "claim": "vaccines"}, set()))
+        self.assertIn("off our beat", N.triage({"kind": "factcheck", "domain": "nbcnews.com", "url": "https://nbcnews.com/x", "claim": "Tariffs cost $4,200"}, set()))
+        self.assertIsNone(N.triage({"kind": "factcheck", "domain": "nbcnews.com", "url": "https://nbcnews.com/x", "claim": "The vaccine causes autism"}, set()))
+        self.assertIn("republished", N.triage({"kind": "paper", "domain": "x.com", "url": "https://news.example/x", "doi": "10.1/p"}, {"10.1/p"}))
+
+
 if __name__ == "__main__":
     unittest.main()

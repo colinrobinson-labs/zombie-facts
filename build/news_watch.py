@@ -69,6 +69,40 @@ SCIENCE_RX = re.compile(r"\b(vaccin\w*|jabs?|mmr|measles|covid\w*|coronavirus|vi
 SCIENCE_CASED = re.compile(r"\bWHO\b")   # the World Health Organization, not the word "who"
 
 
+# Not news outlets: governments, politicians and parliaments (their claims are politics, not reporting
+# an editor can correct), press-release wires, and document hosts.
+NOT_NEWSROOMS = re.compile(r"(^|\.)(gov|gov\.\w\w|gc\.ca|gob\.\w\w|mil|parliament\.\w+|senate\.gov|house\.gov|"
+                           r"whitehouse\.gov|europa\.eu|un\.org|documentcloud\.org|scribd\.com|"
+                           r"prnewswire\.com|businesswire\.com|globenewswire\.com|einpresswire\.com|accesswire\.com|"
+                           r"newswire\.com|prweb\.com|openpr\.com)$", re.I)
+PRESS_RELEASE = re.compile(r"/press-?releases?/|/pressreleases/|/press-releases-ani/|/content/press-releases", re.I)
+
+# Retracted papers watched by name even if Wikipedia no longer cites them: big, recent retractions that
+# news stories and reports are likely to keep quoting. Same rules as every other lead.
+WATCHLIST = [
+    {"doi": "10.1038/s41586-024-07219-0", "title": "The economic commitment of climate change",
+     "retracted": "2025-12-03", "notice": "10.1038/s41586-025-09726-0"},
+]
+
+
+def triage(it, superseded_dois):
+    """Why an unreviewed lead is off our beat, or None if a person should read it.
+
+    Run on new leads and on old unreviewed ones, so the review queue only holds health and science
+    stories from real newsrooms. Dismissed leads stay in news.json with the reason.
+    """
+    h = it.get("domain") or host(it.get("url") or "")
+    if NOT_NEWSROOMS.search(h) or PRESS_RELEASE.search(it.get("url") or ""):
+        return "auto: not a newsroom (government, politician, press release or document host)"
+    if it.get("kind") == "paper" and it.get("doi") in superseded_dois:
+        return "auto: the paper was retracted and republished in corrected form, so citing it is not a zombie"
+    if it.get("kind") == "factcheck":
+        c = it.get("claim") or ""
+        if not (SCIENCE_RX.search(c) or SCIENCE_CASED.search(c)):
+            return "auto: off our beat (not a health or science claim)"
+    return None
+
+
 def now():
     return datetime.now(timezone.utc)
 
@@ -379,6 +413,8 @@ def papers_to_search(data):
     ps = [p for p in data.get("papers", []) if not p.get("superseded") and not superseded(p)]
     ps.sort(key=lambda p: -(p.get("reach") or 0))
     ps = ps[:MAX_TITLES]
+    have = {p["doi"] for p in ps}
+    ps = [dict(w) for w in WATCHLIST if w["doi"] not in have] + ps
     if ps:   # start somewhere new each week, so a time budget still covers every paper over a month
         k = (now().isocalendar()[1] * 120) % len(ps)
         ps = ps[k:] + ps[:k]
@@ -483,8 +519,10 @@ def key(it):
     return f'{it["kind"]}|{it.get("doi") or it.get("checkUrl")}|{it["url"]}'
 
 
-def merge(prev, found):
-    """Keep every reviewed item and its review; add new ones as unreviewed; refresh 'last seen'."""
+def merge(prev, found, superseded_dois=frozenset()):
+    """Keep every reviewed item and its review; add new ones as unreviewed; refresh 'last seen'.
+
+    Unreviewed leads that are off our beat (see triage) are dismissed with the reason."""
     items = {i["key"]: i for i in prev.get("items", [])}
     for it in found:
         k = key(it)
@@ -494,6 +532,11 @@ def merge(prev, found):
         else:
             it.update({"key": k, "review": "unreviewed", "first": today(), "last": today()})
             items[k] = it
+    for it in items.values():
+        if it["review"] == "unreviewed":
+            why = triage(it, superseded_dois)
+            if why:
+                it.update(review="dismissed", note=why)
     return sorted(items.values(), key=lambda i: (i["review"] != "confirmed", i.get("first", "")), reverse=False)
 
 
@@ -537,7 +580,8 @@ def main():
         print("FCHIT", json.dumps({k: h[k] for k in ("url", "outlet", "claim", "verdict", "checker", "checkUrl", "checked")}, ensure_ascii=False)[:700], flush=True)
 
     found = [s for s in stories if s["verdict"] in ("no mention", "unread")] + hits
-    items = merge(prev, found)
+    sup = {p["doi"] for p in data.get("papers", []) if p.get("superseded") or superseded(p)}
+    items = merge(prev, found, sup)
     out = {
         "built": now().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "seconds": round(time.time() - t0),

@@ -8,18 +8,20 @@ article to see whether the retraction is mentioned near the citation.
 Output: data.json, consumed by index.html.
 Stdlib only. Runs in GitHub Actions (see .github/workflows/zombie-facts.yml).
 """
+import unicodedata
 import csv, io, json, re, sys, time, gzip, os, html
 import urllib.request, urllib.parse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from collections import Counter, defaultdict
 
-UA = "ZombieFacts/1.0 (https://zombiefacts.org/; retraction tracker)"
+CONTACT = "tips@zombiefacts.org"  # a working inbox, so a source that has a problem with us can write instead of blocking
+UA = f"ZombieFacts/1.1 (https://zombiefacts.org/; {CONTACT}) retraction tracker"
 WP = "https://en.wikipedia.org/w/api.php"
 OUT = os.path.join(os.path.dirname(__file__), "..", "data.json")
 RW_URLS = [
     "https://gitlab.com/crossref/retraction-watch-data/-/raw/main/retraction_watch.csv",
-    "https://api.labs.crossref.org/data/retractionwatch?mailto=zombiefacts@users.noreply.github.com",
+    "https://api.labs.crossref.org/data/retractionwatch?mailto=tips@zombiefacts.org",
 ]
 MAX_PAGES_READ = int(os.environ.get("ZF_MAX_PAGES", "6000"))
 
@@ -76,6 +78,25 @@ def mdy(s):
         return ""
 
 
+def pmid_of(s):
+    s = (s or "").strip()
+    return s if s.isdigit() and s != "0" else ""
+
+
+def positions(low, doi, pmid=""):
+    """Every place lowercased wikitext cites the paper: its DOI (plain or URL-encoded) or its PubMed ID."""
+    out = set()
+    for needle in {doi, urllib.parse.quote(doi, safe="/").lower()}:
+        j = low.find(needle)
+        while j >= 0:
+            out.add(j)
+            j = low.find(needle, j + len(needle))
+    if pmid:
+        for m in re.finditer(r"(?:pmid\s*=\s*|\{\{\s*pmid\s*\|\s*|pubmed(?:\.ncbi\.nlm\.nih\.gov)?/(?:pubmed/)?)" + pmid + r"(?!\d)", low):
+            out.add(m.start())
+    return sorted(out)
+
+
 # ---------------------------------------------------------------- 1. Retraction Watch
 def load_rw():
     for u in RW_URLS:
@@ -113,6 +134,7 @@ def load_rw():
             "reasons": reasons,
             "type": (r.get("ArticleType") or "").strip(),
             "rwid": (r.get("Record ID") or "").strip(),
+            "pmid": pmid_of(r.get("OriginalPaperPubMedID")),
         }
         prev = out.get(d)
         if not prev or rec["retracted"] > prev["retracted"]:
@@ -122,28 +144,6 @@ def load_rw():
 
 
 # ---------------------------------------------------------------- 2. Wikipedia links
-def exturl(query, protocol):
-    """All mainspace pages linking to URLs that start with protocol://query."""
-    res, cont = [], {}
-    while True:
-        p = {"action": "query", "list": "exturlusage", "euquery": query, "euprotocol": protocol,
-             "eunamespace": "0", "eulimit": "500", "euprop": "title|url", "format": "json",
-             "formatversion": "2", "maxlag": "5"}
-        p.update(cont)
-        j = get(WP + "?" + urllib.parse.urlencode(p))
-        if "error" in j:
-            if j["error"].get("code") == "maxlag":
-                time.sleep(5); continue
-            log("api error", j["error"]); break
-        for x in j.get("query", {}).get("exturlusage", []):
-            res.append((x["title"], x["url"]))
-        if "continue" in j:
-            cont = {k: v for k, v in j["continue"].items()}
-        else:
-            break
-    return res
-
-
 DUMPS = [
     "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-externallinks.sql.gz",
     "https://mirror.accum.se/mirror/wikimedia.org/dumps/enwiki/latest/enwiki-latest-externallinks.sql.gz",
@@ -151,9 +151,12 @@ DUMPS = [
 
 
 def find_wiki_links(rw):
-    """Stream the full enwiki externallinks table (official dump) and keep doi.org links to retracted papers."""
+    """Stream the full enwiki externallinks table (official dump) and keep doi.org and PubMed links to retracted papers.
+
+    Citation templates turn |doi= into a doi.org link and |pmid= into a PubMed link, so a paper cited
+    only by its PubMed ID is caught too."""
     import subprocess
-    pat = r"\([0-9]+,[0-9]+,'https?://org\.doi\.(dx\.)?','[^']*'\)"
+    pat = r"\([0-9]+,[0-9]+,'https?://(org\.doi\.(dx\.)?|gov\.nih\.nlm\.ncbi\.(www\.|pubmed\.)?)','[^']*'\)"
     rows = None
     for u in DUMPS:
         log("streaming dump", u)
@@ -165,15 +168,20 @@ def find_wiki_links(rw):
         log("dump failed", pr.returncode, pr.stderr[-400:])
     if rows is None:
         raise SystemExit("no dump reachable")
-    log("doi.org links in enwiki", len(rows))
-    rx = re.compile(r"\(([0-9]+),([0-9]+),'[^']*','([^']*)'\)")
+    log("doi.org and PubMed links in enwiki", len(rows))
+    rx = re.compile(r"\(([0-9]+),([0-9]+),'([^']*)','([^']*)'\)")
+    by_pmid = {r["pmid"]: d for d, r in rw.items() if r.get("pmid")}
     by_page = defaultdict(set)
     for line in rows:
         m = rx.match(line)
         if not m:
             continue
-        d = norm(m.group(3).lstrip("/"))
-        if d in rw:
+        if ".doi." in m.group(3):
+            d = norm(m.group(4).lstrip("/"))
+        else:
+            pm = re.match(r"^/(?:pubmed/)?(\d+)(?:[/?#]|$)", m.group(4))
+            d = by_pmid.get(pm.group(1)) if pm else None
+        if d and d in rw:
             by_page[int(m.group(2))].add(d)
     log("pages linking retracted DOIs (all namespaces)", len(by_page))
     # page ids -> titles, mainspace only
@@ -223,13 +231,27 @@ PROCEDURAL = re.compile(r"out of date|retract and replace|^removed$|temporary re
                         r"date of (?:article|retraction)|notice unknown|upgrade/update", re.I)
 
 
-def superseded(p):
-    """A Cochrane review withdrawn for procedural reasons (out of date, handed to new authors, replaced).
+REPLACED = re.compile(r"retract and replace", re.I)
 
-    PubMed's withdrawal notices for these say e.g. "This review is to be passed onto a new group of
-    authors". The review is outdated, not discredited, so it is not presented as a zombie. Withdrawals
-    with any substantive reason (data concerns, conflict of interest, misconduct) are kept.
+
+def replaced(p):
+    """Retracted and republished in corrected form ("retract and replace"): a newer version stands."""
+    return any(REPLACED.search(r) for r in p.get("reasons") or [])
+
+
+def superseded(p):
+    """Not presented as a zombie, because a newer version of the work stands.
+
+    1. Retract and replace, from any journal: the publisher retracted the paper and republished a
+       corrected version (PREDIMED in NEJM, 2018, is the famous one). Citing it is out of date, not
+       citing a dead fact; the case page says to cite the new version instead.
+    2. A Cochrane review withdrawn for procedural reasons (out of date, handed to new authors).
+       PubMed's withdrawal notices for these say e.g. "This review is to be passed onto a new group of
+       authors". Withdrawals with any substantive reason (data concerns, conflict of interest,
+       misconduct) are kept.
     """
+    if replaced(p):
+        return True
     if not p["doi"].startswith("10.1002/14651858"):
         return False
     rs = p.get("reasons") or []
@@ -317,6 +339,25 @@ def _nm(s):
     return re.sub(r"[^a-z ]", "", re.sub(r"\s*\(.*?\)", "", s.lower())).split()
 
 
+def _fold(s):
+    return unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower()
+
+
+def is_subject_page(txt, authors):
+    """True when the article is about the retraction itself: its lead talks about a retraction or
+    fraud and names one of the paper's authors (e.g. "Schön scandal", "When Contact Changes Minds").
+    Such articles cite the paper on purpose, so it is not a zombie."""
+    lead = re.split(r"\n==[^=]", txt or "", maxsplit=1)[0]
+    lead = _fold(re.sub(r"<ref[^>]*/>|<ref[^>]*>.*?</ref>|\{\{[^{}]*\}\}", " ", lead, flags=re.S))
+    if not re.search(r"retract|fabricat|falsif|fraud|misconduct", lead):
+        return False
+    for a in authors or []:
+        last = re.sub(r"[^a-z\- ]", "", _fold(re.sub(r"\s*\(.*?\)", "", a))).split()
+        if last and len(last[-1]) >= 3 and re.search(r"\b" + re.escape(last[-1]) + r"\b", lead):
+            return True
+    return False
+
+
 def is_author_page(title, authors):
     """True when the article title is one of the paper's authors (first and last name match)."""
     t = _nm(title)
@@ -338,7 +379,7 @@ def crossref_counts(dois):
         f = ",".join("doi:" + d for d in chunk)
         u = "https://api.crossref.org/works?" + urllib.parse.urlencode(
             {"filter": f, "rows": len(chunk), "select": "DOI,is-referenced-by-count,title,container-title,issued",
-             "mailto": "zombiefacts@users.noreply.github.com"})
+             "mailto": CONTACT})
         try:
             return get(u)["message"]["items"]
         except Exception as e:
@@ -452,29 +493,26 @@ def main():
                 continue
             txt = pg["text"]
             low = txt.lower()
-            i = low.find(d)
-            if i < 0:
-                i = low.find(urllib.parse.quote(d, safe="/").lower())
-            if i < 0:
+            where = positions(low, d, rec.get("pmid"))
+            if not where:
                 continue
-            # look at every occurrence: zombie if any is unflagged
-            flagged_all, sent, sec = True, "", ""
-            j = i
-            while j >= 0:
-                s, se, fl = context_for(txt, low, j)
-                if not sent or (not fl and flagged_all):
-                    sent, sec = s, se
-                if not fl:
-                    flagged_all = False
-                j = low.find(d, j + len(d))
+            # look at every occurrence: zombie if any is unflagged; quote the first one of that kind
+            # that gives a readable sentence (a named ref's first use can be a bare list row)
+            seen = [context_for(txt, low, j) for j in where]
+            flagged_all = all(fl for _, _, fl in seen)
+            pool = seen if flagged_all else [x for x in seen if not x[2]]
+            sent, sec, _ = next((x for x in pool if x[0]), pool[0])
             status = "flagged" if flagged_all else "zombie"
             if status == "zombie" and is_author_page(t, rec["authors"]):
                 status = "author"  # biography of an author: the citation is about the paper itself
+            elif status == "zombie" and is_subject_page(txt, rec["authors"]):
+                status = "subject"  # the article is about the retraction scandal itself
             cites.append({"page": t, "status": status, "said": sent,
                           "section": sec, "views": pg["views"], "rev": pg["ts"][:10]})
         if not cites:
             continue
         rec["superseded"] = superseded(rec)
+        rec["replaced"] = replaced(rec)
         rec["wiki"] = sorted(cites, key=lambda c: (c["status"] != "zombie", -c["views"]))
         rec["zombies"] = sum(c["status"] == "zombie" for c in cites)
         rec["reach"] = sum(c["views"] for c in cites if c["status"] == "zombie")

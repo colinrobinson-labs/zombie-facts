@@ -7,6 +7,12 @@
         <div class="row2"><input id="qScan" placeholder="e.g. Ivermectin" enterkeyhint="go"><button class="go" id="bScan">Scan</button></div>
         <div class="try" id="tryScan"></div>
         <div class="status" id="sScan"></div><div class="out" id="oScan"></div>
+        <div class="bmk">
+          <h4>Check while you read</h4>
+          <p>Drag this button to your bookmarks bar. On any English Wikipedia article, click it to scan that article here.</p>
+          <a class="btn bmkbtn" href="javascript:(()=&gt;{const m=location.href.match(/\/\/en\.(?:m\.)?wikipedia\.org\/wiki\/([^?#]+)/);if(!m){alert(&#x27;Open an English Wikipedia article first.&#x27;);return}window.open(&#x27;https://zombiefacts.org/check/?page=&#x27;+m[1],&#x27;_blank&#x27;,&#x27;noopener&#x27;)})()" onclick="event.preventDefault()" title="Drag me to your bookmarks bar">Zombie check</a>
+          <p class="rs-fine">On a phone: bookmark any page, then edit the bookmark and paste this as its address. <button type="button" class="linkbtn" id="bmkCopy">Copy the code</button></p>
+        </div>
       </div>
       <div class="panel">
         <h3>Freshly dead</h3>

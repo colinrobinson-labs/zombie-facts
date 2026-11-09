@@ -1,0 +1,36 @@
+name: Site health check
+on:
+  schedule:
+    - cron: "40 15 * * *"   # daily, after the 14:15 UTC watch run
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the live site
+        id: check
+        continue-on-error: true
+        run: python3 build/health.py
+      - name: Open or close the health issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OUTCOME: ${{ steps.check.outcome }}
+        run: |
+          title="Site health check failing"
+          num=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          run="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          if [ "$OUTCOME" = "failure" ]; then
+            body="$(cat health.txt 2>/dev/null)
+
+          Run: $run"
+            if [ -n "$num" ]; then gh issue comment "$num" --body "$body"
+            else gh issue create --title "$title" --body "$body" --assignee lightsgoblack; fi
+            exit 1
+          elif [ -n "$num" ]; then
+            gh issue close "$num" --comment "All checks pass again. $run"
+          fi

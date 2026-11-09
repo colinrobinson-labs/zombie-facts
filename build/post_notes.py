@@ -85,8 +85,8 @@ def main():
         if e.get("result") != "Success":
             log("post failed", n["page"], json.dumps(r)[:300]); n["status"] = "error"; n["error"] = json.dumps(r)[:300]
             continue
-        n.update(status="posted", by=account, posted=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"),
-                 diff=f"https://en.wikipedia.org/w/index.php?diff={e.get('newrevid')}")
+        # no account name, revision id or diff link: outreach.json is public and must not point at the account
+        n.update(status="posted", posted=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"))
         save(OUTREACH, out, pretty=True)  # persist after every post so a later failure can't cause a repost
         log("posted", n["page"], e.get("newrevid"))
         time.sleep(12)  # stay well under any editing rate limit
