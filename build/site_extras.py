@@ -178,12 +178,16 @@ def model():
         p = papers.get(doi)
         if p and superseded(p) and doi not in slugs:
             continue  # never shown as a case; one that already had a page keeps it, marked reviewed
-        if c.get("how") == "author":
+        if c.get("how") == "author" or (c.get("how") == "subject" and doi not in slugs):
             continue
         n = note.get(k)
-        if p and superseded(p):
+        if c.get("how") == "subject":
             st = "ok"
-            n = n or {"status": "dismissed", "reviewed": "2026-11-09",  # the day this rule shipped
+            n = n or {"status": "dismissed", "auto": True, "reviewed": (c.get("c") or "")[:10] or "2026-11-09",
+                      "verdict": "The Wikipedia article is about the retraction itself, so it lists the paper on purpose. Not a zombie."}
+        elif p and superseded(p):
+            st = "ok"
+            n = n or {"status": "dismissed", "auto": True, "reviewed": "2026-11-09",  # the day this rule shipped
                       "verdict": ("The publisher retracted this paper and republished a corrected version, so it is out of date rather than discredited. Citing the newer version is the fix."
                                   if any(SUP_REPLACE.search(r) for r in p.get("reasons") or []) else
                                   "Withdrawn because a newer version replaced it, not because it was discredited.")}
@@ -240,7 +244,7 @@ def events(c):
         cc, n, pg = x["c"], x["n"], x["page"]
         ev.append((cc["o"], "found", f"Found on <b>{esc(pg)}</b>: the citation is live and nothing near it mentions the retraction."))
         if n and n.get("reviewed"):
-            ev.append((n["reviewed"], "rev", f"Read by hand ({esc(pg)}). {esc(n.get('verdict') or '')}"))
+            ev.append((n["reviewed"], "rev", f"{'Rechecked under a stricter rule' if n.get('auto') else 'Read by hand'} ({esc(pg)}). {esc(n.get('verdict') or '')}"))
         if n and n.get("posted"):
             ev.append((n["posted"][:10], "post", f"Note posted on the talk page of <b>{esc(pg)}</b>."))
         if n and n.get("edited"):

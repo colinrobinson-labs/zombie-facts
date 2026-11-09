@@ -244,3 +244,48 @@ class DataFile(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SubjectPages(unittest.TestCase):
+    def test_scandal_article_is_not_a_zombie(self):
+        from build_data import is_subject_page
+        txt = ("The '''Schön scandal''' concerns German physicist [[Jan Hendrik Schön]], whose papers were "
+               "retracted after it emerged that he had fabricated data.<ref>{{cite web|title=x}}</ref>\n== Withdrawn journal articles ==\n* paper")
+        self.assertTrue(is_subject_page(txt, ["J. H. Schön", "C. Kloc"]))
+
+    def test_ordinary_article_is_still_checked(self):
+        from build_data import is_subject_page
+        txt = "'''Axons''' carry signals. Smith showed this in 2003.\n== Function ==\nA retracted study by Smith claimed..."
+        self.assertFalse(is_subject_page(txt, ["A. Smith"]))  # retraction only mentioned after the lead
+        txt2 = "'''Vaccines''' were the subject of a retracted 1998 paper by Wakefield.\n== Safety ==\n..."
+        self.assertFalse(is_subject_page(txt2, ["B. Jones"]))  # lead names a different author
+
+    def test_editorial_brackets_keep_the_quote(self):
+        import site_extras as X
+        w = {"page": "List of pseudoscience topics", "section": "Health and medicine",
+             "said": 'A recent review concluded that "[t]here is no evidence that [Therapeutic Touch] promotes healing of acute wounds."'}
+        self.assertTrue(X.said(w))
+        self.assertTrue(X.whole(X.said(w, 10000)))
+        self.assertFalse(X.whole("…and so it was found to be true."))
+        self.assertFalse(X.said({"page": "A", "section": "B", "said": "See [[Link]] for a long enough sentence here ok"}))
+
+
+class SaidParity(unittest.TestCase):
+    """assets/app.js and site_extras.said() must clean quotes the same way (pages are pre-rendered in Python)."""
+    def test_same_output(self):
+        import shutil, subprocess, re as _re
+        import site_extras as X
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("node not installed")
+        js = open(os.path.join(HERE, "..", "..", "assets", "app.js")).read()
+        lines = [l for l in js.splitlines() if l.startswith("const LISTSEC=") or l.startswith("const said=")]
+        self.assertEqual(len(lines), 2)
+        d = json.load(open(os.path.join(HERE, "..", "..", "data.json")))
+        ws = [w for p in d["papers"] for w in p["wiki"]][:400]
+        ws += [{"page": "A", "section": "B", "said": s} for s in [
+            'A recent review concluded that "[t]here is no evidence that it works at all."', "[[x]] and a long tail of words here",
+            "x" * 300 + " end of a very long sentence with many words in it.", "* | title = Something long enough to count here ok"]]
+        prog = "\n".join(lines) + "\nconst ws=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(JSON.stringify(ws.map(w=>said(w))))"
+        out = subprocess.run([node, "-e", prog], input=json.dumps(ws), capture_output=True, text=True, check=True).stdout
+        self.assertEqual(json.loads(out), [X.said(w) for w in ws])

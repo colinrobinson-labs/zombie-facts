@@ -15,7 +15,7 @@ import json, os, re, sys, urllib.parse
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
-from build_data import OUT, log, read_pages, context_for, is_author_page, clean_said, superseded, replaced, positions  # noqa: E402
+from build_data import OUT, log, read_pages, context_for, is_author_page, is_subject_page, clean_said, superseded, replaced, positions  # noqa: E402
 
 OUTREACH = os.path.join(os.path.dirname(__file__), "..", "outreach.json")
 CONTEXT_DUMP = os.environ.get("ZF_DUMP_CONTEXT")  # optional path: write raw wikitext around each open citation
@@ -145,6 +145,8 @@ def recheck_cases(data, pages, now):
                         w["said"], w["section"] = sent, sec
             if not how and p and is_author_page(page, p.get("authors") or []):
                 how = "author"
+            elif not how and p and is_subject_page(txt, p.get("authors") or []):
+                how = "subject"
         c["v"] = pg.get("views", c.get("v"))
         if how:
             c.update(c=now, how=how)
@@ -152,7 +154,7 @@ def recheck_cases(data, pages, now):
             if p:
                 for w in p["wiki"]:
                     if w["page"] == page:
-                        w["status"] = "flagged" if how == "flagged" else ("author" if how == "author" else "removed")
+                        w["status"] = how if how in ("flagged", "author", "subject") else "removed"
                 p["wiki"] = [w for w in p["wiki"] if w["status"] != "removed"]
                 p["zombies"] = sum(w["status"] == "zombie" for w in p["wiki"])
                 p["reach"] = sum(w["views"] for w in p["wiki"] if w["status"] == "zombie")

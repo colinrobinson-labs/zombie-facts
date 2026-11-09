@@ -8,6 +8,7 @@ article to see whether the retraction is mentioned near the citation.
 Output: data.json, consumed by index.html.
 Stdlib only. Runs in GitHub Actions (see .github/workflows/zombie-facts.yml).
 """
+import unicodedata
 import csv, io, json, re, sys, time, gzip, os, html
 import urllib.request, urllib.parse
 from concurrent.futures import ThreadPoolExecutor
@@ -338,6 +339,25 @@ def _nm(s):
     return re.sub(r"[^a-z ]", "", re.sub(r"\s*\(.*?\)", "", s.lower())).split()
 
 
+def _fold(s):
+    return unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower()
+
+
+def is_subject_page(txt, authors):
+    """True when the article is about the retraction itself: its lead talks about a retraction or
+    fraud and names one of the paper's authors (e.g. "Schön scandal", "When Contact Changes Minds").
+    Such articles cite the paper on purpose, so it is not a zombie."""
+    lead = re.split(r"\n==[^=]", txt or "", maxsplit=1)[0]
+    lead = _fold(re.sub(r"<ref[^>]*/>|<ref[^>]*>.*?</ref>|\{\{[^{}]*\}\}", " ", lead, flags=re.S))
+    if not re.search(r"retract|fabricat|falsif|fraud|misconduct", lead):
+        return False
+    for a in authors or []:
+        last = re.sub(r"[^a-z\- ]", "", _fold(re.sub(r"\s*\(.*?\)", "", a))).split()
+        if last and len(last[-1]) >= 3 and re.search(r"\b" + re.escape(last[-1]) + r"\b", lead):
+            return True
+    return False
+
+
 def is_author_page(title, authors):
     """True when the article title is one of the paper's authors (first and last name match)."""
     t = _nm(title)
@@ -485,6 +505,8 @@ def main():
             status = "flagged" if flagged_all else "zombie"
             if status == "zombie" and is_author_page(t, rec["authors"]):
                 status = "author"  # biography of an author: the citation is about the paper itself
+            elif status == "zombie" and is_subject_page(txt, rec["authors"]):
+                status = "subject"  # the article is about the retraction scandal itself
             cites.append({"page": t, "status": status, "said": sent,
                           "section": sec, "views": pg["views"], "rev": pg["ts"][:10]})
         if not cites:

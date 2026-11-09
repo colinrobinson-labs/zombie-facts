@@ -200,7 +200,7 @@ function show(p){
    <p class="by">${esc((p.authors||[]).slice(0,4).join(", "))}${(p.authors||[]).length>4?" et al.":""}<br>${esc(p.journal)}${p.publisher?" · "+esc(p.publisher):""}${p.cites?` · cited ${full(p.cites)} times by other papers`:""}</p>
    <div class="tl">${lifeSVG(p,56,1)}<div class="ty"><span>Published ${esc(fmtDate(p.published)||"?")}</span><span style="color:var(--blood)">Retracted ${esc(fmtDate(p.retracted))}</span><span style="color:var(--acidInk)">Now · ${ago(p)} undead</span></div></div>
    ${p.reasons&&p.reasons.length?`<div class="cause">${p.reasons.slice(0,8).map(r=>`<span>${esc(r)}</span>`).join("")}</div>`:""}
-   <div class="ws"><h4>Where Wikipedia still uses it</h4>${ws.map((w,wi)=>`<div class="w ${w.status==="zombie"?"":"fl"}"><div class="wt"><a href="${wurl(w.page,w.section)}" target="_blank" rel="noopener">${esc(w.page)}</a><span class="pill ${w.status==="zombie"?"z":"fl"}">${w.status==="author"?"author's own page":w.status==="reviewed"?"reviewed · ok":w.status}</span></div>
+   <div class="ws"><h4>Where Wikipedia still uses it</h4>${ws.map((w,wi)=>`<div class="w ${w.status==="zombie"?"":"fl"}"><div class="wt"><a href="${wurl(w.page,w.section)}" target="_blank" rel="noopener">${esc(w.page)}</a><span class="pill ${w.status==="zombie"?"z":"fl"}">${w.status==="author"?"author's own page":w.status==="subject"?"article is about the retraction":w.status==="reviewed"?"reviewed · ok":w.status}</span></div>
      ${said(w,500)?`<blockquote>${esc(said(w,500))}</blockquote>`:""}<div class="wm">${w.section?esc(w.section)+" · ":""}${full(w.views)} views in the last 30 days</div>${w.status==="zombie"?fixRow(p,w,wi):""}</div>`).join("")}</div>
    <div class="acts"><a class="p" href="https://doi.org/${esc(p.notice||p.doi)}" target="_blank" rel="noopener">Retraction notice</a><a href="https://doi.org/${esc(p.doi)}" target="_blank" rel="noopener">The paper</a>${p.zombies?`<button id="cpy">Copy note to editors</button>`:""}${casePath(p.doi)?`<a href="${casePath(p.doi)}">Case page</a>`:""}<button id="shr">Share</button>${p.zombies&&said(z1(p))?`<button id="card">Save share image</button>`:""}</div>`;
   const z=ws.find(w=>w.status==="zombie");
@@ -276,7 +276,7 @@ function desk(){
   const all=Object.entries(L.cases).map(([k,c])=>{const doi=k.slice(0,k.indexOf("|"));return {...c,k,doi,p:byDoi[doi],n:noteOf(k)}}).filter(c=>!(c.p&&c.p._sup));
   const open=all.filter(c=>!c.c).sort((a,b)=>(b.v||0)-(a.v||0));
   const kept=all.filter(c=>c.n&&c.n.status==="dismissed"),told=open.filter(c=>toldS(c.n)),waiting=open.filter(c=>!kept.includes(c)&&!told.includes(c));
-  const shut=all.filter(c=>c.c&&c.how!=="author"&&!(c.n&&c.n.status==="dismissed")).sort((a,b)=>b.c.localeCompare(a.c));
+  const shut=all.filter(c=>c.c&&c.how!=="author"&&c.how!=="subject"&&!(c.n&&c.n.status==="dismissed")).sort((a,b)=>b.c.localeCompare(a.c));
   const ds=shut.map(c=>daysBetween(c.o,c.c)).sort((a,b)=>a-b),med=ds.length?ds[Math.floor(ds.length/2)]:null;
   const ours=shut.filter(c=>c.n&&c.n.edited).length,first=OUT.filter(n=>n.posted).map(n=>n.posted.slice(0,10)).sort()[0];
   const fixedReads=shut.reduce((a,c)=>a+(c.v||0),0),posted=OUT.filter(toldS),replies=posted.reduce((a,n)=>a+(n.replies||[]).length,0);
@@ -294,7 +294,7 @@ function desk(){
 }
 function feed(all){
   const ev=[],pg=k=>k.slice(k.indexOf("|")+1),doi=k=>k.slice(0,k.indexOf("|")),btn=k=>`<button data-doi="${esc(doi(k))}">${esc(pg(k))}</button>`;
-  all.forEach(c=>{if(c.c&&c.how!=="author"&&!(c.n&&c.n.status==="dismissed"))ev.push([c.c,"fix","Fixed",`${btn(c.k)}: ${c.how==="flagged"?"an editor marked the retracted source":"the retracted source was removed"}, ${daysBetween(c.o,c.c)} days after we found it.`])});
+  all.forEach(c=>{if(c.c&&c.how!=="author"&&c.how!=="subject"&&!(c.n&&c.n.status==="dismissed"))ev.push([c.c,"fix","Fixed",`${btn(c.k)}: ${c.how==="flagged"?"an editor marked the retracted source":"the retracted source was removed"}, ${daysBetween(c.o,c.c)} days after we found it.`])});
   OUT.forEach(n=>{
     if(n.posted)ev.push([n.posted.slice(0,10),"post","Note posted",`${btn(n.key)}: a sourced note is on the article's talk page`]);
     (n.replies||[]).forEach(r=>ev.push([(r.at||"").slice(0,10),"rep","Reply",`${btn(n.key)}: ${esc(r.user)} wrote <q>${esc(r.said.slice(-160))}</q>`]));
