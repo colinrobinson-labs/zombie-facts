@@ -77,6 +77,25 @@ def mdy(s):
         return ""
 
 
+def pmid_of(s):
+    s = (s or "").strip()
+    return s if s.isdigit() and s != "0" else ""
+
+
+def positions(low, doi, pmid=""):
+    """Every place lowercased wikitext cites the paper: its DOI (plain or URL-encoded) or its PubMed ID."""
+    out = set()
+    for needle in {doi, urllib.parse.quote(doi, safe="/").lower()}:
+        j = low.find(needle)
+        while j >= 0:
+            out.add(j)
+            j = low.find(needle, j + len(needle))
+    if pmid:
+        for m in re.finditer(r"(?:pmid\s*=\s*|\{\{\s*pmid\s*\|\s*|pubmed(?:\.ncbi\.nlm\.nih\.gov)?/(?:pubmed/)?)" + pmid + r"(?!\d)", low):
+            out.add(m.start())
+    return sorted(out)
+
+
 # ---------------------------------------------------------------- 1. Retraction Watch
 def load_rw():
     for u in RW_URLS:
@@ -114,6 +133,7 @@ def load_rw():
             "reasons": reasons,
             "type": (r.get("ArticleType") or "").strip(),
             "rwid": (r.get("Record ID") or "").strip(),
+            "pmid": pmid_of(r.get("OriginalPaperPubMedID")),
         }
         prev = out.get(d)
         if not prev or rec["retracted"] > prev["retracted"]:
@@ -130,9 +150,12 @@ DUMPS = [
 
 
 def find_wiki_links(rw):
-    """Stream the full enwiki externallinks table (official dump) and keep doi.org links to retracted papers."""
+    """Stream the full enwiki externallinks table (official dump) and keep doi.org and PubMed links to retracted papers.
+
+    Citation templates turn |doi= into a doi.org link and |pmid= into a PubMed link, so a paper cited
+    only by its PubMed ID is caught too."""
     import subprocess
-    pat = r"\([0-9]+,[0-9]+,'https?://org\.doi\.(dx\.)?','[^']*'\)"
+    pat = r"\([0-9]+,[0-9]+,'https?://(org\.doi\.(dx\.)?|gov\.nih\.nlm\.ncbi\.(www\.|pubmed\.)?)','[^']*'\)"
     rows = None
     for u in DUMPS:
         log("streaming dump", u)
@@ -144,15 +167,20 @@ def find_wiki_links(rw):
         log("dump failed", pr.returncode, pr.stderr[-400:])
     if rows is None:
         raise SystemExit("no dump reachable")
-    log("doi.org links in enwiki", len(rows))
-    rx = re.compile(r"\(([0-9]+),([0-9]+),'[^']*','([^']*)'\)")
+    log("doi.org and PubMed links in enwiki", len(rows))
+    rx = re.compile(r"\(([0-9]+),([0-9]+),'([^']*)','([^']*)'\)")
+    by_pmid = {r["pmid"]: d for d, r in rw.items() if r.get("pmid")}
     by_page = defaultdict(set)
     for line in rows:
         m = rx.match(line)
         if not m:
             continue
-        d = norm(m.group(3).lstrip("/"))
-        if d in rw:
+        if ".doi." in m.group(3):
+            d = norm(m.group(4).lstrip("/"))
+        else:
+            pm = re.match(r"^/(?:pubmed/)?(\d+)(?:[/?#]|$)", m.group(4))
+            d = by_pmid.get(pm.group(1)) if pm else None
+        if d and d in rw:
             by_page[int(m.group(2))].add(d)
     log("pages linking retracted DOIs (all namespaces)", len(by_page))
     # page ids -> titles, mainspace only
@@ -445,21 +473,15 @@ def main():
                 continue
             txt = pg["text"]
             low = txt.lower()
-            i = low.find(d)
-            if i < 0:
-                i = low.find(urllib.parse.quote(d, safe="/").lower())
-            if i < 0:
+            where = positions(low, d, rec.get("pmid"))
+            if not where:
                 continue
-            # look at every occurrence: zombie if any is unflagged
-            flagged_all, sent, sec = True, "", ""
-            j = i
-            while j >= 0:
-                s, se, fl = context_for(txt, low, j)
-                if not sent or (not fl and flagged_all):
-                    sent, sec = s, se
-                if not fl:
-                    flagged_all = False
-                j = low.find(d, j + len(d))
+            # look at every occurrence: zombie if any is unflagged; quote the first one of that kind
+            # that gives a readable sentence (a named ref's first use can be a bare list row)
+            seen = [context_for(txt, low, j) for j in where]
+            flagged_all = all(fl for _, _, fl in seen)
+            pool = seen if flagged_all else [x for x in seen if not x[2]]
+            sent, sec, _ = next((x for x in pool if x[0]), pool[0])
             status = "flagged" if flagged_all else "zombie"
             if status == "zombie" and is_author_page(t, rec["authors"]):
                 status = "author"  # biography of an author: the citation is about the paper itself

@@ -15,7 +15,7 @@ import json, os, re, sys, urllib.parse
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
-from build_data import OUT, log, read_pages, context_for, is_author_page, clean_said, superseded, replaced  # noqa: E402
+from build_data import OUT, log, read_pages, context_for, is_author_page, clean_said, superseded, replaced, positions  # noqa: E402
 
 OUTREACH = os.path.join(os.path.dirname(__file__), "..", "outreach.json")
 CONTEXT_DUMP = os.environ.get("ZF_DUMP_CONTEXT")  # optional path: write raw wikitext around each open citation
@@ -126,22 +126,23 @@ def recheck_cases(data, pages, now):
             continue  # not read: leave open
         txt = pg["text"]
         low = txt.lower()
-        i = low.find(doi)
-        if i < 0:
-            i = low.find(urllib.parse.quote(doi, safe="/").lower())
         p = by_doi.get(doi)
-        if i < 0:
+        where = positions(low, doi, (p or {}).get("pmid", ""))
+        if not where:
             how = "removed"
         else:
-            flagged_all, j = True, i
-            while j >= 0:
-                s, sec, fl = context_for(txt, low, j)
+            seen = []
+            for j in where:
+                seen.append(context_for(txt, low, j))
                 if CONTEXT_DUMP and k not in dumped:
-                    dumped[k] = {"page": page, "section": sec, "wikitext": txt[max(0, j - 1500): j + 300]}
-                if not fl:
-                    flagged_all = False
-                j = low.find(doi, j + len(doi))
+                    dumped[k] = {"page": page, "section": seen[-1][1], "wikitext": txt[max(0, j - 1500): j + 300]}
+            flagged_all = all(fl for _, _, fl in seen)
             how = "flagged" if flagged_all else None
+            if not how and p:   # still a zombie: refresh the quoted sentence with the current wikitext
+                sent, sec, _ = next((x for x in seen if not x[2] and x[0]), next(x for x in seen if not x[2]))
+                for w in p["wiki"]:
+                    if w["page"] == page and w["status"] == "zombie" and sent:
+                        w["said"], w["section"] = sent, sec
             if not how and p and is_author_page(page, p.get("authors") or []):
                 how = "author"
         c["v"] = pg.get("views", c.get("v"))

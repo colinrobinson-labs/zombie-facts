@@ -212,6 +212,23 @@ class Posting(unittest.TestCase):
         self.assertNotIn('"nocreate"', src)
 
 
+class AuditFixes(unittest.TestCase):
+    def test_retract_and_replace_is_superseded_anywhere(self):
+        p = {"doi": "10.1056/nejmoa1200303", "reasons": ["Retract and Replace"]}
+        self.assertTrue(B.superseded(p))
+        self.assertTrue(B.replaced(p))
+        self.assertFalse(B.superseded({"doi": "10.1/x", "reasons": ["Falsification/Fabrication of Data"]}))
+
+    def test_positions_find_doi_and_pmid(self):
+        low = "text<ref>{{cite journal |doi=10.1/abc |pmid=12345}}</ref> more <ref>{{cite journal|pmid = 12345}}</ref> pmid=123456"
+        where = B.positions(low, "10.1/abc", "12345")
+        self.assertEqual(len(where), 3)
+        self.assertEqual(B.positions("nothing here", "10.1/abc", "12345"), [])
+
+    def test_contact_is_a_real_inbox(self):
+        self.assertIn("tips@zombiefacts.org", B.UA)
+
+
 class DataFile(unittest.TestCase):
     def test_shape(self):
         d = json.load(open(DATA))
