@@ -18,8 +18,8 @@
 <meta name="twitter:image" content="https://zombiefacts.org/og.png?v=4">
 <meta name="theme-color" content="#f2f0e9" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#0e100d" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23c6f432' stroke='%23141412' stroke-width='2.4' stroke-linejoin='round' d='M8 9.5C10 4.5 17 3 23 3.6c7.4.8 11.6 5.3 11.3 12.6-.2 4.7.9 8.7-.6 13.2-1.6 4.7-6.3 7.4-12.6 7.6-6.9.2-12.4-2.2-14-7.6C5.6 24.6 6 14.3 8 9.5z'/%3E%3Cpath fill='none' stroke='%23141412' stroke-width='2.4' stroke-linecap='round' d='M12 8.6l9.8-1.4M14.2 6.6l.7 3.4M17.6 6.1l.6 3.3M20.6 5.7l.6 3.3'/%3E%3Cpath fill='none' stroke='%23141412' stroke-width='2.4' stroke-linecap='round' d='M11 15.2l5.6 5.4M16.6 15.2L11 20.6'/%3E%3Cg%3E%3Ccircle cx='26.4' cy='17.6' r='4.6' fill='%23f6f2e8' stroke='%23141412' stroke-width='2.4'/%3E%3Ccircle cx='27.6' cy='18.4' r='1.9' fill='%23141412'/%3E%3C/g%3E%3Cpath fill='none' stroke='%23141412' stroke-width='2.4' stroke-linecap='round' d='M12.6 28.2c2.6 1.2 5.2-.8 7.8.2s4.6 1.4 7.4-.4'/%3E%3Cpath fill='none' stroke='%23141412' stroke-width='2.4' stroke-linecap='round' d='M15.4 26.6l.4 3.2M19.6 27.2l.2 3M23.8 27.8l.2 3'/%3E%3Cpath fill='%23c6f432' stroke='%23141412' d='M21 36.9c.3 1.6.4 2.4 0 2.8-.5.4-1.3.1-1.2-.8 0-.7.5-1.2.7-2.1z'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,500..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/fonts/archivo-latin-b42cd5.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/source-serif-4-latin-554d1c.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
 <script>try{var t=localStorage.zfTheme;if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="canonical" href="https://zombiefacts.org/method/">
 <link rel="alternate" type="application/atom+xml" title="Zombie Facts: new cases and fixes" href="/feed.xml">
@@ -40,23 +40,15 @@
   </header>
 
   <section class="sec pagehead" id="method">
-    <div class="sh"><h1>How this works</h1><p>Built from two open sources, rebuilt every week by a script anyone can read.</p></div>
+    <div class="sh"><h1>How this works</h1><p>Built from open sources and rebuilt every week. The data behind every page is public: <a href="/data/">download it</a>.</p></div>
     <div class="method">
       <div><h4>The record</h4><ol>
         <li>The Retraction Watch database, now published openly by Crossref, lists every known retraction. We keep only full retractions, not corrections.</li>
-        <li>We walk every link to doi.org on English Wikipedia (<span id="mLinks">millions</span> of them) and match each one to that list.</li>
+        <li>We walk every link to doi.org and PubMed on English Wikipedia (<span id="mLinks">millions</span> of them) and match each one to that list by DOI or PubMed ID.</li>
         <li>For each match we read the article, find the sentence the citation supports, and check the citation and its surroundings for any mention of the retraction.</li></ol></div>
-      <div><h4>Zombie or flagged</h4><p><span class="pill z">Zombie</span> means the retracted paper is cited and nothing near it says so. <span class="pill fl">Flagged</span> means the article already warns readers, usually with Wikipedia's Retracted template. A citation on the biography of one of the paper's own authors is listed separately, since it is there to describe their work.</p><p>A zombie is not an accusation. Some articles cite a retracted paper to discuss it, and some retractions were for reasons that don't touch the cited claim. A person should read the context before editing. Every entry links to the article and the official notice.</p><p>We leave out, by default, reviews withdrawn only because a newer version replaced them (common with Cochrane). Those are outdated, not discredited. One switch in the register brings them back.</p></div>
-      <div><h4>Note to editors</h4><pre id="tpl">A note from Zombie Facts, a free public tracker of retracted research.
-
-The article "{PAGE}" ({SECTION}) cites
-  {TITLE}
-  https://doi.org/{DOI}
-which was retracted on {DATE}: https://doi.org/{NOTICE}
-
-It supports this sentence: "{SAID}"
-
-If the citation is there to discuss the retraction, nothing to do. Otherwise it may need replacing, or marking with {{tl|Retracted}}. ~~~~</pre></div>
+      <div><h4>Zombie or flagged</h4><p><span class="pill z">Zombie</span> means the retracted paper is cited and nothing near it says so. <span class="pill fl">Flagged</span> means the article already warns readers, usually with Wikipedia's Retracted template. A citation on the biography of one of the paper's own authors is listed separately, since it is there to describe their work.</p><p>A zombie is not an accusation. Some articles cite a retracted paper to discuss it, and some retractions were for reasons that don't touch the cited claim. That's why a person reads every case before anyone is told. Every entry links to the article and the official notice.</p><p>We leave out, by default, papers that a newer version replaced: journals that retract a paper and republish a corrected one ("retract and replace"), and reviews withdrawn only because they went out of date (common with Cochrane). Those are outdated, not discredited. One switch in the register brings them back.</p></div>
+      <div><h4>How this fits</h4><p>Retracted papers lingering on Wikipedia is a known problem. A 2026 study by researchers at Northwestern University (<a href="https://arxiv.org/abs/2509.18403" target="_blank" rel="noopener">Shi et al.</a>, ACM CSCW) found 1,181 citations of retracted papers and a median of 3.7 years before they were corrected. Wikipedia volunteers already run <a href="https://en.wikipedia.org/wiki/User:RetractionBot" target="_blank" rel="noopener">RetractionBot</a>, which adds the retraction warning to many citations automatically, which is why most matches here show up as flagged.</p><p>What we add is the follow-up: a person reads each remaining case, tells the editors who can fix it, checks the article every day, and publishes the outcome on the <a href="/results/">Results</a> page, fixed or not. The same work extends to news stories on the <a href="/news/">Newsroom</a>.</p></div>
+      <div><h4>What we tell editors</h4><p>Each note goes on the article's talk page, written and posted by a person. It names the section, the paper, the retraction notice and the sentence it supports, says why we think it matters, and suggests replacing the source or marking it with Wikipedia's Retracted template. It ends with a disclosure that it came from a tracker of retracted papers. Notes never link to this site.</p><p>For clear-cut cases we sometimes add the Retracted template ourselves. Those fixes are counted separately on Results, so they never inflate the question of whether notes work.</p></div>
     </div>
   </section>
 

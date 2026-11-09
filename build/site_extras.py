@@ -165,7 +165,8 @@ def model():
             st = "open"
         w = next((w for w in (p or {}).get("wiki", []) if w["page"] == page), None)
         by.setdefault(doi, []).append({"key": k, "page": page, "c": c, "n": n, "st": st, "w": w,
-                                      "told": bool(n and n.get("status") in TOLD) or bool(n and n.get("posted"))})
+                                      "told": bool(n and n.get("status") in TOLD) or bool(n and n.get("posted")),
+                                      "ours": bool(n and n.get("edited"))})
     cases = []
     for doi, cs in by.items():
         p = papers.get(doi) or {}
@@ -211,12 +212,14 @@ def events(c):
         if n and n.get("reviewed"):
             ev.append((n["reviewed"], "rev", f"Read by hand ({esc(pg)}). {esc(n.get('verdict') or '')}"))
         if n and n.get("posted"):
-            link = f' <a href="{esc(n["diff"])}" target="_blank" rel="noopener">See the note</a>.' if n.get("diff") else ""
-            ev.append((n["posted"][:10], "post", f"Note posted on the talk page of <b>{esc(pg)}</b>.{link}"))
+            ev.append((n["posted"][:10], "post", f"Note posted on the talk page of <b>{esc(pg)}</b>."))
+        if n and n.get("edited"):
+            ev.append((n["edited"][:10], "post", f"We marked the citation on <b>{esc(pg)}</b> with Wikipedia's Retracted template ourselves."))
         for r in (n or {}).get("replies") or []:
             ev.append(((r.get("at") or n.get("posted") or "")[:10], "rep", f"{esc(r.get('user'))} replied: <q>{esc((r.get('said') or '')[-220:])}</q>"))
         if x["st"] == "fixed":
-            how = "an editor marked the citation as retracted" if cc.get("how") == "flagged" else "the retracted source was removed"
+            how = ("our edit marked the citation as retracted" if x["ours"] else
+                   "an editor marked the citation as retracted" if cc.get("how") == "flagged" else "the retracted source was removed")
             ev.append((cc["c"], "fix", f"Fixed on <b>{esc(pg)}</b>: {how}, {days(cc['o'], cc['c'])} days after we found it."))
     order = {"found": 0, "rev": 1, "post": 2, "rep": 3, "fix": 4}
     ev.sort(key=lambda e: (e[0], order[e[1]]))
@@ -380,14 +383,16 @@ def results_numbers(M):
     open_ = [x for x in cites if x["st"] == "open"]
     fixed = [x for x in cites if x["st"] == "fixed"]
     ok = [x for x in cites if x["st"] == "ok"]
-    told = [x for x in cites if x["told"]]
+    ours = [x for x in fixed if x["ours"]]   # fixed by our own edit: counted, but kept out of the note test
+    told = [x for x in cites if x["told"] and not x["ours"]]
     told_fixed = [x for x in told if x["st"] == "fixed"]
-    untold = [x for x in cites if not x["told"] and x["st"] != "ok"]
+    untold = [x for x in cites if not x["told"] and not x["ours"] and x["st"] != "ok"]
     untold_fixed = [x for x in untold if x["st"] == "fixed"]
     replies = sum(len((x["n"] or {}).get("replies") or []) for x in told)
     posted_notes = [n for n in M["notes"] if n.get("posted")]
     after_note = [days(x["n"]["posted"][:10], x["c"]["c"]) for x in told_fixed if x["n"].get("posted")]
-    return {"cites": cites, "open": open_, "fixed": fixed, "ok": ok, "told": told, "told_fixed": told_fixed,
+    return {"cites": cites, "open": open_, "fixed": fixed, "ours": ours,
+            "reviewed": [n for n in M["notes"] if n.get("reviewed")], "ok": ok, "told": told, "told_fixed": told_fixed,
             "untold": untold, "untold_fixed": untold_fixed, "replies": replies, "posted": posted_notes,
             "med_fix": median([days(x["c"]["o"], x["c"]["c"]) for x in fixed]),
             "med_after_note": median(after_note),
@@ -427,19 +432,22 @@ def results_body(M):
     sent = [i for i in confirmed if i.get("outcome")]
     nfixed = [i for i in confirmed if i.get("outcome") == "fixed"]
     med = lambda v: "—" if v is None else (f"{v:g} d")
+    first_note = min((n["posted"][:10] for n in M["notes"] if n.get("posted")), default=None)
+    ours_txt = f" · {len(R['ours'])} by our own edit" if R["ours"] else ""
     rep = f" · {R['replies']} repl{'ies' if R['replies'] > 1 else 'y'}" if R["replies"] else ""
     clean = f" · {fmt_k(R['clean_reads'])} reads a month now clean" if R["clean_reads"] else ""
     board = (f'<div class="board">'
              f'<div><b>{len(R["cites"]):,}</b><span>Zombie citations opened as cases</span></div>'
              f'<div><b>{len(R["posted"]):,}</b><span>Notes posted to Wikipedia editors{rep}</span></div>'
-             f'<div class="fx"><b>{len(R["fixed"]):,}</b><span>Fixed{clean}</span></div>'
-             f'<div><b>{med(R["med_fix"])}</b><span>Median time to fix</span></div></div>')
+             + (f'<div class="fx"><b>{len(R["fixed"]):,}</b><span>Fixed{ours_txt}{clean}</span></div>'
+                f'<div><b>{med(R["med_fix"])}</b><span>Median time to fix</span></div></div>' if R["fixed"] else
+                f'<div><b>{len(R["reviewed"]):,}</b><span>Cases read by hand</span></div>'
+                f'<div><b>{days(first_note, M["today"]) if first_note else "—"}{" d" if first_note else ""}</b><span>Since the first note · editors often take weeks</span></div></div>'))
 
     def bar(label, a, b, note):
         w = 0 if not b else max(2, round(100 * a / b)) if a else 0
         return (f'<li><div class="rs-l"><b>{esc(label)}</b><span>{a:,} of {b:,} fixed · {pct(a, b)}</span></div>'
                 f'<div class="rs-bar"><i style="width:{w}%"></i></div><p>{note}</p></li>')
-    first_note = min((n["posted"][:10] for n in M["notes"] if n.get("posted")), default=None)
     told_note = (f"No fixes yet on cases where we told editors. The first notes went up {nice(first_note)}; editors usually take days to weeks."
                  if R["told"] and not R["told_fixed"] else "Cases where a note is on the article's talk page.")
     if not R["told"]:

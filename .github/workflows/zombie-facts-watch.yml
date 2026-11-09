@@ -55,7 +55,7 @@ jobs:
         run: python build/recheck.py
       - name: Print review contexts
         if: github.ref != 'refs/heads/main'
-        run: test -f /tmp/contexts.json && python -c "import json;d=json.load(open('/tmp/contexts.json'));[print('CTX', json.dumps({'k':k,**v})) for k,v in d.items()]" || true
+        run: test -f /tmp/contexts.json && python build/diag_quotes.py /tmp/contexts.json || true
       - name: Accuracy audit (loose flags, retraction notices)
         if: github.ref != 'refs/heads/main'
         run: python build/audit.py || true

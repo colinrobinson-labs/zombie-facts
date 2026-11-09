@@ -1,20 +1,12 @@
   <section class="sec pagehead" id="method">
-    <div class="sh"><h1>How this works</h1><p>Built from two open sources, rebuilt every week by a script anyone can read.</p></div>
+    <div class="sh"><h1>How this works</h1><p>Built from open sources and rebuilt every week. The data behind every page is public: <a href="/data/">download it</a>.</p></div>
     <div class="method">
       <div><h4>The record</h4><ol>
         <li>The Retraction Watch database, now published openly by Crossref, lists every known retraction. We keep only full retractions, not corrections.</li>
-        <li>We walk every link to doi.org on English Wikipedia (<span id="mLinks">millions</span> of them) and match each one to that list.</li>
+        <li>We walk every link to doi.org and PubMed on English Wikipedia (<span id="mLinks">millions</span> of them) and match each one to that list by DOI or PubMed ID.</li>
         <li>For each match we read the article, find the sentence the citation supports, and check the citation and its surroundings for any mention of the retraction.</li></ol></div>
-      <div><h4>Zombie or flagged</h4><p><span class="pill z">Zombie</span> means the retracted paper is cited and nothing near it says so. <span class="pill fl">Flagged</span> means the article already warns readers, usually with Wikipedia's Retracted template. A citation on the biography of one of the paper's own authors is listed separately, since it is there to describe their work.</p><p>A zombie is not an accusation. Some articles cite a retracted paper to discuss it, and some retractions were for reasons that don't touch the cited claim. A person should read the context before editing. Every entry links to the article and the official notice.</p><p>We leave out, by default, reviews withdrawn only because a newer version replaced them (common with Cochrane). Those are outdated, not discredited. One switch in the register brings them back.</p></div>
-      <div><h4>Note to editors</h4><pre id="tpl">A note from Zombie Facts, a free public tracker of retracted research.
-
-The article "{PAGE}" ({SECTION}) cites
-  {TITLE}
-  https://doi.org/{DOI}
-which was retracted on {DATE}: https://doi.org/{NOTICE}
-
-It supports this sentence: "{SAID}"
-
-If the citation is there to discuss the retraction, nothing to do. Otherwise it may need replacing, or marking with {{tl|Retracted}}. ~~~~</pre></div>
+      <div><h4>Zombie or flagged</h4><p><span class="pill z">Zombie</span> means the retracted paper is cited and nothing near it says so. <span class="pill fl">Flagged</span> means the article already warns readers, usually with Wikipedia's Retracted template. A citation on the biography of one of the paper's own authors is listed separately, since it is there to describe their work.</p><p>A zombie is not an accusation. Some articles cite a retracted paper to discuss it, and some retractions were for reasons that don't touch the cited claim. That's why a person reads every case before anyone is told. Every entry links to the article and the official notice.</p><p>We leave out, by default, papers that a newer version replaced: journals that retract a paper and republish a corrected one ("retract and replace"), and reviews withdrawn only because they went out of date (common with Cochrane). Those are outdated, not discredited. One switch in the register brings them back.</p></div>
+      <div><h4>How this fits</h4><p>Retracted papers lingering on Wikipedia is a known problem. A 2026 study by researchers at Northwestern University (<a href="https://arxiv.org/abs/2509.18403" target="_blank" rel="noopener">Shi et al.</a>, ACM CSCW) found 1,181 citations of retracted papers and a median of 3.7 years before they were corrected. Wikipedia volunteers already run <a href="https://en.wikipedia.org/wiki/User:RetractionBot" target="_blank" rel="noopener">RetractionBot</a>, which adds the retraction warning to many citations automatically, which is why most matches here show up as flagged.</p><p>What we add is the follow-up: a person reads each remaining case, tells the editors who can fix it, checks the article every day, and publishes the outcome on the <a href="/results/">Results</a> page, fixed or not. The same work extends to news stories on the <a href="/news/">Newsroom</a>.</p></div>
+      <div><h4>What we tell editors</h4><p>Each note goes on the article's talk page, written and posted by a person. It names the section, the paper, the retraction notice and the sentence it supports, says why we think it matters, and suggests replacing the source or marking it with Wikipedia's Retracted template. It ends with a disclosure that it came from a tracker of retracted papers. Notes never link to this site.</p><p>For clear-cut cases we sometimes add the Retracted template ourselves. Those fixes are counted separately on Results, so they never inflate the question of whether notes work.</p></div>
     </div>
   </section>
