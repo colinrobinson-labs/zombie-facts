@@ -16,6 +16,8 @@ def paper(doi, pages, status="zombie", authors=("Ann Lee",)):
 
 class Ledger(unittest.TestCase):
     def setUp(self):
+        self._rp, B.read_pages = B.read_pages, lambda titles: {}   # no network in tests
+        self.addCleanup(lambda: setattr(B, "read_pages", self._rp))
         self.ps = [paper("10.1/a", ["A", "B"]), paper("10.1/b", ["C"])]
         self.hits = {"10.1/a": {"A", "B"}, "10.1/b": {"C"}}
         self.pages = {t: {"text": "x"} for t in "ABC"}
@@ -41,6 +43,27 @@ class Ledger(unittest.TestCase):
         pages = {"A": {"text": "x"}, "B": {"text": "x"}}
         L2 = B.update_ledger({"ledger": self.L}, ps, self.hits, pages, "2026-11-12")
         self.assertIsNone(L2["cases"]["10.1/b|C"]["c"])
+
+    def test_dropped_by_retraction_watch_is_not_a_fix(self):
+        ps = copy.deepcopy(self.ps); ps[1]["wiki"] = []
+        L2 = B.update_ledger({"ledger": self.L}, ps[:1], {"10.1/a": {"A", "B"}}, self.pages, "2026-11-12", rw={"10.1/a": {}})
+        self.assertEqual(L2["cases"]["10.1/b|C"]["how"], "unlisted")
+
+    def test_removed_only_after_reading_the_article(self):
+        hits = {"10.1/a": {"A", "B"}, "10.1/b": set()}   # the links dump lost the link
+        rw = {"10.1/a": {}, "10.1/b": {}}
+        still = lambda titles: {"C": {"text": "<ref>{{cite journal|doi=10.1/B}}</ref>"}}
+        L2 = B.update_ledger({"ledger": self.L}, self.ps[:1], hits, {"A": {"text": "x"}, "B": {"text": "x"}}, "2026-11-12", rw, still)
+        self.assertIsNone(L2["cases"]["10.1/b|C"]["c"], "the article still cites it, so the case stays open")
+        gone = lambda titles: {"C": {"text": "no citation here"}}
+        L3 = B.update_ledger({"ledger": self.L}, self.ps[:1], hits, {"A": {"text": "x"}, "B": {"text": "x"}}, "2026-11-12", rw, gone)
+        self.assertEqual(L3["cases"]["10.1/b|C"]["how"], "removed")
+
+    def test_superseded_is_remembered_on_the_case(self):
+        ps = copy.deepcopy(self.ps); ps[1]["reasons"] = ["Retract and Replace"]
+        L = B.update_ledger({}, ps, self.hits, self.pages, "2026-11-05")
+        self.assertTrue(L["cases"]["10.1/b|C"].get("sup"))
+        self.assertNotIn("sup", L["cases"]["10.1/a|A"])
 
     def test_mass_close_guard(self):
         many = [paper(f"10.1/{i}", ["P%d" % i]) for i in range(30)]

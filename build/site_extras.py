@@ -176,23 +176,28 @@ def model():
     for k, c in ledger.items():
         doi, page = k.split("|", 1)
         p = papers.get(doi)
-        if p and superseded(p) and doi not in slugs:
+        sup = (p and superseded(p)) or bool(c.get("sup"))
+        if sup and doi not in slugs:
             continue  # never shown as a case; one that already had a page keeps it, marked reviewed
-        if c.get("how") == "author" or (c.get("how") == "subject" and doi not in slugs):
+        if c.get("how") == "author" or (c.get("how") in ("subject", "unlisted") and doi not in slugs):
             continue
         n = note.get(k)
-        if c.get("how") == "subject":
+        if n and n.get("status") == "dismissed":
+            st = "ok"   # a verdict written by hand wins over the automatic ones below
+        elif c.get("how") == "unlisted":
+            st = "ok"
+            n = n or {"status": "dismissed", "auto": "Record withdrawn", "reviewed": (c.get("c") or "")[:10] or today,
+                      "verdict": "Retraction Watch no longer lists this paper as retracted, so there is nothing to fix. The case is closed and is not counted as a fix."}
+        elif c.get("how") == "subject":
             st = "ok"
             n = n or {"status": "dismissed", "auto": True, "reviewed": (c.get("c") or "")[:10] or "2026-11-09",
                       "verdict": "The Wikipedia article is about the retraction itself, so it lists the paper on purpose. Not a zombie."}
-        elif p and superseded(p):
+        elif sup:
             st = "ok"
             n = n or {"status": "dismissed", "auto": True, "reviewed": "2026-11-09",  # the day this rule shipped
                       "verdict": ("The publisher retracted this paper and republished a corrected version, so it is out of date rather than discredited. Citing the newer version is the fix."
-                                  if any(SUP_REPLACE.search(r) for r in p.get("reasons") or []) else
+                                  if any(SUP_REPLACE.search(r) for r in (p or {}).get("reasons") or []) else
                                   "Withdrawn because a newer version replaced it, not because it was discredited.")}
-        elif n and n.get("status") == "dismissed":
-            st = "ok"
         elif c.get("c"):
             st = "fixed"
         else:
@@ -214,6 +219,7 @@ def model():
             "publisher": p.get("publisher"), "authors": p.get("authors") or [], "published": p.get("published"),
             "retracted": p.get("retracted") or c0.get("r"), "notice": p.get("notice"), "reasons": p.get("reasons") or [],
             "causes": causes_of(p) if p else [], "cites": p.get("cites"), "st": st, "cites_on": cs, "lead": lead,
+            "unlisted": all(x["c"].get("how") == "unlisted" for x in cs),
             "quote": said(quote_w, 420) if quote_w else "", "quote_w": quote_w,
             "flagged": [w for w in p.get("wiki", []) if w.get("status") == "flagged"],
             "opened": min(x["c"]["o"] for x in cs), "reach": sum(x["c"].get("v") or 0 for x in cs if x["st"] == "open"),
@@ -244,7 +250,7 @@ def events(c):
         cc, n, pg = x["c"], x["n"], x["page"]
         ev.append((cc["o"], "found", f"Found on <b>{esc(pg)}</b>: the citation is live and nothing near it mentions the retraction."))
         if n and n.get("reviewed"):
-            ev.append((n["reviewed"], "rev", f"{'Rechecked under a stricter rule' if n.get('auto') else 'Read by hand'} ({esc(pg)}). {esc(n.get('verdict') or '')}"))
+            ev.append((n["reviewed"], "rev", f"{(n['auto'] if isinstance(n.get('auto'), str) else 'Rechecked under a stricter rule') if n.get('auto') else 'Read by hand'} ({esc(pg)}). {esc(n.get('verdict') or '')}"))
         if n and n.get("posted"):
             ev.append((n["posted"][:10], "post", f"Note posted on the talk page of <b>{esc(pg)}</b>."))
         if n and n.get("edited"):
@@ -270,7 +276,9 @@ def headline(c):
         if c["lead"]["c"].get("how") == "flagged":
             return f"Fixed: Wikipedia now warns readers on “{pg}”{more}"
         return f"Fixed: “{pg}”{more} no longer cites a retracted paper"
-    return f"Reviewed: “{pg}” cites a retracted paper, and here that's fine"
+    if c.get("unlisted"):
+        return f"Closed: the paper cited on “{pg}” is no longer listed as retracted"
+    return f"Reviewed: no fix needed on “{pg}”"
 
 
 def plain_title(c):
@@ -278,6 +286,8 @@ def plain_title(c):
     pg = c["lead"]["page"]
     if c["st"] == "fixed":
         return f"Fixed: retracted paper removed from “{pg}” on Wikipedia"
+    if c.get("unlisted"):
+        return f"Closed: paper cited on “{pg}” is no longer listed as retracted"
     if c["st"] == "ok":
         return f"Reviewed: a retracted paper cited on “{pg}”"
     return f"Retracted paper still cited on Wikipedia’s “{pg}”"
@@ -288,6 +298,8 @@ def describe(c):
     if q and len(q) > 170:
         q = q[:168].rsplit(" ", 1)[0] + "…"
     src = f"Source: “{c['title'][:110]}{'…' if len(c['title']) > 110 else ''}”, retracted {month(c['retracted'])}."
+    if c.get("unlisted"):
+        src = f"Source: “{c['title'][:110]}{'…' if len(c['title']) > 110 else ''}”. Retraction Watch withdrew its record, so the case is closed."
     return (f"“{q.lstrip('…')}” {src}" if q else src)
 
 
@@ -314,7 +326,8 @@ def case_body(c, M):
     paper = (f'<div class="cf-paper"><h4>The source</h4><h2>{esc(c["title"])}</h2>'
              f'<p class="by">{esc(authors)}{"<br>" if authors else ""}{esc(meta)}'
              f'{" · cited " + format(c["cites"], ",") + " times by other papers" if c.get("cites") else ""}</p>'
-             f'<p class="cf-dead">Retracted {esc(nice(c["retracted"]))}</p>'
+             + (f'<p class="by">Retraction Watch listed this paper as retracted when we opened the case, and has since withdrawn the record.</p>' if c.get("unlisted") else
+                f'<p class="cf-dead">Retracted {esc(nice(c["retracted"]))}</p>') +
              f'{"<div class=cause>" + reasons + "</div>" if reasons else ""}</div>')
     rows = []
     for x in c["cites_on"]:
@@ -335,11 +348,13 @@ def case_body(c, M):
     nxt = {"open": "We read every case by hand before telling editors, then check the article every day. This page updates when anything changes.",
            "fixed": "The fix is checked every day. If the citation comes back, the case reopens here.",
            "ok": "We read the article and the retraction notice and decided no change is needed. The reason is in the case log below."}[st]
+    if c.get("unlisted"):
+        nxt = "This case came from a record in the Retraction Watch database that has since been withdrawn. Nothing on Wikipedia needed fixing, and we don't count it as a fix."
     from urllib.parse import quote as q
     contest = "mailto:tips@zombiefacts.org?subject=" + q("Contest: " + lead["page"]) + "&body=" + q(f"Case: {c['url']}\n\nWhat's wrong with it:\n\nEvidence (links):\n")
     share_t = plain_title(c)
     acts = (f'<div class="acts">'
-            f'<a class="p" href="https://doi.org/{esc(c["notice"] or c["doi"])}" target="_blank" rel="noopener">Retraction notice</a>'
+            + ("" if c.get("unlisted") else f'<a class="p" href="https://doi.org/{esc(c["notice"] or c["doi"])}" target="_blank" rel="noopener">Retraction notice</a>') +
             f'<a href="https://doi.org/{esc(c["doi"])}" target="_blank" rel="noopener">The paper</a>'
             f'<button type="button" class="cf-share" data-url="{esc(c["url"])}" data-text="{esc(share_t)}">Share</button>'
             f'<a href="{esc(contest)}">Contest this case</a></div>')
@@ -403,7 +418,7 @@ def card_input(c):
     return {"st": c["st"], "page": c["lead"]["page"], "quote": said(w, 230) if w else "", "title": c["title"],
             "retracted": (c["retracted"] or "")[:4], "journal": c["journal"] or "",
             "fixdays": days(c["lead"]["c"]["o"], c["lead"]["c"]["c"]) if c["st"] == "fixed" else None,
-            "how": c["lead"]["c"].get("how")}
+            "how": c["lead"]["c"].get("how"), **({"unlisted": True} if c.get("unlisted") else {})}
 
 
 # ───────────────────────── results ─────────────────────────
@@ -702,7 +717,7 @@ def data_body(M):
                                 ("status", "zombie: no warning near it · flagged: the article mentions the retraction · reviewed: read by hand, cited on purpose · author or subject: the article is about the author or the scandal · superseded: replaced by a newer version"),
                                 ("quoted_sentence", "the sentence the citation supports, when it is readable"), ("monthly_views", "article views in the last 30 days")])}</ul>
         <h3>cases.csv columns</h3>
-        <ul class="cols">{cols([("state", "open, fixed, or ok (reviewed, no fix needed)"), ("how_closed", "flagged: the citation was marked as retracted · removed: the source was taken out · dismissed: reviewed and kept on purpose"),
+        <ul class="cols">{cols([("state", "open, fixed, or ok (reviewed, no fix needed)"), ("how_closed", "flagged: the citation was marked as retracted · removed: we re-read the article and the source is gone · dismissed: reviewed and kept on purpose · unlisted: Retraction Watch withdrew its record, nothing was fixed"),
                                 ("note_posted", "the day a note went up on the article's talk page")])}</ul>
       </div>
       <aside class="ab-side">

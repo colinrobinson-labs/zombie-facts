@@ -197,6 +197,14 @@
    "status": "dismissed",
    "verdict": "This is the author's own biography and it discusses the retraction.",
    "reviewed": "2026-11-05"
+  },
+  {
+   "key": "10.1002/14651858.cd004326|Vitamin B12 deficiency",
+   "doi": "10.1002/14651858.cd004326",
+   "page": "Vitamin B12 deficiency",
+   "status": "dismissed",
+   "verdict": "The article meant a different paper. PubMed listed the wrong DOI for a vitamin B12 review, and it pointed at this ear wax review instead. A Wikipedia editor corrected the DOI on Nov 9, 2026. Not a zombie, and not counted as a fix.",
+   "reviewed": "2026-11-17"
   }
  ]
 }

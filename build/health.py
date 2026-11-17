@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Daily check that the live site works. Prints one line per check; exits 1 if any fail.
 
-Checks: pages load over HTTPS, data is fresh, the feed and sitemap parse, a case page
+Checks: pages load over HTTPS, the daily and weekly jobs are landing, the feed and sitemap parse, a case page
 loads, www redirects, and the certificate has more than 14 days left.
 """
 import json, socket, ssl, sys, urllib.request
@@ -34,14 +34,30 @@ def pages():
     return "10 pages"
 
 
+def hours_since(stamp):
+    t = datetime.fromisoformat(stamp.replace("Z", "+00:00"))
+    return (datetime.now(timezone.utc) - t).total_seconds() / 3600
+
+
 def fresh():
+    """The daily recheck is landing: data.json was checked in the last 50 hours."""
     _, _, b = get(SITE + "/data.json")
     d = json.loads(b)
-    t = datetime.fromisoformat((d.get("checked") or d["built"]).replace("Z", "+00:00"))
-    h = (datetime.now(timezone.utc) - t).total_seconds() / 3600
+    h = hours_since(max(d.get("checked") or "", d["built"]))
     assert h < 50, f"data last checked {h:.0f} hours ago"
     assert d.get("papers"), "no papers in data.json"
     return f"checked {h:.0f} h ago, {len(d['papers'])} papers"
+
+
+def weekly():
+    """The weekly jobs are landing: the full build and the newsroom ran in the last 9 days."""
+    _, _, b = get(SITE + "/data.json")
+    hb = hours_since(json.loads(b)["built"])
+    assert hb < 9 * 24 + 12, f"full data build is {hb / 24:.0f} days old"
+    _, _, n = get(SITE + "/news.json")
+    hn = hours_since(json.loads(n)["built"])
+    assert hn < 9 * 24 + 12, f"newsroom is {hn / 24:.0f} days old"
+    return f"build {hb / 24:.0f} d, newsroom {hn / 24:.0f} d"
 
 
 def feed_and_sitemap():
@@ -70,7 +86,7 @@ def cert():
 
 
 if __name__ == "__main__":
-    for n, f in [("pages load", pages), ("data is fresh", fresh), ("feed, sitemap and a case page", feed_and_sitemap),
+    for n, f in [("pages load", pages), ("data is fresh", fresh), ("weekly jobs", weekly), ("feed, sitemap and a case page", feed_and_sitemap),
                  ("www redirects", www), ("certificate", cert)]:
         check(n, f)
     if fails:

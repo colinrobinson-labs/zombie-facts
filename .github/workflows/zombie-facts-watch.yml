@@ -24,15 +24,18 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
       - name: Unit tests
         run: python -m unittest discover -v build/tests
-      - name: Pages are built from src/ and the script parses
-        run: |
-          python build/make_pages.py --check
-          node --check assets/app.js
+      - name: The script parses
+        run: node --check assets/app.js
+      - name: Pages are built from src/
+        # Only on branches. On main the watch job rebuilds the pages itself, so stale
+        # pages there must never stop the job that would fix them.
+        if: github.ref != 'refs/heads/main'
+        run: python build/make_pages.py --check
       - name: JSON files parse
         run: for f in *.json; do python -m json.tool "$f" > /dev/null && echo "ok $f"; done
   watch:
@@ -40,8 +43,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with: { python-version: "3.12" }
       - name: Post approved notes
         if: github.event_name == 'workflow_dispatch' && inputs.post
@@ -77,19 +80,10 @@ jobs:
           BSKY_APP_PASSWORD: ${{ secrets.BSKY_APP_PASSWORD }}
           MASTODON_URL: ${{ secrets.MASTODON_URL }}
           MASTODON_TOKEN: ${{ secrets.MASTODON_TOKEN }}
-        run: |
-          case "$(date -u +%H)" in 12|13) python build/social.py ;; *) echo "social posts once a day, on the 12:17 UTC run" ;; esac
+        run: python build/social.py   # at most one post a day; social.json keeps count
       - name: Commit and redeploy
         if: always() && github.ref == 'refs/heads/main'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git config user.name "zombie-facts-bot"
-          git config user.email "actions@users.noreply.github.com"
-          python build/cards.py || true  # share images for new or changed cases
-          python build/make_pages.py  # share-card counts follow the data
-          git add data.json outreach.json social.json index.html 404.html */index.html case share data feed.xml sitemap.xml robots.txt 2>/dev/null || true
-          if git diff --cached --quiet; then echo "no change"; exit 0; fi
-          git commit -m "Zombie Facts: daily recheck"
-          for i in 1 2 3 4 5; do git pull --rebase origin main && git push && break; sleep $((i*5)); done
-          gh workflow run pages.yml --ref main
+          build/publish.sh "Zombie Facts: daily recheck"
