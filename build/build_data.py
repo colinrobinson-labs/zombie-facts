@@ -378,7 +378,7 @@ def crossref_counts(dois):
     def batch(chunk):
         f = ",".join("doi:" + d for d in chunk)
         u = "https://api.crossref.org/works?" + urllib.parse.urlencode(
-            {"filter": f, "rows": len(chunk), "select": "DOI,is-referenced-by-count,title,container-title,issued",
+            {"filter": f, "rows": len(chunk), "select": "DOI,is-referenced-by-count,title,container-title,issued,updated-by",
              "mailto": CONTACT})
         try:
             return get(u)["message"]["items"]
@@ -392,6 +392,23 @@ def crossref_counts(dois):
                 out[w["DOI"].lower()] = w
     log("crossref enriched", len(out))
     return out
+
+
+def second_source(work):
+    """Who, besides the Retraction Watch file we start from, says this paper is retracted.
+
+    Crossref lists retractions on the paper's own record ("updated-by"), from two feeds: the
+    publisher's notice and Retraction Watch. Returns "publisher" when the publisher's notice is
+    there, "rw" when only Retraction Watch's entry is, "none" when Crossref knows the paper but
+    lists no retraction (worth a look: this is how a mistaken record shows up), and "" when
+    Crossref does not know the DOI at all.
+    """
+    if not work:
+        return ""
+    ups = [u for u in work.get("updated-by") or [] if (u.get("type") or "").lower() in ("retraction", "withdrawal", "removal")]
+    if any((u.get("source") or "").lower() == "publisher" for u in ups):
+        return "publisher"
+    return "rw" if ups else "none"
 
 
 # ---------------------------------------------------------------- 5. correction ledger
@@ -513,6 +530,7 @@ def main():
         rec = dict(rw[d])
         w = cr.get(d, {})
         rec["cites"] = w.get("is-referenced-by-count")
+        rec["confirm"] = second_source(w) if cr else None  # None: Crossref was unreachable this run
         if not rec["title"] and w.get("title"):
             rec["title"] = w["title"][0]
         cites = []

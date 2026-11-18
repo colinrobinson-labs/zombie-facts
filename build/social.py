@@ -36,7 +36,7 @@ def candidates(M):
                             f"Fixed: the Wikipedia article “{x['page']}” no longer cites a retracted paper without warning, "
                             f"{d} days after we found it.", c["url"], card))
         q = re.sub(r'"([^"]*)"', "‘\\1’", c["quote"])
-        if c["st"] == "open" and X.whole(c["quote"]) and len(q) <= 200:
+        if c["st"] == "open" and c.get("confirm") != "none" and X.whole(c["quote"]) and len(q) <= 200:
             out.append(((1, -c["reach"]), f"case:{c['doi']}",
                         f"“{q}”\n\nStill on Wikipedia (“{c['lead']['page']}”). The paper behind it was retracted in {(c['retracted'] or '')[:4]}.",
                         c["url"], card))

@@ -5,7 +5,10 @@
 | Piece | What it does | When |
 |---|---|---|
 | `build/build_data.py` | Checks every retraction in the Retraction Watch database (via Crossref) against every DOI link on English Wikipedia, reads each citing article, and updates the case ledger | Weekly, Monday 09:00 UTC (`zombie-facts.yml`) |
-| `build/recheck.py` | Re-reads articles with open cases and closes the fixed ones, then reads talk-page replies to our notes | Daily, 14:15 UTC (`zombie-facts-watch.yml`) |
+| `build/recheck.py` | Re-reads articles with open cases and closes the fixed ones, then reads talk-page replies to our notes | Every 6 hours (`zombie-facts-watch.yml`) |
+| `build/publish.sh` | The one commit-and-deploy step every data workflow ends with: redraw share images, rebuild pages, commit, push, deploy | After each data job |
+| `build/health.py`, `build/audit.py` | Daily check of the live site (restarts stalled jobs) and the weekly accuracy audit | `health.yml`, `audit.yml` |
+| `build/social.py` | One post a day to Bluesky and Mastodon, once the account secrets exist | With the watch workflow |
 | `build/outreach.py` | Drafts a sourced talk-page note for a reviewed case into `outreach.json` | By hand |
 | `build/post_notes.py` | Posts approved notes, at most 3 per run. Needs the `WIKI_USER` and `WIKI_PASS` repo secrets | Manual run of the watch workflow with `post` ticked |
 | `index.html`, `register/`, `desk/`, `news/`, `results/`, `autopsy/`, `check/`, `method/`, `about/`, `report/`, `404.html` | The pages. Generated from `src/` by `build/make_pages.py`; edit `src/`, never the output | Deployed by `pages.yml` |
@@ -16,6 +19,8 @@
 | `build/og-card.html`, `assets/feed.css` | Source of the site-wide share image `og.png`, and the stylesheet that makes `feed.xml` readable in a browser | |
 
 A note in `outreach.json` moves through these statuses: `queued` → `approved` → `posted` → `replied`, or ends as `dismissed`, which means we reviewed it and no fix is needed.
+
+How the whole loop runs unattended, and what still needs a person: `docs/automation.md`.
 
 Tests: `python -m unittest discover build/tests`. The code uses only the Python standard library.
 

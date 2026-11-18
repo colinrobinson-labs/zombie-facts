@@ -18,7 +18,7 @@ import http.cookiejar, json, os, sys, time, urllib.parse, urllib.request
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
-from build_data import UA, WP, log  # noqa: E402
+from build_data import OUT, UA, WP, log  # noqa: E402
 from recheck import OUTREACH, load, save  # noqa: E402
 
 LIMIT = int(os.environ.get("ZF_POST_LIMIT", "3"))
@@ -62,7 +62,11 @@ def still_cited(page, doi):
 
 def main():
     out = load(OUTREACH, {"version": 1, "notes": []})
-    queue = [n for n in out["notes"] if n.get("status") == "approved"][:LIMIT]
+    unconfirmed = {p["doi"] for p in (load(OUT, None) or {}).get("papers", []) if p.get("confirm") == "none"}
+    held = [n for n in out["notes"] if n.get("status") == "approved" and n.get("doi") in unconfirmed]
+    for n in held:
+        log("holding (Crossref lists no retraction for this paper):", n["page"])
+    queue = [n for n in out["notes"] if n.get("status") == "approved" and not n.get("wait") and n not in held][:LIMIT]
     if not queue:
         log("nothing approved to post"); return
     if not (USER and PASS) and not DRY:

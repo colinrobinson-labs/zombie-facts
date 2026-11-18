@@ -312,3 +312,19 @@ class SaidParity(unittest.TestCase):
         prog = "\n".join(lines) + "\nconst ws=JSON.parse(require('fs').readFileSync(0,'utf8'));console.log(JSON.stringify(ws.map(w=>said(w))))"
         out = subprocess.run([node, "-e", prog], input=json.dumps(ws), capture_output=True, text=True, check=True).stdout
         self.assertEqual(json.loads(out), [X.said(w) for w in ws])
+
+
+class SecondSource(unittest.TestCase):
+    def test_publisher_notice_wins(self):
+        w = {"updated-by": [{"type": "retraction", "source": "retraction-watch"}, {"type": "retraction", "source": "publisher"}]}
+        self.assertEqual(B.second_source(w), "publisher")
+
+    def test_retraction_watch_only(self):
+        self.assertEqual(B.second_source({"updated-by": [{"type": "retraction", "source": "retraction-watch"}]}), "rw")
+
+    def test_known_paper_with_no_retraction(self):
+        self.assertEqual(B.second_source({"DOI": "10.1/x"}), "none")
+        self.assertEqual(B.second_source({"updated-by": [{"type": "correction", "source": "publisher"}]}), "none")
+
+    def test_unknown_to_crossref(self):
+        self.assertEqual(B.second_source({}), "")
