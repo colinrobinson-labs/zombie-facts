@@ -6,9 +6,16 @@
   <link href="https://zombiefacts.org/feed.xml" rel="self" type="application/atom+xml"/>
   <link href="https://zombiefacts.org/" rel="alternate" type="text/html"/>
   <id>https://zombiefacts.org/</id>
-  <updated>2026-11-09T12:00:00Z</updated>
+  <updated>2026-11-16T12:00:00Z</updated>
   <author><name>Zombie Facts</name><uri>https://zombiefacts.org/about/</uri></author>
   <icon>https://zombiefacts.org/assets/icon.png</icon>
+  <entry>
+    <title>The week of Nov 9: 3 found, 0 told, 0 fixed</title>
+    <link href="https://zombiefacts.org/results/"/>
+    <id>tag:zombiefacts.org,2026:week:2026-11-09</id>
+    <updated>2026-11-16T12:00:00Z</updated>
+    <summary>3 new zombie citations found, 0 notes posted to Wikipedia editors and 0 citations fixed. The full scoreboard is on the Results page.</summary>
+  </entry>
   <entry>
     <title>3 new zombie citations found on Wikipedia</title>
     <link href="https://zombiefacts.org/desk/"/>
@@ -16,6 +23,13 @@
     <updated>2026-11-09T12:00:00Z</updated>
     <summary>Retracted papers still cited with no warning on “Cardiac arrest”, “Porin (protein)”, “Ramosetron”.</summary>
     <content type="html">&lt;ul&gt;&lt;li&gt;&lt;a href=&quot;https://zombiefacts.org/case/epinephrine-for-out-of-hospital-cardiac-arrest-a/&quot;&gt;Cardiac arrest&lt;/a&gt;: Epinephrine for out of hospital cardiac arrest: A systematic review and meta-analysis of randomized controlled trials&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;https://zombiefacts.org/case/microbe-host-interactions-structure-and-role-of-gram/&quot;&gt;Porin (protein)&lt;/a&gt;: Microbe-Host Interactions: Structure and Role of Gram-Negative Bacterial Porins&lt;/li&gt;&lt;li&gt;&lt;a href=&quot;https://zombiefacts.org/case/ramosetron-for-preventing-postoperative-nausea-and-vomiting-in/&quot;&gt;Ramosetron&lt;/a&gt;: Ramosetron for preventing postoperative nausea and vomiting in women undergoing gynecological surgery&lt;/li&gt;&lt;/ul&gt;</content>
+  </entry>
+  <entry>
+    <title>The week of Nov 2: 81 found, 11 told, 0 fixed</title>
+    <link href="https://zombiefacts.org/results/"/>
+    <id>tag:zombiefacts.org,2026:week:2026-11-02</id>
+    <updated>2026-11-09T12:00:00Z</updated>
+    <summary>81 new zombie citations found, 11 notes posted to Wikipedia editors and 0 citations fixed. The full scoreboard is on the Results page.</summary>
   </entry>
   <entry>
     <title>Note posted: Non-coding RNA</title>

@@ -56,9 +56,9 @@ jobs:
         env:
           ZF_DUMP_CONTEXT: ${{ github.ref != 'refs/heads/main' && '/tmp/contexts.json' || '' }}
         run: python build/recheck.py
-      - name: Print review contexts
+      - name: Print the review queue (open cases with no verdict yet)
         if: github.ref != 'refs/heads/main'
-        run: test -f /tmp/contexts.json && python -c "import json;d=json.load(open('/tmp/contexts.json'));[print('CTX', json.dumps({'k':k,**v})) for k,v in d.items()]" || true
+        run: python build/review_queue.py /tmp/contexts.json
       - name: Accuracy audit (loose flags, retraction notices)
         if: github.ref != 'refs/heads/main'
         run: python build/audit.py || true

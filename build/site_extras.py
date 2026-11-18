@@ -90,7 +90,7 @@ def lead_quote(D, notes, mx=240):
     def ok(p, w):
         q = said(w, 10000)
         return (w.get("status") == "zombie" and f'{p["doi"]}|{w["page"]}' not in gone and whole(q) and len(q) <= mx)
-    papers = [p for p in D.get("papers", []) if not superseded(p)]
+    papers = [p for p in D.get("papers", []) if not superseded(p) and p.get("confirm") != "none"]
     for p in papers:
         if p["doi"] == PICK["doi"]:
             w = next((w for w in p.get("wiki", []) if w["page"] == PICK["page"]), None)
@@ -219,7 +219,7 @@ def model():
             "publisher": p.get("publisher"), "authors": p.get("authors") or [], "published": p.get("published"),
             "retracted": p.get("retracted") or c0.get("r"), "notice": p.get("notice"), "reasons": p.get("reasons") or [],
             "causes": causes_of(p) if p else [], "cites": p.get("cites"), "st": st, "cites_on": cs, "lead": lead,
-            "unlisted": all(x["c"].get("how") == "unlisted" for x in cs),
+            "unlisted": all(x["c"].get("how") == "unlisted" for x in cs), "confirm": p.get("confirm"),
             "quote": said(quote_w, 420) if quote_w else "", "quote_w": quote_w,
             "flagged": [w for w in p.get("wiki", []) if w.get("status") == "flagged"],
             "opened": min(x["c"]["o"] for x in cs), "reach": sum(x["c"].get("v") or 0 for x in cs if x["st"] == "open"),
@@ -327,7 +327,8 @@ def case_body(c, M):
              f'<p class="by">{esc(authors)}{"<br>" if authors else ""}{esc(meta)}'
              f'{" · cited " + format(c["cites"], ",") + " times by other papers" if c.get("cites") else ""}</p>'
              + (f'<p class="by">Retraction Watch listed this paper as retracted when we opened the case, and has since withdrawn the record.</p>' if c.get("unlisted") else
-                f'<p class="cf-dead">Retracted {esc(nice(c["retracted"]))}</p>') +
+                f'<p class="cf-dead">Retracted {esc(nice(c["retracted"]))}</p>'
+                + ('<p class="by">The publisher’s own notice is on record at Crossref.</p>' if c.get("confirm") == "publisher" else "")) +
              f'{"<div class=cause>" + reasons + "</div>" if reasons else ""}</div>')
     rows = []
     for x in c["cites_on"]:
@@ -627,6 +628,16 @@ def feed(M):
             if i.get("outcome") == "fixed":
                 E.append((stamp(i.get("fixed") or i.get("last")), f"newsfix:{i.get('key') or i.get('url')}",
                           f"Corrected: {i.get('outlet') or i.get('domain')}", f"{SITE}/news/", i.get("claim") or ""))
+    plural = lambda n, one, many: f"{n} {one if n == 1 else many}"
+    for x in weeks(M)[:-1]:  # one round-up for each finished week in which something happened
+        if not (x["found"] or x["notes"] or x["fixed"]):
+            continue
+        bits = [plural(x["found"], "new zombie citation", "new zombie citations") + " found",
+                plural(x["notes"], "note", "notes") + " posted to Wikipedia editors",
+                plural(x["fixed"], "citation", "citations") + " fixed"]
+        E.append((stamp((d(x["w"]) + timedelta(days=7)).isoformat()), f"week:{x['w']}",
+                  f"The week of {nice(x['w'], False)}: {x['found']} found, {x['notes']} told, {x['fixed']} fixed",
+                  f"{SITE}/results/", f"{bits[0]}, {bits[1]} and {bits[2]}. The full scoreboard is on the Results page."))
     E.sort(key=lambda e: e[0], reverse=True)
     E = E[:60]
     updated = E[0][0] if E else stamp(M["today"])
@@ -660,7 +671,7 @@ def sitemap(urls):
 # ───────────────────────── open data ─────────────────────────
 
 DATA_LICENSE = "https://creativecommons.org/licenses/by/4.0/"
-CITE_COLS = ["doi", "title", "journal", "published", "retracted", "retraction_notice", "reasons", "superseded",
+CITE_COLS = ["doi", "title", "journal", "published", "retracted", "retraction_notice", "reasons", "second_source", "superseded",
              "wikipedia_article", "section", "status", "quoted_sentence", "monthly_views"]
 CASE_COLS = ["case_url", "doi", "title", "wikipedia_article", "state", "opened", "closed", "how_closed", "note_posted"]
 
@@ -683,9 +694,9 @@ def data_files(M):
             st = "superseded" if superseded(p) else "reviewed" if f'{p["doi"]}|{w["page"]}' in gone and w.get("status") == "zombie" else w.get("status") or ""
             cites.append([p["doi"], clean_title(p.get("title")), p.get("journal") or "", p.get("published") or "",
                           p.get("retracted") or "", p.get("notice") or "", "; ".join(p.get("reasons") or []),
-                          "yes" if superseded(p) else "no", w["page"], w.get("section") or "", st,
+                          p.get("confirm") or "", "yes" if superseded(p) else "no", w["page"], w.get("section") or "", st,
                           said(w, 10000), w.get("views") or 0])
-    cites.sort(key=lambda r: (r[10] != "zombie", -r[12], r[0], r[8]))
+    cites.sort(key=lambda r: (r[11] != "zombie", -r[13], r[0], r[9]))
     cases = []
     for c in M["cases"]:
         for x in c["cites_on"]:
@@ -713,6 +724,7 @@ def data_body(M):
         </ul>
         <h3>citations.csv columns</h3>
         <ul class="cols">{cols([("doi", "the retracted paper"), ("retraction_notice", "DOI of the official notice"), ("reasons", "Retraction Watch's reason codes"),
+                                ("second_source", "who else lists the retraction at Crossref: publisher (the publisher's own notice), rw (Retraction Watch's entry only), none (Crossref lists no retraction; we treat these with care)"),
                                 ("superseded", "yes when the paper was only replaced by a newer version (out of date, not discredited)"),
                                 ("status", "zombie: no warning near it · flagged: the article mentions the retraction · reviewed: read by hand, cited on purpose · author or subject: the article is about the author or the scandal · superseded: replaced by a newer version"),
                                 ("quoted_sentence", "the sentence the citation supports, when it is readable"), ("monthly_views", "article views in the last 30 days")])}</ul>

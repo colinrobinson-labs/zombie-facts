@@ -147,7 +147,12 @@ def recheck_cases(data, pages, now):
                 how = "author"
             elif not how and p and is_subject_page(txt, p.get("authors") or []):
                 how = "subject"
-        c["v"] = pg.get("views", c.get("v"))
+        if pg.get("views") is not None:
+            c["v"] = pg["views"]
+            if p:   # keep the paper's own reader numbers in step, so the home page and the desk agree
+                for w in p["wiki"]:
+                    if w["page"] == page:
+                        w["views"] = pg["views"]
         if how:
             c.update(c=now, how=how)
             closed.append((k, how))
@@ -221,6 +226,7 @@ def main():
     replies = watch_outreach(outreach, pages, now_ts)
     retire_notes(outreach, cases, now)
     for p in data["papers"]:  # older builds stored list rows and markup as quotes
+        p["reach"] = sum(w.get("views") or 0 for w in p["wiki"] if w["status"] == "zombie")
         p["superseded"] = superseded(p)
         p["replaced"] = replaced(p)
         for w in p["wiki"]:

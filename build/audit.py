@@ -97,6 +97,8 @@ def report(path):
             review.append(f"`{p['doi']}` ({', '.join(p['reasons'][:3])}): PubMed notice reads as procedural. "
                           f"Check before reporting: {t[:300]}")
     live = [p for p in data["papers"] if p["zombies"] and not p.get("superseded")]
+    unconfirmed = [p for p in live if p.get("confirm") == "none"]
+    placeholder = [p for p in live if (p.get("retracted") or "")[5:] == "01-01" and p.get("confirm") != "publisher"]
     lines = [f"Data built {data.get('built')}, checked {data.get('checked') or 'n/a'}.",
              f"**{sum(p['zombies'] for p in live)} zombie citations on {len(live)} papers** "
              f"({sum(1 for p in data['papers'] if p['zombies'] and p.get('superseded'))} superseded papers excluded: retracted-and-replaced or Cochrane procedural withdrawals).", "",
@@ -105,7 +107,15 @@ def report(path):
     lines += ["", f"### Consistency\n{len(issues)} issue(s)."] + [f"- {i}" for i in issues[:50]]
     lines += ["", f"### Cochrane reviews to re-check\n{len(review)} still counted as zombies but read as procedural."]
     lines += [f"- {r}" for r in review]
-    bad = len(issues) + len(review) + max(0, len(loose) - 1)
+    by = lambda k: sum(1 for p in live if (p.get("confirm") or "") == k)
+    lines += ["", f"### Second source\nOf {len(live)} zombie papers: {by('publisher')} confirmed by the publisher's notice at Crossref, "
+                  f"{by('rw')} by Retraction Watch's entry there, {by('')} not checked or unknown to Crossref, "
+                  f"**{len(unconfirmed)} with no retraction on record at Crossref** (kept off the home page, social posts and notes)."]
+    lines += [f"- `{p['doi']}` {p['title'][:90]} (retracted {p.get('retracted')}; on {', '.join(w['page'] for w in p['wiki'] if w['status'] == 'zombie')[:120]})" for p in unconfirmed]
+    if placeholder:
+        lines += ["", "Retraction dated January 1 (often a placeholder) and not publisher-confirmed:"]
+        lines += [f"- `{p['doi']}` {p['title'][:90]} ({p.get('retracted')})" for p in placeholder]
+    bad = len(issues) + len(review) + max(0, len(loose) - 1) + len(unconfirmed)
     lines.insert(0, ("All clear." if not bad else f"{bad} item(s) need a look.") + "\n")
     with open(path, "w") as f:
         f.write("\n".join(lines) + "\n")

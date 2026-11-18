@@ -278,10 +278,16 @@ def context_for(txt, low, i):
     if not inside:
         # inline citation such as {{doi-inline}} in a list row: the text before it on the same line
         ls = low.rfind("\n", 0, i) + 1
-        t0 = low.rfind("{{", ls, i)
+        t0 = low.rfind("{{", max(0, i - 1500), i)
+        if t0 >= 0 and low.find("}}", t0, i) >= 0:
+            t0 = -1                                  # that template closed before the DOI
+        te = low.find("}}", i) if t0 >= 0 else -1
+        if t0 >= 0 and t0 < ls:
+            ls = low.rfind("\n", 0, t0) + 1          # a template written over several lines: the row starts where it does
         rs = t0 if t0 >= 0 else max(ls, i - 300)
-        le = low.find("\n", i)
+        le = low.find("\n", te if 0 <= te - i < 1500 else i)   # ...and ends after the template closes ("}}. Retracted.")
         row_end = le if le >= 0 else len(low)
+        row_start = ls
     # first occurrence might be a named ref defined in a reference list
     a = max(0, rs - 1600)
     before = txt[a:rs]
@@ -299,7 +305,7 @@ def context_for(txt, low, i):
     if inside:
         win = low[max(0, rs - 600): (re_ + 400 if 0 <= re_ - i < 4000 else i + 900)]
     else:  # an inline citation: only its own list row
-        win = low[low.rfind("\n", 0, i) + 1: row_end]
+        win = low[row_start: row_end]
     flagged = bool(re.search(r"retract|\{\{\s*retracted|expression of concern|withdr|\bremoved:|was (?:\w+ )?removed\b", win))
     return sentence, sec, flagged
 
@@ -312,16 +318,25 @@ def read_pages(titles):
         p = {"action": "query", "prop": "revisions|pageviews|info", "rvprop": "content|timestamp",
              "rvslots": "main", "pvipdays": "30", "titles": "|".join(chunk), "format": "json",
              "formatversion": "2", "maxlag": "5"}
-        try:
-            j = get(WP + "?" + urllib.parse.urlencode(p))
-        except Exception as e:
-            log("read failed", e); return {}
-        r = {}
-        for pg in j.get("query", {}).get("pages", []):
-            rev = (pg.get("revisions") or [{}])[0]
-            views = sum(v or 0 for v in (pg.get("pageviews") or {}).values())
-            r[pg["title"]] = {"text": rev.get("slots", {}).get("main", {}).get("content", ""),
-                               "ts": rev.get("timestamp", ""), "views": views, "missing": bool(pg.get("missing"))}
+        r, more = {}, {}
+        for _ in range(8):
+            # Page views arrive a few pages at a time: the API answers with a "continue" marker until
+            # every page in the batch has its numbers. Stopping early used to record 0 readers.
+            try:
+                j = get(WP + "?" + urllib.parse.urlencode({**p, **more}))
+            except Exception as e:
+                log("read failed", e); break
+            for pg in j.get("query", {}).get("pages", []):
+                cur = r.setdefault(pg["title"], {"text": "", "ts": "", "views": None, "missing": bool(pg.get("missing"))})
+                rev = (pg.get("revisions") or [{}])[0]
+                if rev.get("slots"):
+                    cur["text"] = rev["slots"].get("main", {}).get("content", "")
+                    cur["ts"] = rev.get("timestamp", "")
+                if pg.get("pageviews") is not None:
+                    cur["views"] = sum(v or 0 for v in pg["pageviews"].values())
+            more = j.get("continue") or {}
+            if not more:
+                break
         return r
 
     # content of many pages per request is limited; 10 is safe and fast enough.
@@ -378,7 +393,7 @@ def crossref_counts(dois):
     def batch(chunk):
         f = ",".join("doi:" + d for d in chunk)
         u = "https://api.crossref.org/works?" + urllib.parse.urlencode(
-            {"filter": f, "rows": len(chunk), "select": "DOI,is-referenced-by-count,title,container-title,issued",
+            {"filter": f, "rows": len(chunk), "select": "DOI,is-referenced-by-count,title,container-title,issued,updated-by",
              "mailto": CONTACT})
         try:
             return get(u)["message"]["items"]
@@ -392,6 +407,23 @@ def crossref_counts(dois):
                 out[w["DOI"].lower()] = w
     log("crossref enriched", len(out))
     return out
+
+
+def second_source(work):
+    """Who, besides the Retraction Watch file we start from, says this paper is retracted.
+
+    Crossref lists retractions on the paper's own record ("updated-by"), from two feeds: the
+    publisher's notice and Retraction Watch. Returns "publisher" when the publisher's notice is
+    there, "rw" when only Retraction Watch's entry is, "none" when Crossref knows the paper but
+    lists no retraction (worth a look: this is how a mistaken record shows up), and "" when
+    Crossref does not know the DOI at all.
+    """
+    if not work:
+        return ""
+    ups = [u for u in work.get("updated-by") or [] if (u.get("type") or "").lower() in ("retraction", "withdrawal", "removal")]
+    if any((u.get("source") or "").lower() == "publisher" for u in ups):
+        return "publisher"
+    return "rw" if ups else "none"
 
 
 # ---------------------------------------------------------------- 5. correction ledger
@@ -507,12 +539,18 @@ def main():
         order = order[:MAX_PAGES_READ]
     pages = read_pages(order)
     cr = crossref_counts(hits.keys())
+    prev = load_prev()
+    # readers we could not get this run fall back to last week's number, never to zero
+    old_views = {(p["doi"], w["page"]): w.get("views") or 0 for p in prev.get("papers", []) for w in p.get("wiki", [])}
+    unknown = sum(1 for t in order if (pages.get(t) or {}).get("views") is None and (pages.get(t) or {}).get("text"))
+    log("pages with no view count this run:", unknown)
 
     papers = []
     for d, ts in hits.items():
         rec = dict(rw[d])
         w = cr.get(d, {})
         rec["cites"] = w.get("is-referenced-by-count")
+        rec["confirm"] = second_source(w) if cr else None  # None: Crossref was unreachable this run
         if not rec["title"] and w.get("title"):
             rec["title"] = w["title"][0]
         cites = []
@@ -537,7 +575,8 @@ def main():
             elif status == "zombie" and is_subject_page(txt, rec["authors"]):
                 status = "subject"  # the article is about the retraction scandal itself
             cites.append({"page": t, "status": status, "said": sent,
-                          "section": sec, "views": pg["views"], "rev": pg["ts"][:10]})
+                          "section": sec, "rev": pg["ts"][:10],
+                          "views": pg["views"] if pg["views"] is not None else old_views.get((d, t), 0)})
         if not cites:
             continue
         rec["superseded"] = superseded(rec)
@@ -549,7 +588,6 @@ def main():
 
     papers.sort(key=lambda p: (-p["reach"], -p["zombies"]))
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    prev = load_prev()
     sanity_check(prev, papers, rw)
     ledger = update_ledger(prev, papers, hits, pages, today, rw)
     reasons = Counter(r for p in papers if p["zombies"] for r in p["reasons"])
