@@ -217,7 +217,7 @@ def shell(head, drawer, slug, active, title, desc, og_title, og_desc, body, nxt,
         h = h.replace('<meta property="og:type" content="website">', '<meta property="og:type" content="article">')
     h = h.replace("</head>", "")
     if X.GOATCOUNTER:
-        extra_head += f'<script data-goatcounter="https://{X.GOATCOUNTER}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>\n'
+        extra_head += f'<script data-goatcounter="https://{X.GOATCOUNTER}.goatcounter.com/count" async src="https://gc.zgo.at/count.v4.js" crossorigin="anonymous" integrity="sha384-nRw6qfbWyJha9LhsOtSb2YJDyZdKvvCFh0fJYlkquSFjUxp9FVNugbfy8q1jdxI+"></script>\n'
     return (h + f'<link rel="canonical" href="{url}">\n'
             '<link rel="alternate" type="application/atom+xml" title="Zombie Facts: new cases and fixes" href="/feed.xml">\n'
             '<link rel="apple-touch-icon" href="/assets/icon.png">\n'

@@ -19,9 +19,24 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: actions/configure-pages@v5
+      - name: Copy only the public site (no build scripts, sources, docs or repo files)
+        run: |
+          mkdir _site
+          rsync -a --exclude-from=- ./ _site/ <<'EOF'
+          .git/
+          .github/
+          .gitignore
+          _site/
+          build/
+          src/
+          docs/
+          README.md
+          __pycache__/
+          *.pyc
+          EOF
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
       - name: Tell search engines what changed (IndexNow)

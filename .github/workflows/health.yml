@@ -52,7 +52,7 @@ jobs:
           The stalled jobs were restarted automatically and the site was still failing afterwards.
           Run: $run"
             if [ -n "$num" ]; then gh issue comment "$num" --body "$body"
-            else gh issue create --title "$title" --body "$body" --assignee lightsgoblack; fi
+            else gh issue create --title "$title" --body "$body"; fi
             exit 1
           elif [ -n "$num" ]; then
             gh issue close "$num" --comment "All checks pass again. $run"
