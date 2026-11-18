@@ -17,7 +17,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/configure-pages@v5
       - name: Copy only the public site (no build scripts, sources, docs or repo files)
         run: |
