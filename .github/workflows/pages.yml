@@ -18,7 +18,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
       - name: Copy only the public site (no build scripts, sources, docs or repo files)
         run: |
           mkdir _site
