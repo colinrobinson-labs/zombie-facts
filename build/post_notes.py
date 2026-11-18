@@ -14,7 +14,7 @@ own account, with a plain edit summary and no site credit.
 Each note is re-checked against the live article first, so a citation fixed in
 the meantime is never reported.
 """
-import http.cookiejar, json, os, sys, time, urllib.parse, urllib.request
+import http.cookiejar, json, os, re, sys, time, urllib.parse, urllib.request
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -53,6 +53,28 @@ def talk_has_section(page, title):
     return any(x.get("line", "").strip().lower() == title.strip().lower() for x in r.get("parse", {}).get("sections", []))
 
 
+def opted_out(page, account):
+    """True when the talk page asks bots to stay away ({{nobots}} or {{bots|deny=...}})."""
+    r = api({"action": "query", "prop": "revisions", "rvprop": "content", "rvslots": "main", "titles": "Talk:" + page})
+    pg = (r.get("query", {}).get("pages") or [{}])[0]
+    txt = ((pg.get("revisions") or [{}])[0].get("slots", {}).get("main", {}).get("content") or "")
+    return bots_denied(txt, account)
+
+
+def bots_denied(wikitext, account):
+    low = wikitext.lower()
+    if re.search(r"\{\{\s*nobots\s*\}\}", low):
+        return True
+    for m in re.finditer(r"\{\{\s*bots\s*\|([^}]*)\}\}", low):
+        args = dict(a.split("=", 1) for a in m.group(1).split("|") if "=" in a)
+        deny = [x.strip() for x in args.get("deny", "").split(",") if x.strip()]
+        allow = [x.strip() for x in args.get("allow", "").split(",") if x.strip()]
+        me = account.lower()
+        if "all" in deny or me in deny or (allow and "all" not in allow and me not in allow):
+            return True
+    return False
+
+
 def still_cited(page, doi):
     r = api({"action": "query", "prop": "revisions", "rvprop": "content", "rvslots": "main", "titles": page})
     pg = (r.get("query", {}).get("pages") or [{}])[0]
@@ -80,6 +102,9 @@ def main():
         if talk_has_section(n["page"], n["section"]):
             n["status"] = "posted"; n.setdefault("posted", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ"))
             save(OUTREACH, out, pretty=True); log("already on talk page, marking posted:", n["page"]); continue
+        if opted_out(n["page"], account):
+            n["status"] = "skipped"; n["why_skipped"] = "the talk page asks bots not to post"
+            log("skip, talk page opts out of bots:", n["page"]); continue
         if DRY:
             log("DRY RUN would post to Talk:" + n["page"], "|", n["section"]); continue
         r = api({"action": "edit", "title": "Talk:" + n["page"], "section": "new", "sectiontitle": n["section"],

@@ -328,3 +328,28 @@ class SecondSource(unittest.TestCase):
 
     def test_unknown_to_crossref(self):
         self.assertEqual(B.second_source({}), "")
+
+
+class BotExclusion(unittest.TestCase):
+    def test_nobots_and_deny(self):
+        import post_notes as P
+        self.assertTrue(P.bots_denied("{{nobots}}\n== Talk ==", "NoteBot"))
+        self.assertTrue(P.bots_denied("{{bots|deny=all}}", "NoteBot"))
+        self.assertTrue(P.bots_denied("{{bots|deny=OtherBot, NoteBot}}", "NoteBot"))
+        self.assertTrue(P.bots_denied("{{bots|allow=OtherBot}}", "NoteBot"))
+        self.assertFalse(P.bots_denied("{{bots|deny=OtherBot}}", "NoteBot"))
+        self.assertFalse(P.bots_denied("{{bots|allow=all}}", "NoteBot"))
+        self.assertFalse(P.bots_denied("Just a talk page", "NoteBot"))
+
+
+class MultiLineListCitation(unittest.TestCase):
+    TXT = ("== References ==\n'''2008'''\n*{{citation\n |last1= Said |first1= Yasmin H.\n |title= Social networks\n"
+           " |doi= 10.1016/j.csda.2007.07.021\n|doi-access= free\n }}. Retracted.\n*{{Citation\n| last1 = d'Arrigo\n| doi = 10.1/other\n}}\n")
+
+    def test_note_after_a_multi_line_template_counts(self):
+        low = self.TXT.lower()
+        self.assertTrue(B.context_for(self.TXT, low, low.find("10.1016/j.csda"))[2])
+
+    def test_next_row_is_not_flagged_by_its_neighbour(self):
+        low = self.TXT.lower()
+        self.assertFalse(B.context_for(self.TXT, low, low.find("10.1/other"))[2])
