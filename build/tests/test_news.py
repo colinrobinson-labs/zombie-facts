@@ -98,3 +98,20 @@ class Triage(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TriageWhoSaidIt(unittest.TestCase):
+    def lead(self, **kw):
+        return dict({"kind": "factcheck", "url": "https://example-news.com/a", "domain": "example-news.com",
+                     "outlet": "Example News", "claim": "A vaccine study was hidden", "known": True}, **kw)
+
+    def test_unknown_site_is_not_a_lead(self):
+        self.assertIn("not a newsroom", N.triage(self.lead(known=False), set()))
+
+    def test_someone_elses_claim_is_not_the_outlets(self):
+        self.assertIn("Senator Smith", N.triage(self.lead(claimant="Senator Smith"), set()))
+
+    def test_outlet_named_as_the_claimant_stays(self):
+        self.assertIsNone(N.triage(self.lead(claimant="Example News"), set()))
+        self.assertIsNone(N.triage(self.lead(claimant="Social media users"), set()))
+        self.assertIsNone(N.triage(self.lead(claimant=""), set()))

@@ -100,7 +100,24 @@ def triage(it, superseded_dois):
         c = it.get("claim") or ""
         if not (SCIENCE_RX.search(c) or SCIENCE_CASED.search(c)):
             return "auto: off our beat (not a health or science claim)"
+        if it.get("known") is False:
+            return "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
+        who = (it.get("claimant") or "").strip()
+        if who and not CROWD.search(who) and not same_name(who, it.get("outlet") or "", h):
+            return f"auto: the claim is {who}'s, and the outlet reported or hosted it. Nothing for the outlet to correct"
     return None
+
+
+# "Who said it" values that mean nobody in particular, so the outlet itself may be the one asserting it.
+CROWD = re.compile(r"social media|viral|multiple|various|users?\b|posts?\b|facebook|instagram|tiktok|twitter|\bx\b|"
+                   r"whatsapp|youtube|blog|website|online|internet|anonymous|unknown|bloggers?", re.I)
+
+
+def same_name(who, outlet, domain):
+    """True when the fact-checker names the outlet itself as the one who made the claim."""
+    squash = lambda s: re.sub(r"[^a-z0-9]", "", (s or "").lower())
+    w, o, d = squash(who), squash(outlet), squash((domain or "").split(".")[0])
+    return bool(w) and ((o and (w in o or o in w)) or (d and (w in d or d in w)))
 
 
 def now():
@@ -243,7 +260,8 @@ def outlet_hits(fcs, outlets):
             o = outlet_for(h, outlets) or {"name": h, "domain": h}
             out.append({"kind": "factcheck", "url": u, "outlet": o["name"], "domain": o["domain"],
                         "claim": f["claim"], "verdict": f["verdict"], "checker": f["checker"],
-                        "checkUrl": f["url"], "checked": f["date"], "known": "page" in o})
+                        "checkUrl": f["url"], "checked": f["date"], "known": "page" in o,
+                        "claimant": f.get("claimant") or ""})
     return out
 
 

@@ -9,7 +9,7 @@
   "newsSource": "Media Cloud",
   "stories": 0,
   "storiesMentionRetraction": 0,
-  "unreviewed": 12,
+  "unreviewed": 0,
   "confirmed": 0
  },
  "factchecks": [
@@ -569,9 +569,10 @@
    "outlet": "Forbes",
    "verdict": "unread",
    "key": "paper|10.1038/s41586-024-07219-0|https://www.forbes.com/sites/hugheynewsome-1/2025/12/15/climate-change-is-real-but-bad-data-is-a-gift-to-skeptics/",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-05"
+   "last": "2026-11-05",
+   "note": "Read Nov 17, 2026. The story is about the retraction itself and says Nature retracted the study. Not a zombie."
   },
   {
    "kind": "factcheck",
@@ -1197,9 +1198,10 @@
    "checked": "2025-06-13",
    "known": true,
    "key": "factcheck|https://www.factcheck.org/2025/06/hhs-misleads-on-mrna-vaccine-safety-after-pulling-moderna-funding/|https://www.npr.org/2025/05/28/nx-s1-5414642/trump-vaccine-bird-flu-mrna",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "Read Nov 17, 2026. The claim was made by the U.S. health department; the outlet reported it. Nothing for the outlet to correct."
   },
   {
    "kind": "factcheck",
@@ -1213,9 +1215,10 @@
    "checked": "2025-06-13",
    "known": true,
    "key": "factcheck|https://www.factcheck.org/2025/06/hhs-misleads-on-mrna-vaccine-safety-after-pulling-moderna-funding/|https://www.theatlantic.com/health/archive/2025/05/hiv-vaccines-hives-funding/683000/",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "Read Nov 17, 2026. The claim was made by the U.S. health department; the outlet reported it. Nothing for the outlet to correct."
   },
   {
    "kind": "factcheck",
@@ -1229,9 +1232,10 @@
    "checked": "2025-05-17",
    "known": false,
    "key": "factcheck|https://pesacheck.org/missing-context-the-fact-that-the-sahara-was-once-green-does-not-prove-climate-change-is-natural-e6359ce6c7e9|https://notrickszone.com/2025/03/26/sahara-desert-shows-abrupt-extreme-climate-change-is-natural-nothing-human-about-it/",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
   },
   {
    "kind": "factcheck",
@@ -1279,9 +1283,10 @@
    "checked": "2025-04-28",
    "known": true,
    "key": "factcheck|https://www.factcheck.org/2025/04/rfk-jr-misleads-on-autism-prevalence-causes/|https://www.foxnews.com/media/hhs-secretary-rfk-jr-pledges-make-sure-kids-get-real-food-not-poison-after-artificial-food-dye-ban",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "Read Nov 17, 2026. The claim was made by the U.S. health secretary in an interview the outlet reported. Nothing for the outlet to correct."
   },
   {
    "kind": "factcheck",
@@ -1346,9 +1351,10 @@
    "checked": "2025-02-13",
    "known": false,
    "key": "factcheck|https://verafiles.org/articles/fact-check-neygold-plus-not-fda-approved-for-prostatitis|https://www.fda-gov.asia/prostatitis",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
   },
   {
    "kind": "factcheck",
@@ -1362,9 +1368,10 @@
    "checked": "2025-01-14",
    "known": false,
    "key": "factcheck|https://pesacheck.org/missing-context-this-nature-article-on-antarctic-ice-does-not-prove-global-warming-is-a-hoax-902db557575d|https://www.globalresearch.ca/global-warming-hoax-antarctic-ice-expanding/5859679",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
   },
   {
    "kind": "factcheck",
@@ -1395,9 +1402,10 @@
    "checked": "2025-01-29",
    "known": false,
    "key": "factcheck|https://pesacheck.org/false-extreme-weather-in-2024-can-be-linked-to-climate-change-430f258fb6e1|https://climatechangedispatch.com/meteorologist-bbc-article-falsely-blames-2024-extreme-weather-on-climate-change/",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
   },
   {
    "kind": "factcheck",
@@ -1411,9 +1419,10 @@
    "checked": "2024-12-09",
    "known": false,
    "key": "factcheck|https://www.thip.media/health-news-fact-check/did-dr-fauci-admit-72-childhood-vaccines-lacked-safety-testing/94820/|https://thepeoplesvoice.tv/fauci-admits-none-of-the-72-mandatory-childrens-vaccines-were-ever-safety-tested/",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
   },
   {
    "kind": "factcheck",
@@ -1478,9 +1487,10 @@
    "checked": "2024-12-06",
    "known": true,
    "key": "factcheck|https://www.factcheck.org/2024/12/sen-mullins-misleading-vaccine-testing-claim/|https://www.nbcnews.com/meet-the-press/meet-press-november-17-2024-n1311057",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "Read Nov 17, 2026. The claim was made by a U.S. senator in an interview; the page is the transcript. Nothing for the outlet to correct."
   },
   {
    "kind": "factcheck",
@@ -1511,9 +1521,10 @@
    "checked": "2024-11-26",
    "known": false,
    "key": "factcheck|https://www.thip.media/health-news-fact-check/did-cleveland-clinic-warn-of-mass-deaths-from-mrna-vaccines/92865/|https://slaynews.com/news/cleveland-clinic-warns-wave-mass-deaths-wipe-out-covid-vaxxed-within-5-years/",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-16",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
   },
   {
    "kind": "factcheck",
@@ -1579,9 +1590,10 @@
    "verdict": "no mention",
    "context": "esman it now celebrates Dorothy Kuya a lifelong member of the Communist Party of Britain We had the Grievance Studies Affair where academics deliberately published absurd papers in journals including Human Reactions to Rape Culture and Queer Performativity at Urban Dog Parks in Portland Oregon in Gender Place Culture and An Ethnography of Breastaurant Masculinity Themes of Objectification Sexual Conquest Male Control and Masculine Toughness in a Sexual",
    "key": "paper|10.1080/0966369x.2018.1475346|https://hotair.com/david-strom/2026/08/07/the-problem-is-not-just-dei-or-academic-fraud-its-that-gibberish-is-considered-scholarship-n3817731",
-   "review": "unreviewed",
+   "review": "dismissed",
    "first": "2026-11-09",
-   "last": "2026-11-09"
+   "last": "2026-11-09",
+   "note": "Read Nov 17, 2026. The story names the paper as one of the Grievance Studies hoax papers, which is why it was retracted. Not a zombie."
   }
  ]
 }
