@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """Post one case a day to Bluesky and Mastodon. Off until the accounts exist.
 
+Runs on every scheduled watch run and decides for itself: at most one post per UTC day,
+and not before 13:00 UTC (morning in the Americas, afternoon in Europe). The schedule
+itself can't be trusted for this, because GitHub starts scheduled runs hours late.
+
 Switched on by repository secrets (never in code): BSKY_HANDLE + BSKY_APP_PASSWORD for
 Bluesky, MASTODON_URL (e.g. https://mastodon.social) + MASTODON_TOKEN for Mastodon. With
 neither set it prints "social: off" and does nothing. Each run posts at most one item:
@@ -80,6 +84,14 @@ def main():
         state = json.load(open(STATE))
     except (OSError, ValueError):
         state = {"posted": {}}
+    now = datetime.now(timezone.utc)
+    if not dry and "--now" not in sys.argv:
+        if any((v.get("at") or "")[:10] == now.strftime("%Y-%m-%d") for v in state["posted"].values()):
+            print("social: already posted today")
+            return
+        if now.hour < 13:
+            print("social: waiting until 13:00 UTC")
+            return
     nxt = next(((i, t, u, c) for i, t, u, c in candidates(X.model()) if i not in state["posted"]), None)
     if not nxt:
         print("social: nothing new")

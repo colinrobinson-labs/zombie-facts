@@ -321,7 +321,7 @@ def read_pages(titles):
             rev = (pg.get("revisions") or [{}])[0]
             views = sum(v or 0 for v in (pg.get("pageviews") or {}).values())
             r[pg["title"]] = {"text": rev.get("slots", {}).get("main", {}).get("content", ""),
-                               "ts": rev.get("timestamp", ""), "views": views}
+                               "ts": rev.get("timestamp", ""), "views": views, "missing": bool(pg.get("missing"))}
         return r
 
     # content of many pages per request is limited; 10 is safe and fast enough.
@@ -412,12 +412,20 @@ def sanity_check(prev, papers, rw):
     if before and len(papers) < 0.6 * before:
         raise SystemExit(f"cited papers dropped from {before} to {len(papers)}; not publishing")
 
-def update_ledger(prev, papers, hits, pages, today):
+def update_ledger(prev, papers, hits, pages, today, rw=None, reader=None):
     """Carry every zombie citation forward as a case, week to week.
 
     A case is one retracted DOI cited on one article. It opens the first week the
     citation is seen with no warning nearby, and closes when a later build finds
-    the article now flags it ("flagged") or no longer links the DOI ("removed").
+    the article now flags it ("flagged") or no longer cites the paper ("removed").
+
+    "removed" is a claim that Wikipedia changed, so it is only made after reading the
+    article and not finding the DOI or PubMed ID in it. Two things that used to be
+    mistaken for a removal are kept apart:
+    - Retraction Watch dropped its record for the paper: closed as "unlisted". Nothing
+      was fixed, the paper just isn't on record as retracted any more.
+    - The links dump no longer shows the link but the article still cites the paper
+      (dump lag or a changed link format): the case stays open.
     Pages we failed to read this run never close a case.
     """
     old = (prev.get("ledger") or {})
@@ -442,19 +450,40 @@ def update_ledger(prev, papers, hits, pages, today):
             rec.update(c=None, how=None, re=(rec.get("re") or 0) + 1)
             reopened += 1
         cases[k].update(t=p["title"][:200], pg=c["page"], v=c["views"], r=p["retracted"])
-    to_close = []
+        if superseded(p):
+            cases[k]["sup"] = True   # remembered on the case, so it is never counted as a fix after the paper drops out
+        else:
+            cases[k].pop("sup", None)
+    pending = []
     for k, rec in cases.items():
         if rec.get("c") or k in now_z:
             continue
+        pending.append(k)
+    # read the articles this build did not read, so every "removed" is checked against the live text
+    unread = sorted({k.split("|", 1)[1] for k in pending if k not in now_f
+                     and not (pages.get(k.split("|", 1)[1]) or {}).get("text")})
+    extra = (reader or read_pages)(unread) if unread else {}
+    to_close = []
+    for k in pending:
         doi, page = k.split("|", 1)
         if k in now_f:
             to_close.append((k, now_f[k]))
-        elif page not in hits.get(doi, ()):
-            to_close.append((k, "removed"))
-        elif page in pages and pages[page].get("text"):
-            # still linked and readable but neither zombie nor flagged: DOI text gone from wikitext
-            to_close.append((k, "removed"))
-        # else: page not read this run, leave open
+            continue
+        if rw is not None and doi not in rw:
+            to_close.append((k, "unlisted"))
+            continue
+        pg = pages.get(page) if (pages.get(page) or {}).get("text") else extra.get(page)
+        if not pg:
+            continue  # not read this run: leave open
+        if not pg.get("text"):
+            if pg.get("missing"):
+                to_close.append((k, "removed"))  # the article itself is gone
+            continue
+        pmid = (by_doi.get(doi) or (rw or {}).get(doi) or {}).get("pmid", "")
+        if positions(pg["text"].lower(), doi, pmid):
+            log("ledger: still cited, staying open:", k)
+            continue
+        to_close.append((k, "removed"))
     still_open = sum(1 for r in cases.values() if not r.get("c"))
     if still_open and len(to_close) > max(10, 0.5 * still_open):
         log("ledger: refusing to close", len(to_close), "of", still_open, "cases in one run (looks like a partial build)")
@@ -522,7 +551,7 @@ def main():
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     prev = load_prev()
     sanity_check(prev, papers, rw)
-    ledger = update_ledger(prev, papers, hits, pages, today)
+    ledger = update_ledger(prev, papers, hits, pages, today, rw)
     reasons = Counter(r for p in papers if p["zombies"] for r in p["reasons"])
     countries = Counter(c for p in papers if p["zombies"] for c in p["country"])
     years = Counter((p["retracted"] or "")[:4] for p in papers if p["zombies"])

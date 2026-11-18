@@ -1,32 +1,55 @@
 name: Site health check
+# Daily: is the live site up and is the data moving? If a data job has stalled, start it
+# again and look once more before bothering anyone. An issue opens only when the site is
+# still broken after that, and closes itself when the checks pass again.
 on:
   schedule:
-    - cron: "40 15 * * *"   # daily, after the 14:15 UTC watch run
+    - cron: "40 15 * * *"   # daily, after the 12:17 UTC watch run
   workflow_dispatch:
 permissions:
   contents: read
   issues: write
+  actions: write
 jobs:
   health:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Check the live site
         id: check
         continue-on-error: true
         run: python3 build/health.py
+      - name: Restart stalled jobs, then check again
+        id: recheck
+        if: steps.check.outcome == 'failure'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat health.txt
+          started=""
+          if grep -q "data is fresh" health.txt; then gh workflow run zombie-facts-watch.yml --ref main && started=1; fi
+          if grep -q "full data build" health.txt; then gh workflow run zombie-facts.yml --ref main && started=1; fi
+          if grep -q "newsroom is" health.txt; then gh workflow run news-watch.yml --ref main && started=1; fi
+          if grep -q "pages load\|feed, sitemap" health.txt; then gh workflow run pages.yml --ref main && started=1; fi
+          if [ -z "$started" ]; then exit 1; fi
+          # the daily recheck and a redeploy take about three minutes; the weekly jobs take longer and are judged tomorrow
+          sleep 420
+          rm -f health.txt
+          python3 build/health.py
       - name: Open or close the health issue
         env:
           GH_TOKEN: ${{ github.token }}
-          OUTCOME: ${{ steps.check.outcome }}
+          BROKEN: ${{ steps.check.outcome == 'failure' && steps.recheck.outcome != 'success' }}
         run: |
           title="Site health check failing"
           num=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
           run="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          if [ "$OUTCOME" = "failure" ]; then
+          if [ "$BROKEN" = "true" ]; then
             body="$(cat health.txt 2>/dev/null)
 
+          The stalled jobs were restarted automatically and the site was still failing afterwards.
           Run: $run"
             if [ -n "$num" ]; then gh issue comment "$num" --body "$body"
             else gh issue create --title "$title" --body "$body" --assignee lightsgoblack; fi

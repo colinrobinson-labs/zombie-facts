@@ -183,7 +183,7 @@ function autopsy(){
 
 /* drawer */
 function openI(i){const p=ZP[i];if(p)show(p)}
-function openP(doi){const p=ZP.find(x=>x.doi===doi.toLowerCase());if(p)show(p)}
+function openP(doi){const p=ZP.find(x=>x.doi===doi.toLowerCase());if(p)return show(p);const u=casePath(doi.toLowerCase())||casePath(doi);if(u)location.href=u}
 function reviewBlock(p,w){const n=noteOf(p.doi+"|"+w.page);if(!n)return "";
   const st={queued:"Reviewed · note queued",approved:"Reviewed · note goes up next",posted:"Note posted",replied:"Note posted · editors replied",dismissed:"Reviewed · no fix needed",skipped:"Fixed before we posted"}[n.status]||n.status;
   return `<div class="review"><b>Our review · ${esc(st)}</b>${esc(n.verdict)}${(n.replies||[]).map(r=>`<div class="rp"><span>${esc(r.user)} · ${esc(shortD((r.at||"").slice(0,10)||n.posted.slice(0,10)))}</span>${esc(r.said)}</div>`).join("")}</div>`}
@@ -272,8 +272,10 @@ const noteOf=k=>OUT.find(n=>n.key===k);
 const toldS=n=>n&&(n.status==="posted"||n.status==="replied");
 function desk(){
   const L=D.ledger;if(!L){$("desk").hidden=true;return}
+  // closed for a reason that is not a fix: Retraction Watch withdrew its record, or the paper was only replaced by a newer version
+  const autoNote=c=>c.c&&c.how==="unlisted"?{status:"dismissed",reviewed:c.c,verdict:"Retraction Watch no longer lists this paper as retracted. Nothing to fix, and not counted as one."}:c.c&&c.sup?{status:"dismissed",reviewed:c.c,verdict:"The paper was replaced by a newer version, not discredited. Not counted as a fix."}:null;
   const today=(D.checked||D.built).slice(0,10),byDoi={};ZP.forEach(p=>byDoi[p.doi]=p);
-  const all=Object.entries(L.cases).map(([k,c])=>{const doi=k.slice(0,k.indexOf("|"));return {...c,k,doi,p:byDoi[doi],n:noteOf(k)}}).filter(c=>!(c.p&&c.p._sup));
+  const all=Object.entries(L.cases).map(([k,c])=>{const doi=k.slice(0,k.indexOf("|"));return {...c,k,doi,p:byDoi[doi],n:noteOf(k)||autoNote(c)}}).filter(c=>!(c.p&&c.p._sup));
   const open=all.filter(c=>!c.c).sort((a,b)=>(b.v||0)-(a.v||0));
   const kept=all.filter(c=>c.n&&c.n.status==="dismissed"),told=open.filter(c=>toldS(c.n)),waiting=open.filter(c=>!kept.includes(c)&&!told.includes(c));
   const shut=all.filter(c=>c.c&&c.how!=="author"&&c.how!=="subject"&&!(c.n&&c.n.status==="dismissed")).sort((a,b)=>b.c.localeCompare(a.c));

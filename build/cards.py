@@ -56,10 +56,13 @@ def card_html(c):
     tag = {"open": "Source retracted " + i["retracted"], "fixed": "Fixed", "ok": "Reviewed"}[i["st"]]
     if i["quote"]:
         body = f'<p>“<mark>{e(i["quote"])}</mark>”</p>'
+    elif i["st"] == "ok":
+        body = (f'<h1>The paper cited on “{e(i["page"])}” is <mark>no longer listed as retracted</mark></h1>' if i.get("unlisted") else
+                f'<h1>Reviewed: <mark>no fix needed</mark> on “{e(i["page"])}”</h1>')
     else:
         body = f'<h1>Wikipedia still cites a <mark>retracted paper</mark> on “{e(i["page"])}”</h1>'
     stamp = (f'<div class="stamp">Fixed in {i["fixdays"]} day{"s" if i["fixdays"] != 1 else ""}</div>' if ok else "")
-    kick = ("Was on Wikipedia · " if ok else "Still on Wikipedia · ") + f'<b>{e(i["page"])}</b>'
+    kick = ("Was on Wikipedia · " if ok else "On Wikipedia · " if i["st"] == "ok" else "Still on Wikipedia · ") + f'<b>{e(i["page"])}</b>'
     meta = " · ".join(x for x in [f'Retracted {i["retracted"]}', i["journal"]] if x)
     return (f'<!doctype html><html><head><meta charset="utf-8">'
             '<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,500..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,600;1,8..60,400'
