@@ -64,7 +64,7 @@ jobs:
         run: python build/audit.py || true
       - name: Upload review contexts
         if: github.ref != 'refs/heads/main'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: zombie-facts-review
           path: |
