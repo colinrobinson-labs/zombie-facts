@@ -1,18 +1,32 @@
 {
- "built": "2026-11-16T21:33:15Z",
+ "built": "2026-11-23T23:04:42Z",
  "seconds": 3335,
  "stats": {
-  "factchecks": 5900,
+  "factchecks": 5787,
   "days": 730,
-  "checkers": 107,
-  "titlesSearched": 104,
+  "checkers": 105,
+  "titlesSearched": 110,
   "newsSource": "Media Cloud",
-  "stories": 0,
-  "storiesMentionRetraction": 0,
+  "stories": 12,
+  "storiesMentionRetraction": 10,
   "unreviewed": 0,
   "confirmed": 0
  },
  "factchecks": [
+  {
+   "claim": "The Moderna mRNA flu vaccine “didn’t work” and came with “massive side effects.”",
+   "verdict": "Misleading",
+   "checker": "FactCheck.org",
+   "url": "https://www.factcheck.org/2026/11/former-trump-administration-health-adviser-misleads-about-mrna-flu-vaccine/",
+   "date": "2026-11-20"
+  },
+  {
+   "claim": "A medical report revealed that Venerable Balangoda Kassapa Thero is addicted to drugs.",
+   "verdict": "False",
+   "checker": "Fact Crescendo Sri Lanka",
+   "url": "https://srilanka.factcrescendo.com/english/balangoda-kassapa-thero-drug-addiction-medical-report-false/",
+   "date": "2026-11-17"
+  },
   {
    "claim": "Airlines are banning COVID-vaccinated pilots from flying because of blood clots.",
    "verdict": "False",
@@ -119,13 +133,6 @@
    "date": "2026-08-11"
   },
   {
-   "claim": "Autism has increased as we \"add progressively more and more vaccines.\"",
-   "verdict": "Misleading",
-   "checker": "FactCheck.org",
-   "url": "https://www.factcheck.org/2026/08/trump-and-rfk-jr-repeat-false-and-misleading-vaccine-claims/",
-   "date": "2026-08-11"
-  },
-  {
    "claim": "American College of Physicians (ACP) guidelines redefined diabetes, stating that an HbA1c level up to 8.4% and an after-meal blood sugar up to 250 mg/dL are normal and no longer considered diabetic.",
    "verdict": "FALSE",
    "checker": "FACTLY",
@@ -138,13 +145,6 @@
    "checker": "Fact Crescendo Sri Lanka",
    "url": "https://srilanka.factcrescendo.com/english/iran-did-not-prove-largest-mossad-research-complex-destroyed/",
    "date": "2026-07-22"
-  },
-  {
-   "claim": "Health Minister Dr. Nalinda Jayatissa said the government bears no blame for the spread of dengue, in a statement carrying a News 1st logo.",
-   "verdict": "False",
-   "checker": "Fact Crescendo Sri Lanka",
-   "url": "https://srilanka.factcrescendo.com/english/fake-statement-on-dengue-falsely-attributed-to-minister-nalinda/",
-   "date": "2026-07-08"
   },
   {
    "claim": "Under the DMK regime, government schools were totally neglected. Students had to study in crumbling buildings without basic drinking water or clean sanitation. Now @TVKVijayHQ government has decided to fix it. To elevate the standard of school infrastructure across Tamil Nadu, a budget of ₹80.64 Crores has been allocated with NABARD assistance for the year 2026-27.",
@@ -449,8 +449,9 @@
    "key": "factcheck|https://www.dw.com/en/fact-check-false-claims-target-us-senate-candidate-abdul-el-sayed/a-78340951|https://dunning-kruger-times.com/michigan-election-update-abdul-el-sayed-got-three-times-as-many-votes-in-detroit-as-there-are-registered-voters/?fbclid=IwY2xjawTvvwtwZG9mBWV4dG4DYWVtAjExAHNydGMGYXBwX2lkEDIyMjAzOTE3ODgyMDA4OTIAAR7YyQk-m-kQ38-iDo6nkQtvAd5XUJ97nu-Yr-53GGl__lo4Ck30cS4EdSfdfQ_aem_fvNOsd7KXl6XkCM6d6bPQA",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "Satire site; the article is labelled as satire. Not an outlet error to correct."
+   "last": "2026-11-23",
+   "note": "Satire site; the article is labelled as satire. Not an outlet error to correct.",
+   "claimant": ""
   },
   {
    "kind": "factcheck",
@@ -467,7 +468,8 @@
    "review": "drafted",
    "note": "Headline says the health ministry called for cigarette-like warnings; PIB fact check says the advisory carries no warning labels. Body is accurate. Read 2026-11-05, unchanged. Draft ready, awaiting approval. On hold (2026-11-09): the first outlet request will be a science case; this one goes after.",
    "first": "2026-11-05",
-   "last": "2026-11-16"
+   "last": "2026-11-23",
+   "claimant": "hindustantimes"
   },
   {
    "kind": "paper",
@@ -553,7 +555,7 @@
    "key": "paper|10.1038/s41586-024-07219-0|https://www.benzinga.com/pressreleases/25/12/n49468879/friends-of-science-society-questions-banking-climate-risk-analysis-based-on-a-retracted-economic-p?utm_source=benzinga_taxonomy&utm_medium=rss_feed_free&utm_content=taxonomy_rss&utm_campaign=channel",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-05",
+   "last": "2026-11-23",
    "note": "auto: not a newsroom (government, politician, press release or document host)"
   },
   {
@@ -571,7 +573,7 @@
    "key": "paper|10.1038/s41586-024-07219-0|https://www.forbes.com/sites/hugheynewsome-1/2025/12/15/climate-change-is-real-but-bad-data-is-a-gift-to-skeptics/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-05",
+   "last": "2026-11-23",
    "note": "Read Nov 17, 2026. The story is about the retraction itself and says Nature retracted the study. Not a zombie."
   },
   {
@@ -588,8 +590,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/fact-check-cm-vijay-tiffin-office-ai-generated-image.html|https://news24online.com/photos/entertainment/tamil-nadu-cm-thalapathy-vijay-skips-luxury-carries-home-food-to-office-his-simplicity-will-surprise-you-eats-with-hands-not-spoon-839980",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "news24online"
   },
   {
    "kind": "factcheck",
@@ -605,8 +608,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2026/jun/05/john-kagia/new-york-coffee-cannabis-consumption/|https://www.politico.com/news/2026/04/02/kagia-q-a-cannabis-czar-00852110",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "John Kagia"
   },
   {
    "kind": "factcheck",
@@ -622,8 +626,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2026/may/21/kirsten-gillibrand/tariff-burden-households-new-york/|https://www.gillibrand.senate.gov/news/press/release/amid-substantial-job-losses-and-rising-prices-gillibrand-calls-for-tax-rebate-for-working-families/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "Kirsten Gillibrand"
   },
   {
    "kind": "factcheck",
@@ -639,8 +644,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2026/may/11/christine-quinn/new-york-city-homeless-children-yankee-stadium/|https://www.governor.ny.gov/news/new-data-highlights-importance-governor-hochuls-plan-deliver-universal-child-care-statewide",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "Christine Quinn"
   },
   {
    "kind": "factcheck",
@@ -656,8 +662,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2026/may/07/liz-krueger/electricity-data-centers-new-york-households/|https://www.timesunion.com/opinion/article/commentary-new-york-press-pause-building-data-21362982.php",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Liz Krueger"
   },
   {
    "kind": "factcheck",
@@ -673,8 +680,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2026/apr/29/ron-desantis/florida-redistricting-republican-democrat-majority/|https://www.foxnews.com/politics/ron-desantis-unveils-new-florida-congressional-map-would-give-gop-extra-four-seats",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Ron DeSantis"
   },
   {
    "kind": "factcheck",
@@ -690,8 +698,9 @@
    "key": "factcheck|https://dripafacts.ca/en/myth/most-racist-law/|https://globalnews.ca/news/11238390/dallas-brodie-onebc/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Dallas Brodie (OneBC)"
   },
   {
    "kind": "factcheck",
@@ -707,8 +716,9 @@
    "key": "factcheck|https://dripafacts.ca/en/myth/cowichan-confusion/|https://www.cbc.ca/news/canada/british-columbia/richmond-cowichan-letters",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Malcolm Brodie (City of Richmond)"
   },
   {
    "kind": "factcheck",
@@ -724,8 +734,9 @@
    "key": "factcheck|https://dripafacts.ca/en/myth/private-property-theft/|https://www.rebelnews.com/bc_embracing_undrip_makes_it_most_extreme_jurisdiction_in_the_world_drea_humphrey",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Drea Humphrey (Rebel News)"
   },
   {
    "kind": "factcheck",
@@ -741,8 +752,9 @@
    "key": "factcheck|https://dripafacts.ca/en/myth/two-tier-system/|https://www.rebelnews.com/bc_embracing_undrip_makes_it_most_extreme_jurisdiction_in_the_world_drea_humphrey",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Drea Humphrey (Rebel News)"
   },
   {
    "kind": "factcheck",
@@ -758,8 +770,9 @@
    "key": "factcheck|https://dripafacts.ca/en/myth/veto-power/|https://www.fraserinstitute.org/commentary/yes-bcs-land-act-changes-give-first-nations-veto-over-use-crown-land",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Drea Humphrey (Rebel News)"
   },
   {
    "kind": "factcheck",
@@ -775,8 +788,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/zee-news-the-tribune-toi-misreport-iran-strike-image-from-iraq.html|https://zeenews.india.com/world/not-only-oil-water-also-at-risk-during-us-israel-vs-iran-war-why-desalination-plants-are-critical-in-gulf-3026032.html",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Z news"
   },
   {
    "kind": "factcheck",
@@ -792,8 +806,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/cripted-wedding-at-metro-station-video-misreported-as-real-incident-by-news-channels.html|https://zeenews.india.com/hindi/off-beat/mother-catches-son-with-girlfriend-at-metro-arranges-roka-on-the-spot-video-viral/3102938",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Znews"
   },
   {
    "kind": "factcheck",
@@ -809,8 +824,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2026/feb/25/josh-riley/investor-owned-single-family-homes-us/|https://riley.house.gov/2026/01/08/riley-introduces-bipartisan-bill-to-stop-wall-street-from-buying-up-affordable-housing/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "Josh Riley"
   },
   {
    "kind": "factcheck",
@@ -826,8 +842,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/video-of-daughter-leaving-her-mother-at-oldage-home-is-scripted.html|https://ndtv.in/zara-hatke/daughter-takes-mother-to-old-age-home-viral-video-sparks-emotional-debate-10339613",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "zara-hatke"
   },
   {
    "kind": "factcheck",
@@ -843,8 +860,9 @@
    "key": "factcheck|https://www.dw.com/en/fact-check-trumps-speech-at-the-world-economic-forum/a-75601073|https://www.whitehouse.gov/videos/president-trump-delivers-a-special-address-to-the-world-economic-forum/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "Donald Trump "
   },
   {
    "kind": "factcheck",
@@ -860,8 +878,9 @@
    "key": "factcheck|https://factly.in/pending-traffic-challan-links-sent-via-sms-and-whatsapp-are-fake-and-fraudulent/|https://echallaom.vip/in",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Social Media User"
   },
   {
    "kind": "factcheck",
@@ -877,8 +896,9 @@
    "key": "factcheck|https://www.factcheck.org/2025/12/vaccine-panel-voting-to-change-hepatitis-b-shot-for-newborns-shares-misleading-information/|https://www.hhs.gov/press-room/acip-recommends-individual-based-decision-making-hepatitis-b-vaccine-birth-dose-infants-born-women-test-negative-virus.html",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "HHS press release"
   },
   {
    "kind": "factcheck",
@@ -894,8 +914,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2025/nov/07/nancy-mace/mamdani-mayor-new-york-shariah-law/|https://legacy.www.documentcloud.org/documents/26220025-a-muslim-radical-bemic-terrorists-bombed-the-twin-towers/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "Nancy Mace"
   },
   {
    "kind": "factcheck",
@@ -911,8 +932,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2025/oct/29/scott-bessent/overall-inflation-decline-trump/|https://www.nbcnews.com/meet-the-press/meet-press-october-26-2025-n1312920",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Scott Bessent"
   },
   {
    "kind": "factcheck",
@@ -928,8 +950,9 @@
    "key": "factcheck|https://www.dw.com/en/fact-check-has-germany-canceled-christmas-markets-in-2025/a-74470370|https://dunapress.org/germany-cancels-christmas-markets-2025/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Bianca Firenze"
   },
   {
    "kind": "factcheck",
@@ -945,8 +968,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/man-brutally-killed-was-mohammad-sohag-alias-lal-chand-a-muslim.html|https://www.republicworld.com/world-news/shocking-hindu-scrap-dealer-lynched-with-concrete-slabs-in-bangladesh-attackers-dance-on-his-body-after-death",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "republicworld"
   },
   {
    "kind": "factcheck",
@@ -962,8 +986,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/sudden-power-cut-triggered-the-karur-stampede-tragedy.html|https://thefederal.com/category/states/south/tamil-nadu/vijays-karur-rally-sudden-power-cut-led-to-stampede-alleges-tvk-functionary-208937",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "thefederal"
   },
   {
    "kind": "factcheck",
@@ -979,8 +1004,9 @@
    "key": "factcheck|https://www.sochfactcheck.com/defence-minister-khawaja-asif-remarks-on-storing-floodwater-presented-out-of-context-pakistan-monsoon-2025/|https://timesofindia.indiatimes.com/world/pakistan/put-it-in-container-pakistan-defence-minister-khawaja-asifs-bizarre-solution-for-floods-calls-excess-water-blessing/articleshow/123649830.cms",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Social media users, PTI supporters, Indians"
   },
   {
    "kind": "factcheck",
@@ -996,8 +1022,9 @@
    "key": "factcheck|https://www.sochfactcheck.com/defence-minister-khawaja-asif-remarks-on-storing-floodwater-presented-out-of-context-pakistan-monsoon-2025/|https://www.indiatoday.in/world/story/pakistan-floods-khawaja-asif-calls-floodwater-a-blessing-says-store-water-in-tubs-homes-2780824-2025-09-02",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Social media users, PTI supporters, Indians"
   },
   {
    "kind": "factcheck",
@@ -1013,8 +1040,9 @@
    "key": "factcheck|https://www.sochfactcheck.com/defence-minister-khawaja-asif-remarks-on-storing-floodwater-presented-out-of-context-pakistan-monsoon-2025/|https://www.ndtv.com/world-news/pakistan-defence-minister-khawaja-asif-s-bizarre-solution-for-floods-store-water-in-tubs-9202217",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Social media users, PTI supporters, Indians"
   },
   {
    "kind": "factcheck",
@@ -1030,8 +1058,9 @@
    "key": "factcheck|https://www.sochfactcheck.com/defence-minister-khawaja-asif-remarks-on-storing-floodwater-presented-out-of-context-pakistan-monsoon-2025/|https://www.republicworld.com/world-news/bizarre-pakistan-defence-minister-khawaja-asif-calls-floodwater-a-blessing-faces-backlash",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Social media users, PTI supporters, Indians"
   },
   {
    "kind": "factcheck",
@@ -1047,8 +1076,9 @@
    "key": "factcheck|https://www.sochfactcheck.com/defence-minister-khawaja-asif-remarks-on-storing-floodwater-presented-out-of-context-pakistan-monsoon-2025/|https://zeenews.india.com/world/pakistan-defence-minister-khawaja-asif-flood-comments-2954612.html",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Social media users, PTI supporters, Indians"
   },
   {
    "kind": "factcheck",
@@ -1064,8 +1094,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2025/aug/19/donald-trump/Trump-voting-machines-paper-ballots-count-election/|https://www.livenowfox.com/news/trump-executive-order-mail-in-ballots-voting",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Donald Trump"
   },
   {
    "kind": "factcheck",
@@ -1081,8 +1112,9 @@
    "key": "factcheck|https://www.sciencepresse.qc.ca/actualites-scientifiques/detecteur-rumeurs/2025/07/03/non-bouclier-spatial-antimissile-ne-peut|https://www.defense.gov/News/Releases/Release/Article/4193417/secretary-of-defense-pete-hegseth-statement-on-golden-dome-for-america/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "United States Secretary of Defense"
   },
   {
    "kind": "factcheck",
@@ -1098,8 +1130,9 @@
    "key": "factcheck|https://www.factcheck.org/2025/08/rfk-jr-justifies-cuts-to-mrna-vaccine-projects-with-falsehoods/|https://www.hhs.gov/press-room/hhs-winds-down-mrna-development-under-barda.html",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "Robert F. Kennedy Jr."
   },
   {
    "kind": "factcheck",
@@ -1115,8 +1148,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/declaration-that-facecovering-garments-will-be-prohibited-in-public-in-kazakhstan.html|https://www.news18.com/photogallery/world/kazakhstan-muslim-majority-country-banned-burqa-hijab-niqab-for-women-in-public-ws-kl-9414279.html",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "news18"
   },
   {
    "kind": "factcheck",
@@ -1132,8 +1166,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/Shocking-video-of-a-lion-sniffing-and-then-walking-away-from-a-man-sleeping-on-a-footpath-is-AI-generated.html|https://www.news18.com/viral/lion-spared-sleeping-mans-life-in-bizarre-street-encounter-watch-9373547.html",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "news18.com"
   },
   {
    "kind": "factcheck",
@@ -1149,8 +1184,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2025/jun/26/donald-trump/take-home-pay-10000-families-big-beautiful-bill/|https://www.whitehouse.gov/articles/2025/06/president-trumps-one-big-beautiful-bill-prevents-the-largest-tax-hike-in-history-and-unleashes-economic-growth/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom (government, politician, press release or document host)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom (government, politician, press release or document host)",
+   "claimant": "Donald Trump"
   },
   {
    "kind": "factcheck",
@@ -1166,8 +1202,9 @@
    "key": "factcheck|https://pesacheck.org/faux-lex-pr%C3%A9sident-s%C3%A9n%C3%A9galais-macky-sall-n-a-pas-%C3%A9t%C3%A9-emp%C3%AAch%C3%A9-de-s-exprimer-lors-du-governance-02c6bd83e56d?source=rss----ab41f21aa9a9---4|https://www.senenews.com/actualites/maroc-le-sale-coup-de-la-fondation-mo-ibrahim-a-lex-president-macky-sall_543932.html",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "www.senenews.com"
   },
   {
    "kind": "factcheck",
@@ -1183,8 +1220,9 @@
    "key": "factcheck|https://pesacheck.org/fake-senator-crystal-asige-has-not-been-arrested-89f629b7ef4b|https://piepay.net/6qWs2hxx?ad_id=120226927432160229&summer=584702857&pixel=759345842704849&token=EAAEiP1jEyCUBO9AthOziYVuMoFUpbzynwGEIffM7ALmejLPc4l5GyukToGnPFwqLR15z5tpRR41fSrCs7nKxHtBddrfE4SLZAoAF1ZBFsL1wX2IDAMoSVPXNcWhWHbFXOFMtA5S0tM0ulch2xq2eYGRP89RrLdZCIfBzcFgwlcb4WoTg6QXlHDKP7HtnMf7vgZDZD&domain=piepay.net&utm_medium=paid&utm_source=fb&utm_id=120226927432150229&utm_content=120226927525820229&utm_term=120226927432140229&utm_campaign=120226927432150229&media_type=image&fbclid=IwY2xjawKtJnBleHRuA2FlbQEwAGFkaWQBqyHA7K5nRWJyaWQRMWJDSW9Wb05UMTdpR3A1YVYBHj54lA6W6JM-b-ktb7DYcZSs8YqkqqJREezrbEFcbxDyKAO9BoYfL22IK4RB_aem_iE1xBkPlk1SbaK0KQSnhTA",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "n/a"
   },
   {
    "kind": "factcheck",
@@ -1200,8 +1238,9 @@
    "key": "factcheck|https://www.factcheck.org/2025/06/hhs-misleads-on-mrna-vaccine-safety-after-pulling-moderna-funding/|https://www.npr.org/2025/05/28/nx-s1-5414642/trump-vaccine-bird-flu-mrna",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "Read Nov 17, 2026. The claim was made by the U.S. health department; the outlet reported it. Nothing for the outlet to correct."
+   "last": "2026-11-23",
+   "note": "Read Nov 17, 2026. The claim was made by the U.S. health department; the outlet reported it. Nothing for the outlet to correct.",
+   "claimant": "Department of Health and Human Services"
   },
   {
    "kind": "factcheck",
@@ -1217,8 +1256,9 @@
    "key": "factcheck|https://www.factcheck.org/2025/06/hhs-misleads-on-mrna-vaccine-safety-after-pulling-moderna-funding/|https://www.theatlantic.com/health/archive/2025/05/hiv-vaccines-hives-funding/683000/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "Read Nov 17, 2026. The claim was made by the U.S. health department; the outlet reported it. Nothing for the outlet to correct."
+   "last": "2026-11-23",
+   "note": "Read Nov 17, 2026. The claim was made by the U.S. health department; the outlet reported it. Nothing for the outlet to correct.",
+   "claimant": "Department of Health and Human Services"
   },
   {
    "kind": "factcheck",
@@ -1234,8 +1274,9 @@
    "key": "factcheck|https://pesacheck.org/missing-context-the-fact-that-the-sahara-was-once-green-does-not-prove-climate-change-is-natural-e6359ce6c7e9|https://notrickszone.com/2025/03/26/sahara-desert-shows-abrupt-extreme-climate-change-is-natural-nothing-human-about-it/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)",
+   "claimant": "notrickszone.com"
   },
   {
    "kind": "factcheck",
@@ -1251,8 +1292,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2025/may/20/scott-bessent/gasoline-prices-fallen-trump-crude-oil/|https://www.nbcnews.com/meet-the-press/meet-press-may-18-2025-n1312151",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Scott Bessent"
   },
   {
    "kind": "factcheck",
@@ -1268,8 +1310,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2025/may/05/tweets/child-sex-trafficking-already-a-felony-in-ca-bill/|https://www.breitbart.com/politics/2025/04/29/california-democrats-block-bill-to-make-sex-trafficking-of-minors-a-felony-again/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "X posts"
   },
   {
    "kind": "factcheck",
@@ -1285,8 +1328,9 @@
    "key": "factcheck|https://www.factcheck.org/2025/04/rfk-jr-misleads-on-autism-prevalence-causes/|https://www.foxnews.com/media/hhs-secretary-rfk-jr-pledges-make-sure-kids-get-real-food-not-poison-after-artificial-food-dye-ban",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "Read Nov 17, 2026. The claim was made by the U.S. health secretary in an interview the outlet reported. Nothing for the outlet to correct."
+   "last": "2026-11-23",
+   "note": "Read Nov 17, 2026. The claim was made by the U.S. health secretary in an interview the outlet reported. Nothing for the outlet to correct.",
+   "claimant": "Robert F. Kennedy Jr."
   },
   {
    "kind": "factcheck",
@@ -1302,8 +1346,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/Woman-caught-smoking-on-IstanbulCyprus-flight-is-from-2019.html|https://www.freepressjournal.in/viral/shocking-woman-caught-smoking-on-istanbul-cyprus-flight-creates-ruckus-after-cabin-crew-attempts-to-confiscate-cigarette-lighter-video",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "freepressjournal"
   },
   {
    "kind": "factcheck",
@@ -1319,8 +1364,9 @@
    "key": "factcheck|https://pesacheck.org/false-artiste-jose-chameleon-is-not-nrms-flag-bearer-in-the-kawempe-north-by-election-517be3c4e04e|https://phoenix-browser.com/CQCtqQm8PKv",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Phoenix"
   },
   {
    "kind": "factcheck",
@@ -1336,8 +1382,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/An-old-and-unrelated-image-of-a-teacher-and-students.html|https://hindupost.in/politics/up-students-vs-tamil-language-chauvinists/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "hindupost"
   },
   {
    "kind": "factcheck",
@@ -1353,8 +1400,9 @@
    "key": "factcheck|https://verafiles.org/articles/fact-check-neygold-plus-not-fda-approved-for-prostatitis|https://www.fda-gov.asia/prostatitis",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)",
+   "claimant": "Facebook page DOH - Department of Health News"
   },
   {
    "kind": "factcheck",
@@ -1370,8 +1418,9 @@
    "key": "factcheck|https://pesacheck.org/missing-context-this-nature-article-on-antarctic-ice-does-not-prove-global-warming-is-a-hoax-902db557575d|https://www.globalresearch.ca/global-warming-hoax-antarctic-ice-expanding/5859679",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)",
+   "claimant": "Global Research"
   },
   {
    "kind": "factcheck",
@@ -1387,8 +1436,9 @@
    "key": "factcheck|https://pesacheck.org/false-humans-are-the-primary-drivers-of-carbon-dioxide-increase-in-the-atmosphere-7d0f04cb2505|https://principia-scientific.com/humans-are-not-primary-drivers-of-co2-increases/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Principia Scientific International "
   },
   {
    "kind": "factcheck",
@@ -1404,8 +1454,9 @@
    "key": "factcheck|https://pesacheck.org/false-extreme-weather-in-2024-can-be-linked-to-climate-change-430f258fb6e1|https://climatechangedispatch.com/meteorologist-bbc-article-falsely-blames-2024-extreme-weather-on-climate-change/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)",
+   "claimant": "Climate Change Dispatch"
   },
   {
    "kind": "factcheck",
@@ -1421,8 +1472,9 @@
    "key": "factcheck|https://www.thip.media/health-news-fact-check/did-dr-fauci-admit-72-childhood-vaccines-lacked-safety-testing/94820/|https://thepeoplesvoice.tv/fauci-admits-none-of-the-72-mandatory-childrens-vaccines-were-ever-safety-tested/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)",
+   "claimant": "Website"
   },
   {
    "kind": "factcheck",
@@ -1438,8 +1490,9 @@
    "key": "factcheck|https://slowblinkmainecoons.com/learn/maine-coon-price|https://money.com/how-much-does-a-maine-coon-cat-cost/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Víctor Rosario"
   },
   {
    "kind": "factcheck",
@@ -1455,8 +1508,9 @@
    "key": "factcheck|https://slowblinkmainecoons.com/learn/maine-coon-price|https://kittentoob.com/price-guide-to-maine-coon-cats/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": " Henry Steinman"
   },
   {
    "kind": "factcheck",
@@ -1472,8 +1526,9 @@
    "key": "factcheck|https://protonvpn.com/|https://vpnuser.com",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "gary"
   },
   {
    "kind": "factcheck",
@@ -1489,8 +1544,9 @@
    "key": "factcheck|https://www.factcheck.org/2024/12/sen-mullins-misleading-vaccine-testing-claim/|https://www.nbcnews.com/meet-the-press/meet-press-november-17-2024-n1311057",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "Read Nov 17, 2026. The claim was made by a U.S. senator in an interview; the page is the transcript. Nothing for the outlet to correct."
+   "last": "2026-11-23",
+   "note": "Read Nov 17, 2026. The claim was made by a U.S. senator in an interview; the page is the transcript. Nothing for the outlet to correct.",
+   "claimant": "Markwayne Mullin"
   },
   {
    "kind": "factcheck",
@@ -1506,8 +1562,9 @@
    "key": "factcheck|https://www.politifact.com/factchecks/2024/nov/26/donald-trump/president-elect-trump-says-wisconsins-electric-and/|https://www.jsonline.com/story/news/politics/elections/2024/10/06/live-updates-donald-trump-rallies-in-juneau-wisconsin-today/75543492007/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Donald Trump"
   },
   {
    "kind": "factcheck",
@@ -1523,8 +1580,9 @@
    "key": "factcheck|https://www.thip.media/health-news-fact-check/did-cleveland-clinic-warn-of-mass-deaths-from-mrna-vaccines/92865/|https://slaynews.com/news/cleveland-clinic-warns-wave-mass-deaths-wipe-out-covid-vaxxed-within-5-years/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)"
+   "last": "2026-11-23",
+   "note": "auto: not a newsroom on our list of outlets with a corrections desk (blog, product page or partisan site)",
+   "claimant": "Website"
   },
   {
    "kind": "factcheck",
@@ -1540,8 +1598,9 @@
    "key": "factcheck|https://verafiles.org/articles/fact-check-panelo-names-wrong-committee-that-cited-ovps-zuleika-lopez-in-contempt|https://www.manilatimes.net/2024/11/25/opinion/columns/abuse-of-power-and-assault-on-dignity/2010291?utm",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Salvador Panelo"
   },
   {
    "kind": "factcheck",
@@ -1557,8 +1616,9 @@
    "key": "factcheck|https://www.logicallyfacts.com/en/fact-check/no-elon-musk-didnt-block-disneys-pride-content-on-x-claim-stems-from-satire|https://bsky.app/profile/jesusnr06.bsky.social/post/3lb6gtspt4u2t",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "Facebook, X and Bluesky"
   },
   {
    "kind": "factcheck",
@@ -1574,8 +1634,9 @@
    "key": "factcheck|https://en.youturn.in/factcheck/Abhaya-Anjaneya-Swamy-temple-demolition-doesnt-have-any-communal-angl.html|https://www.opindia.com/2024/10/abhaya-anjaneya-swamy-temple-in-chittoor-damaged-in-attack/",
    "review": "dismissed",
    "first": "2026-11-05",
-   "last": "2026-11-16",
-   "note": "auto: off our beat (not a health or science claim)"
+   "last": "2026-11-23",
+   "note": "auto: off our beat (not a health or science claim)",
+   "claimant": "opindia"
   },
   {
    "kind": "paper",
